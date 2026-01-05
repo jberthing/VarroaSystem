@@ -25,7 +25,3 @@ dist-ssr
 
 # PWA files in project root only (not dist)
 /dev-dist
-/sw.js
-/sw.js.map
-/workbox-*.js
-/workbox-*.js.map
