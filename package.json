@@ -9,7 +9,7 @@
     "build:local": "npm run build && npm run copy-bat",
     "preview": "vite preview",
     "copy-bat": "powershell -Command \"Copy-Item public/START_VARROA.bat dist/ -ErrorAction SilentlyContinue; Copy-Item public/LÆSMIG.txt dist/ -ErrorAction SilentlyContinue\"",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist --dotfiles"
   },
   "dependencies": {
     "chart.js": "^4.4.0",
