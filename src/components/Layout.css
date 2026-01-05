@@ -62,3 +62,22 @@
   flex: 1;
   padding-bottom: 2rem;
 }
+
+.footer {
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 0;
+  margin-top: auto;
+}
+
+.footer .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.version {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}

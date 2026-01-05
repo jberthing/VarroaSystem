@@ -1,5 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom'
 import './Layout.css'
+import packageJson from '../../package.json'
 
 const Layout = () => {
   return (
@@ -26,6 +27,11 @@ const Layout = () => {
       <main className="main">
         <Outlet />
       </main>
+      <footer className="footer">
+        <div className="container">
+          <p className="version">Version {packageJson.version}</p>
+        </div>
+      </footer>
     </div>
   )
 }
