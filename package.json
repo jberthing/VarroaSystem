@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build && npm run copy-bat",
     "preview": "vite preview",
-    "copy-bat": "powershell -Command \"Copy-Item dist/START_VARROA.bat dist/ -ErrorAction SilentlyContinue; Copy-Item dist/LÆSMIG.txt dist/ -ErrorAction SilentlyContinue\""
+    "copy-bat": "powershell -Command \"Copy-Item dist/START_VARROA.bat dist/ -ErrorAction SilentlyContinue; Copy-Item dist/LÆSMIG.txt dist/ -ErrorAction SilentlyContinue\"",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "chart.js": "^4.4.0",
@@ -25,6 +26,7 @@
     "@types/react-dom": "^18.2.17",
     "@types/uuid": "^11.0.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.2.2",
     "vite": "^7.3.0",
     "vite-plugin-pwa": "^1.2.0"
