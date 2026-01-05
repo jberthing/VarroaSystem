@@ -19,7 +19,7 @@ function App() {
           <Route path="import-eksport" element={<ImportExport />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
