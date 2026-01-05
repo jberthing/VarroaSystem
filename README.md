@@ -1,6 +1,6 @@
 # Varroa Monitor
 
-En PWA (Progressive Web App) til monitering af Varroa mider for biavlere. Appen kører lokalt på din Windows-computer og gemmer alle data lokalt i browseren (IndexedDB).
+En PWA (Progressive Web App) til monitering af Varroa mider for biavlere. Appen kører lokalt på din computer og gemmer alle data lokalt i browseren (IndexedDB).
 
 ## ✨ Funktioner
 
@@ -14,21 +14,63 @@ En PWA (Progressive Web App) til monitering af Varroa mider for biavlere. Appen 
 
 ## 🚀 Kom i gang
 
-### Forudsætninger
+### 📦 Installér appen (anbefalet)
+
+Appen er tilgængelig online og kan installeres direkte på din computer som en selvstændig app:
+
+**🌐 Link:** https://jberthing.github.io/VarroaSystem/
+
+#### Installation i Microsoft Edge
+
+1. Åbn linket ovenfor i Microsoft Edge
+2. Klik på **⊕ App tilgængelig** ikonet i adresselinjen (øverst til højre)
+3. Klik **Installér** i popup-vinduet
+4. Appen installeres som en desktop-app og vises i Start-menuen
+5. Åbn appen fra Start-menuen eller desktop-genvejen
+
+**Alternativt:**
+- Klik på **⋯** (tre prikker) → **Apps** → **Installér dette website som en app**
+
+#### Installation i Google Chrome
+
+1. Åbn linket ovenfor i Google Chrome
+2. Klik på **⊕ Installér** ikonet i adresselinjen (øverst til højre)
+3. Klik **Installér** i popup-vinduet
+4. Appen installeres som en desktop-app og vises i Start-menuen
+5. Åbn appen fra Start-menuen eller desktop-genvejen
+
+**Alternativt:**
+- Klik på **⋮** (tre prikker) → **Gem og del** → **Installér Varroa Monitor**
+
+#### Efter installation
+
+- Appen kører som en selvstændig app uden browserfane
+- Find appen i Start-menuen under "V" for Varroa Monitor
+- Appen kan pinnes til proceslinjen for nem adgang
+- Alle data gemmes **lokalt** på din computer
+- Appen fungerer offline efter installation
+
+### 🛠️ Lokal udvikling (for udviklere)
+
+#### Forudsætninger
 
 - Node.js (version 18 eller nyere)
 - npm (følger med Node.js)
 
-### Installation
+#### Installation
 
-1. Åbn PowerShell/Terminal i projektmappen
+1. Klon repository:
+```powershell
+git clone https://github.com/jberthing/VarroaSystem.git
+cd VarroaSystem
+```
+
 2. Installér dependencies:
-
 ```powershell
 npm install
 ```
 
-### Kør udviklings-server
+#### Kør udviklings-server
 
 ```powershell
 npm run dev
@@ -36,7 +78,7 @@ npm run dev
 
 Appen åbnes på `http://localhost:5173`
 
-### Build til produktion
+#### Build til produktion
 
 ```powershell
 npm run build
@@ -44,18 +86,11 @@ npm run build
 
 De byggede filer er i `dist/` mappen.
 
-### Preview af produktion build
+#### Deploy til GitHub Pages
 
 ```powershell
-npm run preview
+npm run deploy
 ```
-
-## 📦 Installér som PWA på Windows
-
-1. Åbn appen i Microsoft Edge eller Chrome
-2. Klik på "Installér" ikonet i adresselinjen (eller menu → "Installér Varroa Monitor")
-3. Appen installeres som en desktop-app i Start-menuen
-4. Kan nu køre som en selvstændig app uden browserfane
 
 ## 💾 Data
 
