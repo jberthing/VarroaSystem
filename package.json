@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "build:local": "npm run build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist --dotfiles --add"
+    "deploy": "npm run build && gh-pages -d dist --dotfiles"
   },
   "dependencies": {
     "chart.js": "^4.4.0",
