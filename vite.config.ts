@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico'],
+      includeAssets: ['icon.svg'],
       manifest: {
         name: 'Varroa Monitor',
         short_name: 'Varroa',
