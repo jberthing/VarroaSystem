@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:local": "npm run build && npm run copy-bat",
+    "build:local": "npm run build",
     "preview": "vite preview",
-    "copy-bat": "powershell -Command \"Copy-Item public/START_VARROA.bat dist/ -ErrorAction SilentlyContinue; Copy-Item public/LÆSMIG.txt dist/ -ErrorAction SilentlyContinue\"",
     "deploy": "npm run build && gh-pages -d dist --dotfiles --add"
   },
   "dependencies": {
