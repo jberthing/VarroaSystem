@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Apiaries from './pages/Apiaries'
@@ -8,7 +8,7 @@ import ImportExport from './pages/ImportExport'
 
 function App() {
   return (
-    <BrowserRouter basename="/VarroaSystem">
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/oversigt" replace />} />
