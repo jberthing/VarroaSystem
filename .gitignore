@@ -23,9 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# PWA
-dev-dist
-sw.js
-sw.js.map
-workbox-*.js
-workbox-*.js.map
+# PWA files in project root only (not dist)
+/dev-dist
+/sw.js
+/sw.js.map
+/workbox-*.js
+/workbox-*.js.map
