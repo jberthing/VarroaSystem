@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && npm run copy-bat",
+    "build": "tsc && vite build",
+    "build:local": "npm run build && npm run copy-bat",
     "preview": "vite preview",
-    "copy-bat": "powershell -Command \"Copy-Item dist/START_VARROA.bat dist/ -ErrorAction SilentlyContinue; Copy-Item dist/LÆSMIG.txt dist/ -ErrorAction SilentlyContinue\"",
+    "copy-bat": "powershell -Command \"Copy-Item public/START_VARROA.bat dist/ -ErrorAction SilentlyContinue; Copy-Item public/LÆSMIG.txt dist/ -ErrorAction SilentlyContinue\"",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {

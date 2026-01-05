@@ -8,7 +8,7 @@ import ImportExport from './pages/ImportExport'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/VarroaSystem">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/oversigt" replace />} />
