@@ -16,6 +16,8 @@ export default defineConfig({
         theme_color: '#fbbf24',
         background_color: '#ffffff',
         display: 'standalone',
+        start_url: '/VarroaSystem/',
+        scope: '/VarroaSystem/',
         icons: [
           {
             src: '/icon.svg',
