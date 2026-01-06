@@ -10,9 +10,12 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  TimeScale
 } from 'chart.js'
+import 'chartjs-adapter-date-fns'
 import annotationPlugin from 'chartjs-plugin-annotation'
+import zoomPlugin from 'chartjs-plugin-zoom'
 import { getHive, getObservationsForHive, getTreatmentsForHive, deleteObservation, deleteTreatment, updateObservation, updateTreatment } from '../db/repository'
 import { Hive, Treatment, Observation } from '../db/database'
 import { getMitesPerDayColor } from '../utils/calculations'
@@ -27,8 +30,12 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  annotationPlugin
+  TimeScale,
+  annotationPlugin,
+  zoomPlugin
 )
+
+type ViewMode = 'daily' | 'moving10' | 'weekly' | 'monthly'
 
 const HiveDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -39,6 +46,8 @@ const HiveDetail = () => {
   const [editingObservation, setEditingObservation] = useState<string | null>(null)
   const [editingTreatment, setEditingTreatment] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<any>({})
+  const [viewMode, setViewMode] = useState<ViewMode>('daily')
+  const [chartInstance, setChartInstance] = useState<any>(null)
 
   // Live query for observations and treatments
   const observations = useLiveQuery(
@@ -139,84 +148,93 @@ const HiveDetail = () => {
     )
   }
 
-  // Prepare chart data with treatment annotations
-  const reversedDates = observations.map((obs) => obs.date).reverse()
+  // Aggregate data based on view mode
+  const aggregateData = (data: any[], mode: ViewMode) => {
+    if (mode === 'daily') {
+      return data
+    }
+
+    if (mode === 'moving10') {
+      const movingAvg = []
+      const windowSize = 10
+      for (let i = 0; i < data.length; i++) {
+        const start = Math.max(0, i - windowSize + 1)
+        const window = data.slice(start, i + 1)
+        const sum = window.reduce((acc, point) => acc + point.mitesPerDay, 0)
+        const avg = sum / window.length
+        movingAvg.push({ ...data[i], mitesPerDay: parseFloat(avg.toFixed(2)) })
+      }
+      return movingAvg
+    }
+
+    const aggregated: any = {}
+    data.forEach(point => {
+      let key: string
+      const date = new Date(point.date)
+      
+      if (mode === 'weekly') {
+        const weekStart = new Date(date)
+        weekStart.setDate(date.getDate() - date.getDay())
+        key = weekStart.toISOString().split('T')[0]
+      } else {
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      }
+
+      if (!aggregated[key]) {
+        aggregated[key] = { sum: 0, count: 0, date: point.date }
+      }
+      aggregated[key].sum += point.mitesPerDay
+      aggregated[key].count += 1
+    })
+
+    return Object.values(aggregated).map((group: any) => ({
+      date: group.date,
+      mitesPerDay: parseFloat((group.sum / group.count).toFixed(2))
+    }))
+  }
+
+  const aggregatedObservations = aggregateData([...observations].reverse(), viewMode)
+
+  // Prepare chart data with time-series
   const chartData = {
-    labels: reversedDates,
     datasets: [
       {
-        label: 'Mider pr. dag',
-        data: observations.map((obs) => obs.mitesPerDay).reverse(),
-        borderColor: '#fbbf24',
-        backgroundColor: 'rgba(251, 191, 36, 0.1)',
-        tension: 0.3,
-        pointRadius: 4,
-        pointHoverRadius: 6
+        label: viewMode === 'moving10' ? 'Mider pr. dag (10-dages gns.)' : 'Mider pr. dag',
+        data: aggregatedObservations.map((obs) => ({
+          x: new Date(obs.date),
+          y: obs.mitesPerDay
+        })),
+        borderColor: viewMode === 'moving10' ? '#8b5cf6' : '#fbbf24',
+        backgroundColor: viewMode === 'moving10' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(251, 191, 36, 0.1)',
+        tension: viewMode === 'moving10' ? 0.4 : 0.3,
+        pointRadius: viewMode === 'daily' ? 2 : viewMode === 'moving10' ? 1 : 4,
+        pointHoverRadius: 6,
+        fill: true
       }
     ]
   }
 
-  // Create treatment annotations for the chart - find index positions
+  // Create treatment annotations for time-series
   const treatmentAnnotations: any = {}
   treatments.forEach((treatment: Treatment, index: number) => {
-    const dateIndex = reversedDates.indexOf(treatment.date)
-    if (dateIndex >= 0) {
-      // Treatment date matches an observation date
-      treatmentAnnotations[`treatment${index}`] = {
-        type: 'line',
-        scaleID: 'x',
-        value: dateIndex,
-        borderColor: '#ef4444',
-        borderWidth: 3,
-        borderDash: [6, 4],
-        label: {
-          display: true,
-          content: treatment.treatmentType,
-          position: 'start',
-          backgroundColor: 'rgba(239, 68, 68, 0.9)',
-          color: 'white',
-          font: {
-            size: 11,
-            weight: 'bold'
-          },
-          padding: 4,
-          rotation: 0
-        }
-      }
-    } else {
-      // Treatment date doesn't match - find closest date
-      const treatmentTime = new Date(treatment.date).getTime()
-      let closestIndex = 0
-      let minDiff = Math.abs(new Date(reversedDates[0]).getTime() - treatmentTime)
-      
-      reversedDates.forEach((date, idx) => {
-        const diff = Math.abs(new Date(date).getTime() - treatmentTime)
-        if (diff < minDiff) {
-          minDiff = diff
-          closestIndex = idx
-        }
-      })
-
-      treatmentAnnotations[`treatment${index}`] = {
-        type: 'line',
-        scaleID: 'x',
-        value: closestIndex,
-        borderColor: '#ef4444',
-        borderWidth: 3,
-        borderDash: [6, 4],
-        label: {
-          display: true,
-          content: `${treatment.treatmentType} (${treatment.date})`,
-          position: 'start',
-          backgroundColor: 'rgba(239, 68, 68, 0.9)',
-          color: 'white',
-          font: {
-            size: 10,
-            weight: 'bold'
-          },
-          padding: 4,
-          rotation: 0
-        }
+    treatmentAnnotations[`treatment${index}`] = {
+      type: 'line',
+      xMin: new Date(treatment.date),
+      xMax: new Date(treatment.date),
+      borderColor: '#ef4444',
+      borderWidth: 2,
+      borderDash: [6, 4],
+      label: {
+        display: true,
+        content: treatment.treatmentType,
+        position: 'start',
+        backgroundColor: 'rgba(239, 68, 68, 0.9)',
+        color: 'white',
+        font: {
+          size: 10,
+          weight: 'bold'
+        },
+        padding: 4
       }
     }
   })
@@ -236,11 +254,65 @@ const HiveDetail = () => {
           weight: 600 as const
         }
       },
+      tooltip: {
+        callbacks: {
+          title: function(context: any) {
+            const date = new Date(context[0].parsed.x)
+            return date.toLocaleDateString('da-DK', { 
+              weekday: 'short',
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            })
+          },
+          label: function(context: any) {
+            return `Mider/dag: ${context.parsed.y.toFixed(2)}`
+          }
+        }
+      },
+      zoom: {
+        zoom: {
+          wheel: {
+            enabled: true,
+            speed: 0.1
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'x' as const
+        },
+        pan: {
+          enabled: true,
+          mode: 'x' as const
+        },
+        limits: {
+          x: {
+            min: 'original' as const,
+            max: 'original' as const
+          }
+        }
+      },
       annotation: {
         annotations: treatmentAnnotations
       }
     },
     scales: {
+      x: {
+        type: 'time' as const,
+        time: {
+          unit: viewMode === 'monthly' ? 'month' as const : viewMode === 'weekly' ? 'week' as const : 'day' as const,
+          displayFormats: {
+            day: 'MMM d',
+            week: 'MMM d',
+            month: 'MMM yyyy'
+          },
+          tooltipFormat: 'PP'
+        },
+        title: {
+          display: true,
+          text: 'Dato'
+        }
+      },
       y: {
         beginAtZero: true,
         title: {
@@ -248,6 +320,12 @@ const HiveDetail = () => {
           text: 'Mider pr. dag'
         }
       }
+    }
+  }
+
+  const resetZoom = () => {
+    if (chartInstance) {
+      chartInstance.resetZoom()
     }
   }
 
@@ -302,8 +380,27 @@ const HiveDetail = () => {
         </div>
       ) : (
         <>
+          <div className="chart-controls" style={{ marginBottom: '15px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <label style={{ fontWeight: 500 }}>Visning:</label>
+            <select 
+              value={viewMode} 
+              onChange={(e) => setViewMode(e.target.value as ViewMode)}
+              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+            >
+              <option value="daily">Daglig (Alle punkter)</option>
+              <option value="moving10">10-dages gennemsnit</option>
+              <option value="weekly">Ugentligt gennemsnit</option>
+              <option value="monthly">Månedligt gennemsnit</option>
+            </select>
+            <button onClick={resetZoom} className="secondary" style={{ padding: '6px 12px' }}>
+              🔍 Nulstil zoom
+            </button>
+            <span style={{ fontSize: '13px', color: '#6b7280', marginLeft: 'auto' }}>
+              💡 Scroll for at zoome • Træk for at panorere
+            </span>
+          </div>
           <div className="chart-container">
-            <Line data={chartData} options={chartOptions} />
+            <Line ref={(ref: any) => ref && setChartInstance(ref)} data={chartData} options={chartOptions} />
           </div>
 
           <div className="observations-section">

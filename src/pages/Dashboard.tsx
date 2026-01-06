@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/database'
 import { getAllHives, getAllApiaries, getObservationsForHive, getTreatmentsForHive } from '../db/repository'
-import { getDaysAgo, formatDate } from '../utils/dateUtils'
+import { getDaysAgo } from '../utils/dateUtils'
 import { calculateTrend, getTrendIcon, getTrendColor, getMitesPerDayColor } from '../utils/calculations'
 import QuickObservationForm from '../components/QuickObservationForm'
 import {
@@ -14,10 +14,13 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  TimeScale
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import 'chartjs-adapter-date-fns'
 import annotationPlugin from 'chartjs-plugin-annotation'
+import zoomPlugin from 'chartjs-plugin-zoom'
 import './Dashboard.css'
 
 ChartJS.register(
@@ -28,7 +31,9 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  annotationPlugin
+  TimeScale,
+  annotationPlugin,
+  zoomPlugin
 )
 
 type TimeFilter = 'all' | '7' | '30'
@@ -386,30 +391,73 @@ const Dashboard = () => {
   function CombinedApiaryChart({ hives, chartRef, apiaryName }: { hives: any[]; chartRef: any; apiaryName: string }) {
     const [chartData, setChartData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [viewMode, setViewMode] = useState<'daily' | 'moving10' | 'weekly' | 'monthly'>('daily')
+    const [chartInstance, setChartInstance] = useState<any>(null)
 
     useEffect(() => {
       loadAllData()
-    }, [hives])
+    }, [hives, viewMode])
 
     const loadAllData = async () => {
       const colors = [
-        { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' }, // blue
-        { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' }, // green
-        { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' }, // amber
-        { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },  // red
-        { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' }, // violet
-        { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' }, // pink
-        { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },  // cyan
-        { border: '#f97316', bg: 'rgba(249, 115, 22, 0.1)' }, // orange
+        { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+        { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+        { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+        { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+        { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },
+        { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' },
+        { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
+        { border: '#f97316', bg: 'rgba(249, 115, 22, 0.1)' },
       ]
 
-      // Collect all dates across all hives
-      const allDatesSet = new Set<string>()
+      // Aggregation function
+      const aggregateData = (data: any[], mode: string) => {
+        if (mode === 'daily') return data
+
+        if (mode === 'moving10') {
+          const movingAvg = []
+          const windowSize = 10
+          for (let i = 0; i < data.length; i++) {
+            const start = Math.max(0, i - windowSize + 1)
+            const window = data.slice(start, i + 1)
+            const sum = window.reduce((acc: number, point: any) => acc + point.mitesPerDay, 0)
+            const avg = sum / window.length
+            movingAvg.push({ ...data[i], mitesPerDay: parseFloat(avg.toFixed(2)) })
+          }
+          return movingAvg
+        }
+
+        const aggregated: any = {}
+        data.forEach((point: any) => {
+          let key: string
+          const date = new Date(point.date)
+          
+          if (mode === 'weekly') {
+            const weekStart = new Date(date)
+            weekStart.setDate(date.getDate() - date.getDay())
+            key = weekStart.toISOString().split('T')[0]
+          } else {
+            key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+          }
+
+          if (!aggregated[key]) {
+            aggregated[key] = { sum: 0, count: 0, date: point.date }
+          }
+          aggregated[key].sum += point.mitesPerDay
+          aggregated[key].count += 1
+        })
+
+        return Object.values(aggregated).map((group: any) => ({
+          date: group.date,
+          mitesPerDay: parseFloat((group.sum / group.count).toFixed(2))
+        }))
+      }
+
+      // Collect all observations
       const hivesData = await Promise.all(
         hives.map(async (hive, index) => {
           const observations = await getObservationsForHive(hive.id)
           const treatments = await getTreatmentsForHive(hive.id)
-          observations.forEach((obs: any) => allDatesSet.add(obs.date))
           return {
             hive,
             observations,
@@ -419,45 +467,43 @@ const Dashboard = () => {
         })
       )
 
-      const allDates = Array.from(allDatesSet).sort()
-
-      // Create datasets for each hive
+      // Create datasets for each hive with time-series data
       const datasets = hivesData.map(({ hive, observations, color }) => {
-        const dataPoints = allDates.map(date => {
-          const obs = observations.find((o: any) => o.date === date)
-          return obs ? obs.mitesPerDay : null
-        })
-
+        const aggregatedObs = aggregateData(observations, viewMode)
+        
         return {
           label: hive.name,
-          data: dataPoints,
+          data: aggregatedObs.map((obs: any) => ({
+            x: new Date(obs.date),
+            y: obs.mitesPerDay
+          })),
           borderColor: color.border,
           backgroundColor: color.bg,
-          tension: 0.4,
-          spanGaps: true
+          tension: viewMode === 'moving10' ? 0.4 : 0.3,
+          pointRadius: viewMode === 'daily' ? 2 : viewMode === 'moving10' ? 1 : 3,
+          pointHoverRadius: 5,
+          fill: false
         }
       })
 
-      // Create treatment annotations
+      // Create treatment annotations with time-series
       const treatmentAnnotations = hivesData.reduce((acc: any, { treatments, color }, hiveIndex) => {
         treatments.forEach((treatment: any, treatIndex: number) => {
-          const dateIndex = allDates.indexOf(treatment.date)
-          if (dateIndex !== -1) {
-            acc[`treatment_${hiveIndex}_${treatIndex}`] = {
-              type: 'line',
-              xMin: dateIndex,
-              xMax: dateIndex,
-              borderColor: color.border,
-              borderWidth: 2,
-              borderDash: [5, 5],
-              label: {
-                content: treatment.treatmentType,
-                display: true,
-                position: 'start',
-                backgroundColor: color.border,
-                color: 'white',
-                font: { size: 10 }
-              }
+          acc[`treatment_${hiveIndex}_${treatIndex}`] = {
+            type: 'line',
+            xMin: new Date(treatment.date),
+            xMax: new Date(treatment.date),
+            borderColor: color.border,
+            borderWidth: 2,
+            borderDash: [5, 5],
+            label: {
+              content: treatment.treatmentType,
+              display: true,
+              position: 'start',
+              backgroundColor: color.border,
+              color: 'white',
+              font: { size: 9 },
+              padding: 3
             }
           }
         })
@@ -465,7 +511,6 @@ const Dashboard = () => {
       }, {})
 
       setChartData({
-        labels: allDates.map(date => formatDate(date)),
         datasets,
         annotations: treatmentAnnotations
       })
@@ -492,11 +537,65 @@ const Dashboard = () => {
           text: `${apiaryName} - Mider pr. dag`,
           font: { size: 16, weight: 'bold' as const }
         },
+        tooltip: {
+          callbacks: {
+            title: function(context: any) {
+              const date = new Date(context[0].parsed.x)
+              return date.toLocaleDateString('da-DK', { 
+                weekday: 'short',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+              })
+            },
+            label: function(context: any) {
+              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} mider/dag`
+            }
+          }
+        },
+        zoom: {
+          zoom: {
+            wheel: {
+              enabled: true,
+              speed: 0.1
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'x' as const
+          },
+          pan: {
+            enabled: true,
+            mode: 'x' as const
+          },
+          limits: {
+            x: {
+              min: 'original' as const,
+              max: 'original' as const
+            }
+          }
+        },
         annotation: {
           annotations: chartData.annotations
         }
       },
       scales: {
+        x: {
+          type: 'time' as const,
+          time: {
+            unit: viewMode === 'monthly' ? 'month' as const : viewMode === 'weekly' ? 'week' as const : 'day' as const,
+            displayFormats: {
+              day: 'MMM d',
+              week: 'MMM d',
+              month: 'MMM yyyy'
+            },
+            tooltipFormat: 'PP'
+          },
+          title: {
+            display: true,
+            text: 'Dato'
+          }
+        },
         y: {
           beginAtZero: true,
           title: {
@@ -507,9 +606,45 @@ const Dashboard = () => {
       }
     }
 
+    const resetZoom = () => {
+      if (chartInstance) {
+        chartInstance.resetZoom()
+      }
+    }
+
     return (
       <div className="combined-chart-container">
-        <Line ref={chartRef} data={chartData} options={chartOptions} />
+        <div className="chart-controls" style={{ marginBottom: '15px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <label style={{ fontWeight: 500 }}>Visning:</label>
+          <select 
+            value={viewMode} 
+            onChange={(e) => setViewMode(e.target.value as any)}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+          >
+            <option value="daily">Daglig (Alle punkter)</option>
+            <option value="moving10">10-dages gennemsnit</option>
+            <option value="weekly">Ugentligt gennemsnit</option>
+            <option value="monthly">Månedligt gennemsnit</option>
+          </select>
+          <button onClick={resetZoom} className="secondary" style={{ padding: '6px 12px' }}>
+            🔍 Nulstil zoom
+          </button>
+          <span style={{ fontSize: '13px', color: '#6b7280', marginLeft: 'auto' }}>
+            💡 Scroll for at zoome • Træk for at panorere
+          </span>
+        </div>
+        <Line 
+          ref={(ref: any) => {
+            if (ref) {
+              setChartInstance(ref)
+              if (chartRef) {
+                chartRef.current = ref
+              }
+            }
+          }} 
+          data={chartData} 
+          options={chartOptions} 
+        />
       </div>
     )
   }
