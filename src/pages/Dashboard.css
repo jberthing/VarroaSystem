@@ -265,8 +265,9 @@
 }
 
 .combined-chart-container {
-  height: 500px;
+  height: 550px;
   position: relative;
+  padding-bottom: 3rem;
 }
 
 .loading {

@@ -351,26 +351,12 @@ const Dashboard = () => {
 
     const chartRef = useRef<any>(null)
 
-    const handleDownload = () => {
-      if (chartRef.current) {
-        const canvas = chartRef.current.canvas
-        const url = canvas.toDataURL('image/png')
-        const link = document.createElement('a')
-        link.download = `${apiaryData.apiaryName.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.png`
-        link.href = url
-        link.click()
-      }
-    }
-
     return (
       <div className="modal-overlay" onClick={() => setShowChartsForApiary(null)}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <h2>Grafer for {apiaryData.apiaryName}</h2>
             <div className="modal-actions">
-              <button className="secondary" onClick={handleDownload}>
-                📥 Download graf
-              </button>
               <button className="close-button" onClick={() => setShowChartsForApiary(null)}>
                 ✕
               </button>
