@@ -380,23 +380,34 @@ const HiveDetail = () => {
         </div>
       ) : (
         <>
-          <div className="chart-controls" style={{ marginBottom: '15px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <label style={{ fontWeight: 500 }}>Visning:</label>
+          <div className="chart-controls" style={{ marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px' }}>
+            <label style={{ fontWeight: 500, fontSize: '13px' }}>Visning:</label>
             <select 
               value={viewMode} 
               onChange={(e) => setViewMode(e.target.value as ViewMode)}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+              style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '13px' }}
             >
-              <option value="daily">Daglig (Alle punkter)</option>
-              <option value="moving10">10-dages gennemsnit</option>
-              <option value="weekly">Ugentligt gennemsnit</option>
-              <option value="monthly">Månedligt gennemsnit</option>
+              <option value="daily">Daglig</option>
+              <option value="moving10">10-dages gns.</option>
+              <option value="weekly">Ugentlig</option>
+              <option value="monthly">Månedlig</option>
             </select>
-            <button onClick={resetZoom} className="secondary" style={{ padding: '6px 12px' }}>
-              🔍 Nulstil zoom
+            <button onClick={resetZoom} className="secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>
+              🔍 Nulstil
             </button>
-            <span style={{ fontSize: '13px', color: '#6b7280', marginLeft: 'auto' }}>
-              💡 Scroll for at zoome • Træk for at panorere
+            <button onClick={() => {
+              if (chartInstance) {
+                const url = chartInstance.toBase64Image()
+                const link = document.createElement('a')
+                link.download = `${hive.name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.png`
+                link.href = url
+                link.click()
+              }
+            }} className="secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>
+              📥 Download
+            </button>
+            <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: 'auto' }}>
+              💡 Scroll: zoom • Træk: panorér
             </span>
           </div>
           <div className="chart-container">
