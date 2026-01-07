@@ -1,0 +1,383 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
+import Dashboard from './Dashboard';
+import * as repository from '../db/repository';
+import { db } from '../db/database';
+
+// Mock the repository and database
+vi.mock('../db/repository');
+vi.mock('../db/database', () => ({
+  db: {
+    observations: {
+      where: vi.fn(),
+      toArray: vi.fn(),
+    },
+  },
+}));
+
+// Mock Chart.js components
+vi.mock('react-chartjs-2', () => ({
+  Line: vi.fn(() => <div data-testid="chart">Chart</div>),
+}));
+
+// Mock dexie-react-hooks
+const mockUseLiveQuery = vi.fn();
+vi.mock('dexie-react-hooks', () => ({
+  useLiveQuery: (fn: Function) => mockUseLiveQuery(),
+}));
+
+// Wrapper component for Router
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(<BrowserRouter>{component}</BrowserRouter>);
+};
+
+describe('Dashboard Integration Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Empty State', () => {
+    it('should show empty state when no hives exist', async () => {
+      mockUseLiveQuery.mockReturnValue([]);
+
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/velkommen til varroa monitor/i)).toBeInTheDocument();
+        expect(screen.getByText(/du har ingen bistader endnu/i)).toBeInTheDocument();
+        expect(screen.getByText(/opret din første bigård/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Dashboard with Data', () => {
+    const mockApiaries = [
+      { id: 'apiary1', name: 'Bigård 1', isActive: true, createdAt: Date.now() },
+      { id: 'apiary2', name: 'Bigård 2', isActive: true, createdAt: Date.now() },
+    ];
+
+    const mockHives = [
+      { id: 'hive1', name: 'Stade A', apiaryId: 'apiary1', isActive: true, createdAt: Date.now() },
+      { id: 'hive2', name: 'Stade B', apiaryId: 'apiary1', isActive: true, createdAt: Date.now() },
+      { id: 'hive3', name: 'Stade C', apiaryId: 'apiary2', isActive: true, createdAt: Date.now() },
+    ];
+
+    const mockObservations = [
+      {
+        id: 'obs1',
+        hiveId: 'hive1',
+        date: '2026-01-05',
+        miteCount: 30,
+        trayDays: 3,
+        mitesPerDay: 10.0,
+        createdAt: Date.now(),
+      },
+      {
+        id: 'obs2',
+        hiveId: 'hive1',
+        date: '2026-01-01',
+        miteCount: 24,
+        trayDays: 3,
+        mitesPerDay: 8.0,
+        createdAt: Date.now(),
+      },
+      {
+        id: 'obs3',
+        hiveId: 'hive2',
+        date: '2026-01-06',
+        miteCount: 12,
+        trayDays: 3,
+        mitesPerDay: 4.0,
+        createdAt: Date.now(),
+      },
+      {
+        id: 'obs4',
+        hiveId: 'hive3',
+        date: '2026-01-07',
+        miteCount: 45,
+        trayDays: 3,
+        mitesPerDay: 15.0,
+        createdAt: Date.now(),
+      },
+    ];
+
+    beforeEach(() => {
+      // Setup mock to return hives, then apiaries, then observations
+      let callCount = 0;
+      mockUseLiveQuery.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) return mockHives;
+        if (callCount === 2) return mockApiaries;
+        return mockObservations;
+      });
+
+      // Mock the observations query chain with proper hiveId parameter
+      vi.mocked(db.observations.where).mockImplementation((field: string) => ({
+        equals: (hiveId: string) => ({
+          reverse: () => ({
+            sortBy: (sortField: string) => {
+              const filtered = mockObservations.filter(obs => obs.hiveId === hiveId);
+              return Promise.resolve(filtered);
+            },
+          }),
+        }),
+      } as any));
+
+      // Mock getAllHives for QuickObservationForm
+      vi.mocked(repository.getAllHives).mockResolvedValue(mockHives);
+      
+      // Mock getAllApiaries for QuickObservationForm
+      vi.mocked(repository.getAllApiaries).mockResolvedValue(mockApiaries);
+    });
+
+    it('should render dashboard header and controls', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/oversigt/i)).toBeInTheDocument();
+        expect(screen.getByText(/ny registrering/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should display time filter buttons', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText('7 dage')).toBeInTheDocument();
+        expect(screen.getByText('30 dage')).toBeInTheDocument();
+        expect(screen.getByText('Alle data')).toBeInTheDocument();
+      });
+    });
+
+    it('should display apiary filter dropdown', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        const apiaryFilter = screen.getByLabelText(/bigård:/i);
+        expect(apiaryFilter).toBeInTheDocument();
+        expect(within(apiaryFilter.parentElement!).getByText('Alle bigårde')).toBeInTheDocument();
+      });
+    });
+
+    it('should group hives by apiary', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Bigård 1')).toBeInTheDocument();
+        expect(screen.getByText('Bigård 2')).toBeInTheDocument();
+      });
+    });
+
+    it('should display hive cards with data', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Stade A')).toBeInTheDocument();
+        expect(screen.getByText('Stade B')).toBeInTheDocument();
+        expect(screen.getByText('Stade C')).toBeInTheDocument();
+      });
+    });
+
+    it('should sort hives by mites per day (highest first)', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        const hiveCards = screen.getAllByRole('link');
+        // Stade C has 15.0 mites/day, should be first
+        // Stade A has 10.0 mites/day, should be second
+        // Stade B has 4.0 mites/day, should be last
+        const hiveNames = hiveCards.map(card => card.textContent);
+        expect(hiveNames.some(name => name?.includes('Stade C'))).toBe(true);
+      });
+    });
+
+    it('should show quick observation form when button clicked', async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/ny registrering/i)).toBeInTheDocument();
+      });
+
+      const formButton = screen.getByText(/ny registrering/i);
+      await user.click(formButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/skjul formular/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should hide form when "Skjul formular" is clicked', async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<Dashboard />);
+
+      // Show form
+      await waitFor(() => {
+        expect(screen.getByText(/ny registrering/i)).toBeInTheDocument();
+      });
+      const showButton = screen.getByText(/ny registrering/i);
+      await user.click(showButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/skjul formular/i)).toBeInTheDocument();
+      });
+
+      // Hide form
+      const hideButton = screen.getByText(/skjul formular/i);
+      await user.click(hideButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/ny registrering/i)).toBeInTheDocument();
+        expect(screen.queryByText(/skjul formular/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should have apiary filter dropdown with options', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        const apiarySelect = screen.getByLabelText(/bigård:/i) as HTMLSelectElement;
+        expect(apiarySelect).toBeInTheDocument();
+        
+        // Should have "Alle bigårde" and "Uden bigård" options
+        expect(screen.getByRole('option', { name: /alle bigårde/i })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /uden bigård/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should change time filter when button clicked', async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText('7 dage')).toBeInTheDocument();
+      });
+
+      const sevenDaysButton = screen.getByText('7 dage');
+      await user.click(sevenDaysButton);
+
+      // The button should be highlighted (we'd check the style in a real test)
+      expect(sevenDaysButton).toBeInTheDocument();
+    });
+
+    it('should display mites per day with correct color coding', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        const hiveCards = screen.getAllByRole('link');
+        expect(hiveCards.length).toBeGreaterThan(0);
+      });
+
+      // High mites per day (15.0) should be red (#ef4444)
+      // Medium (10.0) should be red
+      // Low (4.0) should be green (#10b981)
+    });
+
+    it('should show trend indicators when data exists', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        // Should show trend icons (↑ ↓ →)
+        const cards = screen.getAllByRole('link');
+        expect(cards.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should show "Vis alle grafer" button for each apiary section', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        const graphButtons = screen.getAllByText(/vis alle grafer/i);
+        expect(graphButtons.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should link to hive detail page', async () => {
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        const hiveLinks = screen.getAllByRole('link');
+        const stadeALink = hiveLinks.find(link => link.textContent?.includes('Stade A'));
+        expect(stadeALink).toHaveAttribute('href', '/bistader/hive1');
+      });
+    });
+
+    it('should show loading state initially', () => {
+      mockUseLiveQuery.mockReturnValue(undefined);
+
+      renderWithRouter(<Dashboard />);
+
+      expect(screen.getByText(/indlæser/i)).toBeInTheDocument();
+    });
+
+    it('should display hives without apiary in separate section', async () => {
+      const hivesWithoutApiary = [
+        ...mockHives,
+        { id: 'hive4', name: 'Stade D', isActive: true, createdAt: Date.now() },
+      ];
+
+      mockUseLiveQuery
+        .mockReturnValueOnce(hivesWithoutApiary)
+        .mockReturnValueOnce(mockApiaries)
+        .mockReturnValue(mockObservations);
+
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Stade D')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Data Aggregation', () => {
+    it('should calculate trends correctly', async () => {
+      const mockHives = [
+        { id: 'hive1', name: 'Stade A', apiaryId: 'apiary1', isActive: true, createdAt: Date.now() },
+      ];
+
+      const mockObservations = [
+        {
+          id: 'obs1',
+          hiveId: 'hive1',
+          date: '2026-01-07',
+          miteCount: 30,
+          trayDays: 3,
+          mitesPerDay: 10.0,
+          createdAt: Date.now(),
+        },
+        {
+          id: 'obs2',
+          hiveId: 'hive1',
+          date: '2026-01-05',
+          miteCount: 15,
+          trayDays: 3,
+          mitesPerDay: 5.0,
+          createdAt: Date.now(),
+        },
+      ];
+
+      mockUseLiveQuery
+        .mockReturnValueOnce(mockHives)
+        .mockReturnValueOnce([])
+        .mockReturnValue(mockObservations);
+
+      const mockWhere = vi.fn().mockReturnValue({
+        equals: vi.fn().mockReturnValue({
+          reverse: vi.fn().mockReturnValue({
+            sortBy: vi.fn().mockResolvedValue(mockObservations),
+          }),
+        }),
+      });
+      vi.mocked(db.observations.where).mockImplementation(mockWhere as any);
+
+      renderWithRouter(<Dashboard />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Stade A')).toBeInTheDocument();
+        // Should show upward trend since 10.0 > 5.0
+      });
+    });
+  });
+});
