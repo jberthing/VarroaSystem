@@ -20,6 +20,11 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth xvfb
         
     - name: Install dependencies
       run: npm ci
