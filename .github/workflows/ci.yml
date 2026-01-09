@@ -30,9 +30,10 @@ jobs:
       run: npm ci
       
     - name: Run tests
-      run: npm test -- --run --reporter=verbose
+      run: npm test -- --run --reporter=verbose --no-coverage
       env:
         CI: true
+        NODE_ENV: test
       
     - name: Build
       run: npm run build
