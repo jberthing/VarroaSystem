@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createObservation, getObservationByHiveAndDate, getAllApiaries, getHivesForApiary } from '../db/repository'
 import { readFileAsText } from '../utils/fileUtils'
 import { Apiary, Hive } from '../db/database'
@@ -14,6 +15,7 @@ interface HiveMapping {
 }
 
 const VarroDetectorImport = () => {
+  const { t } = useTranslation()
   const [apiaries, setApiaries] = useState<Apiary[]>([])
   const [selectedApiaryId, setSelectedApiaryId] = useState<string>('')
   const [apiaryHives, setApiaryHives] = useState<Hive[]>([])
@@ -56,7 +58,7 @@ const VarroDetectorImport = () => {
     setImportSuccess('')
 
     if (!selectedApiaryId) {
-      setImportError('Vælg venligst en bigård først')
+      setImportError(t('varrodetector.selectApiaryFirst'))
       e.target.value = ''
       return
     }
@@ -81,7 +83,7 @@ const VarroDetectorImport = () => {
 
       setHiveMappings(mappings)
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Kunne ikke læse CSV-filen')
+      setImportError(err instanceof Error ? err.message : t('varrodetector.csvReadError'))
       setCsvData([])
       setHiveMappings([])
     } finally {
@@ -107,18 +109,18 @@ const VarroDetectorImport = () => {
 
     // Validation
     if (!observationDate) {
-      setImportError('Indtast venligst observationsdato')
+      setImportError(t('varrodetector.enterObservationDate'))
       return
     }
 
     if (trayDays < 1 || trayDays > 365) {
-      setImportError('Antal dage skal være mellem 1 og 365')
+      setImportError(t('varrodetector.daysRangeError'))
       return
     }
 
     const unmappedRows = hiveMappings.filter(m => !m.matchedHiveId)
     if (unmappedRows.length > 0) {
-      setImportError(`${unmappedRows.length} rækker er ikke koblet til nogen bistade`)
+      setImportError(t('varrodetector.unmappedRowsError', { count: unmappedRows.length }))
       return
     }
 
@@ -143,7 +145,7 @@ const VarroDetectorImport = () => {
       // Handle conflicts
       if (conflicts.length > 0) {
         const conflictList = conflicts.map(c => `- ${c.hiveName} (${c.date})`).join('\n')
-        const message = `Følgende bistader har allerede en observation på ${observationDate}:\n\n${conflictList}\n\nVil du erstatte de eksisterende observationer?`
+        const message = `${t('varrodetector.conflictMessage', { date: observationDate })}:\n\n${conflictList}\n\n${t('varrodetector.replaceConfirm')}`
         
         if (!confirm(message)) {
           setIsProcessing(false)
@@ -174,7 +176,7 @@ const VarroDetectorImport = () => {
         importedCount++
       }
 
-      setImportSuccess(`Importeret ${importedCount} observationer`)
+      setImportSuccess(t('varrodetector.importSuccess', { count: importedCount }))
       
       // Reset form
       setCsvData([])
@@ -183,7 +185,7 @@ const VarroDetectorImport = () => {
       setTrayDays(7)
       
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Fejl ved import')
+      setImportError(err instanceof Error ? err.message : t('varrodetector.importError'))
     } finally {
       setIsProcessing(false)
     }
@@ -192,20 +194,20 @@ const VarroDetectorImport = () => {
   return (
     <div className="container">
       <div className="header-section">
-        <h1>🔬 VarroDetector Import</h1>
+        <h1>🔬 {t('varrodetector.title')}</h1>
         <p className="subtitle">
-          Importér varroa-tællinger fra VarroDetector analyse resultater
+          {t('varrodetector.subtitle')}
         </p>
       </div>
 
       <div className="info-card">
-        <h3>📋 Om VarroDetector import</h3>
+        <h3>📋 {t('varrodetector.aboutTitle')}</h3>
         <ul>
-          <li>Upload <strong>statistics_subfolders.csv</strong> filen fra VarroDetector</li>
-          <li>Vælg hvilken bigård dataene tilhører</li>
-          <li>Angiv dato og antal dage for monitoreringen</li>
-          <li>Gennemse og tilpas koblingen mellem CSV data og dine bistader</li>
-          <li>Importér alle observationer på én gang</li>
+          <li dangerouslySetInnerHTML={{ __html: t('varrodetector.aboutItem1') }} />
+          <li>{t('varrodetector.aboutItem2')}</li>
+          <li>{t('varrodetector.aboutItem3')}</li>
+          <li>{t('varrodetector.aboutItem4')}</li>
+          <li>{t('varrodetector.aboutItem5')}</li>
         </ul>
       </div>
 
@@ -216,14 +218,14 @@ const VarroDetectorImport = () => {
         <div className="step-card">
           <div className="step-number">1</div>
           <div className="step-content">
-            <label htmlFor="apiary-select">Vælg bigård</label>
+            <label htmlFor="apiary-select">{t('varrodetector.step1Label')}</label>
             <select
               id="apiary-select"
               value={selectedApiaryId}
               onChange={(e) => handleApiaryChange(e.target.value)}
               className="form-select"
             >
-              <option value="">-- Vælg bigård --</option>
+              <option value="">{t('varrodetector.selectApiaryPlaceholder')}</option>
               {apiaries.map(apiary => (
                 <option key={apiary.id} value={apiary.id}>
                   {apiary.name}
@@ -231,7 +233,7 @@ const VarroDetectorImport = () => {
               ))}
             </select>
             {!selectedApiaryId && apiaries.length === 0 && (
-              <p className="hint">Du skal først oprette en bigård</p>
+              <p className="hint">{t('varrodetector.createApiaryHint')}</p>
             )}
           </div>
         </div>
@@ -241,7 +243,7 @@ const VarroDetectorImport = () => {
             <div className="step-card">
               <div className="step-number">2</div>
               <div className="step-content">
-                <label htmlFor="csv-file">Upload CSV fil</label>
+                <label htmlFor="csv-file">{t('varrodetector.step2Label')}</label>
                 <div className="file-upload-area">
                   <input
                     type="file"
@@ -252,11 +254,11 @@ const VarroDetectorImport = () => {
                   />
                   <label htmlFor="csv-file" className="file-upload-button">
                     {csvData.length > 0 
-                      ? `✓ ${csvData.length} rækker indlæst` 
-                      : '📄 Vælg statistics_subfolders.csv'}
+                      ? `✓ ${t('varrodetector.rowsLoaded', { count: csvData.length })}` 
+                      : `📄 ${t('varrodetector.selectCSVFile')}`}
                   </label>
                 </div>
-                <p className="hint">Filen skal være i VarroDetector CSV format</p>
+                <p className="hint">{t('varrodetector.csvFormatHint')}</p>
               </div>
             </div>
 
@@ -265,7 +267,7 @@ const VarroDetectorImport = () => {
                 <div className="step-card">
                   <div className="step-number">3</div>
                   <div className="step-content">
-                    <label htmlFor="observation-date">Observationsdato</label>
+                    <label htmlFor="observation-date">{t('varrodetector.step3Label')}</label>
                     <input
                       type="date"
                       id="observation-date"
@@ -279,7 +281,7 @@ const VarroDetectorImport = () => {
                 <div className="step-card">
                   <div className="step-number">4</div>
                   <div className="step-content">
-                    <label htmlFor="tray-days">Antal moniteringsdage</label>
+                    <label htmlFor="tray-days">{t('varrodetector.step4Label')}</label>
                     <input
                       type="number"
                       id="tray-days"
@@ -289,22 +291,22 @@ const VarroDetectorImport = () => {
                       max="365"
                       className="form-input"
                     />
-                    <p className="hint">Hvor mange dage har bundbrættet ligget under bistaden?</p>
+                    <p className="hint">{t('varrodetector.monitoringDaysHint')}</p>
                   </div>
                 </div>
 
                 <div className="step-card full-width">
                   <div className="step-number">5</div>
                   <div className="step-content">
-                    <h3>Kontroller kobling mellem CSV data og bistader</h3>
+                    <h3>{t('varrodetector.step5Title')}</h3>
                     <div className="mapping-table-wrapper">
                       <table className="mapping-table">
                         <thead>
                           <tr>
-                            <th>Mappe navn (CSV)</th>
-                            <th>Varroa antal</th>
-                            <th>Billeder</th>
-                            <th>Koblet til bistade</th>
+                            <th>{t('varrodetector.folderName')}</th>
+                            <th>{t('varrodetector.varroaCount')}</th>
+                            <th>{t('varrodetector.images')}</th>
+                            <th>{t('varrodetector.linkedToHive')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -319,7 +321,7 @@ const VarroDetectorImport = () => {
                                   onChange={(e) => handleMappingChange(index, e.target.value)}
                                   className="hive-select"
                                 >
-                                  <option value="">-- Vælg bistade --</option>
+                                  <option value="">{t('varrodetector.selectHivePlaceholder')}</option>
                                   {apiaryHives.map(hive => (
                                     <option key={hive.id} value={hive.id}>
                                       {hive.name}
@@ -327,7 +329,7 @@ const VarroDetectorImport = () => {
                                   ))}
                                 </select>
                                 {mapping.isAutoMatched && (
-                                  <span className="auto-match-badge" title="Automatisk koblet">✓</span>
+                                  <span className="auto-match-badge" title={t('varrodetector.autoMatched')}>✓</span>
                                 )}
                               </td>
                             </tr>
@@ -339,17 +341,17 @@ const VarroDetectorImport = () => {
                     <div className="import-actions">
                       <div className="import-summary">
                         <div className="summary-item">
-                          <span className="summary-label">Total rækker:</span>
+                          <span className="summary-label">{t('varrodetector.totalRows')}:</span>
                           <span className="summary-value">{hiveMappings.length}</span>
                         </div>
                         <div className="summary-item">
-                          <span className="summary-label">Klar til import:</span>
+                          <span className="summary-label">{t('varrodetector.readyToImport')}:</span>
                           <span className="summary-value success">
                             {hiveMappings.filter(m => m.matchedHiveId).length}
                           </span>
                         </div>
                         <div className="summary-item">
-                          <span className="summary-label">Mangler kobling:</span>
+                          <span className="summary-label">{t('varrodetector.missingLink')}:</span>
                           <span className="summary-value error">
                             {hiveMappings.filter(m => !m.matchedHiveId).length}
                           </span>
@@ -361,7 +363,7 @@ const VarroDetectorImport = () => {
                         disabled={isProcessing || !observationDate || hiveMappings.some(m => !m.matchedHiveId)}
                         className="import-button"
                       >
-                        {isProcessing ? '⏳ Importerer...' : '✓ Importér observationer'}
+                        {isProcessing ? `⏳ ${t('varrodetector.importing')}` : `✓ ${t('varrodetector.importObservations')}`}
                       </button>
                     </div>
                   </div>

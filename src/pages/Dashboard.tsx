@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/database'
 import { getAllHives, getAllApiaries, getObservationsForHive, getTreatmentsForHive } from '../db/repository'
@@ -39,6 +40,7 @@ ChartJS.register(
 type TimeFilter = 'all' | '7' | '30'
 
 const Dashboard = () => {
+  const { t } = useTranslation()
   const [showQuickForm, setShowQuickForm] = useState(false)
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('30')
   const [apiaryFilter, setApiaryFilter] = useState<string>('all')
@@ -165,7 +167,7 @@ const Dashboard = () => {
   if (!hives || !apiaries) {
     return (
       <div className="container">
-        <p>Indlæser...</p>
+        <p>{t('common.loading')}</p>
       </div>
     )
   }
@@ -174,10 +176,10 @@ const Dashboard = () => {
     return (
       <div className="container">
         <div className="empty-dashboard">
-          <h2>Velkommen til Varroa Monitor!</h2>
-          <p>Du har ingen bistader endnu.</p>
+          <h2>{t('dashboard.welcome')}</h2>
+          <p>{t('dashboard.noHives')}</p>
           <Link to="/bigaarde">
-            <button>Opret din første bigård</button>
+            <button>{t('dashboard.createFirstApiary')}</button>
           </Link>
         </div>
       </div>
@@ -189,9 +191,9 @@ const Dashboard = () => {
   return (
     <div className="container">
       <div className="dashboard-header">
-        <h1>Oversigt</h1>
+        <h1>{t('dashboard.title')}</h1>
         <button onClick={() => setShowQuickForm(!showQuickForm)}>
-          {showQuickForm ? 'Skjul formular' : '⚡ Ny registrering'}
+          {showQuickForm ? t('dashboard.hideForm') : `⚡ ${t('dashboard.newObservation')}`}
         </button>
       </div>
 
@@ -213,7 +215,7 @@ const Dashboard = () => {
               backgroundColor: timeFilter === '7' ? '#fbbf24' : undefined
             }}
           >
-            7 dage
+            {t('dashboard.7days')}
           </button>
           <button
             className={timeFilter === '30' ? 'secondary' : 'secondary'}
@@ -222,7 +224,7 @@ const Dashboard = () => {
               backgroundColor: timeFilter === '30' ? '#fbbf24' : undefined
             }}
           >
-            30 dage
+            {t('dashboard.30days')}
           </button>
           <button
             className={timeFilter === 'all' ? 'secondary' : 'secondary'}
@@ -231,18 +233,18 @@ const Dashboard = () => {
               backgroundColor: timeFilter === 'all' ? '#fbbf24' : undefined
             }}
           >
-            Alle data
+            {t('dashboard.allData')}
           </button>
         </div>
 
         <div className="apiary-filter">
-          <label htmlFor="apiaryFilter">Bigård:</label>
+          <label htmlFor="apiaryFilter">{t('dashboard.apiary')}:</label>
           <select
             id="apiaryFilter"
             value={apiaryFilter}
             onChange={(e) => setApiaryFilter(e.target.value)}
           >
-            <option value="all">Alle bigårde</option>
+            <option value="all">{t('dashboard.allApiaries')}</option>
             {apiaries.map(apiary => (
               <option key={apiary.id} value={apiary.id}>
                 {apiary.name}
@@ -262,15 +264,15 @@ const Dashboard = () => {
             <div className="apiary-section-header">
               <h2 className="apiary-section-title">
                 {apiaryFilter === 'none' 
-                  ? 'Uden bigård' 
-                  : apiaries?.find(a => a.id === apiaryFilter)?.name || 'Bigård'}
+                  ? t('dashboard.noApiary')
+                  : apiaries?.find(a => a.id === apiaryFilter)?.name || t('dashboard.apiary')}
               </h2>
               {groupData.ungrouped.length > 0 && (
                 <button
                   className="secondary"
                   onClick={() => setShowChartsForApiary(apiaryFilter)}
                 >
-                  📊 Vis alle grafer
+                  📊 {t('dashboard.showAllCharts')}
                 </button>
               )}
             </div>
@@ -291,7 +293,7 @@ const Dashboard = () => {
                         style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
                       >
                         {latest.mitesPerDay.toFixed(1)}
-                        <span className="unit">mider/dag</span>
+                        <span className="unit">{t('dashboard.mitesPerDay')}</span>
                       </div>
                       <div className="hive-card-footer">
                         <span className="date">{latest.date}</span>
@@ -307,24 +309,24 @@ const Dashboard = () => {
                       {yearlyAverage.totalObservations > 0 && (
                         <div className="yearly-average">
                           <div className="yearly-average-label">
-                            Årsgennemsnit {yearlyAverage.year}:
+                            {t('dashboard.yearlyAverage')} {yearlyAverage.year}:
                             {yearlyAverage.isLowSampleCount && (
-                              <span className="warning-icon" title={`Kun ${yearlyAverage.sampledDays} dages prøvetagning i år`}>
+                              <span className="warning-icon" title={t('dashboard.lowSampleWarning', { days: yearlyAverage.sampledDays })}>
                                 ⚠️
                               </span>
                             )}
                           </div>
                           <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
-                            {yearlyAverage.averageMitesPerDay.toFixed(1)} mider/dag
+                            {yearlyAverage.averageMitesPerDay.toFixed(1)} {t('dashboard.mitesPerDay')}
                           </div>
                           <div className="yearly-average-meta">
-                            {yearlyAverage.sampledDays} dage • {yearlyAverage.totalObservations} obs.
+                            {yearlyAverage.sampledDays} {t('dashboard.days')} • {yearlyAverage.totalObservations} {t('dashboard.observations')}
                           </div>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="no-data">Ingen registreringer endnu</div>
+                    <div className="no-data">{t('dashboard.noObservations')}</div>
                   )}
                 </div>
               </Link>
@@ -342,7 +344,7 @@ const Dashboard = () => {
                   className="secondary"
                   onClick={() => setShowChartsForApiary(apiaryId)}
                 >
-                  📊 Vis alle grafer
+                  📊 {t('dashboard.showAllCharts')}
                 </button>
               </div>
               <div className="hive-grid">
@@ -361,7 +363,7 @@ const Dashboard = () => {
                             style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
                           >
                             {latest.mitesPerDay.toFixed(1)}
-                            <span className="unit">mider/dag</span>
+                            <span className="unit">{t('dashboard.mitesPerDay')}</span>
                           </div>
                           <div className="hive-card-footer">
                             <span className="date">{latest.date}</span>
@@ -377,24 +379,24 @@ const Dashboard = () => {
                           {yearlyAverage.totalObservations > 0 && (
                             <div className="yearly-average">
                               <div className="yearly-average-label">
-                                Årsgennemsnit {yearlyAverage.year}:
+                                {t('dashboard.yearlyAverage')} {yearlyAverage.year}:
                                 {yearlyAverage.isLowSampleCount && (
-                                  <span className="warning-icon" title={`Kun ${yearlyAverage.sampledDays} dages prøvetagning i år`}>
+                                  <span className="warning-icon" title={t('dashboard.lowSampleWarning', { days: yearlyAverage.sampledDays })}>
                                     ⚠️
                                   </span>
                                 )}
                               </div>
                               <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
-                                {yearlyAverage.averageMitesPerDay.toFixed(1)} mider/dag
+                                {yearlyAverage.averageMitesPerDay.toFixed(1)} {t('dashboard.mitesPerDay')}
                               </div>
                               <div className="yearly-average-meta">
-                                {yearlyAverage.sampledDays} dage • {yearlyAverage.totalObservations} obs.
+                                {yearlyAverage.sampledDays} {t('dashboard.days')} • {yearlyAverage.totalObservations} {t('dashboard.observations')}
                               </div>
                             </div>
                           )}
                         </>
                       ) : (
-                        <div className="no-data">Ingen registreringer endnu</div>
+                        <div className="no-data">{t('dashboard.noObservations')}</div>
                       )}
                     </div>
                   </Link>
@@ -437,7 +439,7 @@ const Dashboard = () => {
       <div className="modal-overlay" onClick={() => setShowChartsForApiary(null)}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h2>Grafer for {apiaryName}</h2>
+            <h2>{t('dashboard.chartsFor')} {apiaryName}</h2>
             <div className="modal-actions">
               <button className="close-button" onClick={() => setShowChartsForApiary(null)}>
                 ✕
@@ -586,11 +588,11 @@ const Dashboard = () => {
     }
 
     if (loading) {
-      return <div className="loading">Indlæser grafer...</div>
+      return <div className="loading">{t('dashboard.loadingCharts')}</div>
     }
 
     if (!chartData || chartData.datasets.length === 0) {
-      return <div className="no-data">Ingen data at vise</div>
+      return <div className="no-data">{t('dashboard.noDataToShow')}</div>
     }
 
     const chartOptions = {
@@ -693,25 +695,25 @@ const Dashboard = () => {
     return (
       <div className="combined-chart-container">
         <div className="chart-controls" style={{ marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px' }}>
-          <label style={{ fontWeight: 500, fontSize: '13px' }}>Visning:</label>
+          <label style={{ fontWeight: 500, fontSize: '13px' }}>{t('dashboard.view')}:</label>
           <select 
             value={viewMode} 
             onChange={(e) => setViewMode(e.target.value as any)}
             style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '13px' }}
           >
-            <option value="daily">Daglig</option>
-            <option value="moving10">10-dages gns.</option>
-            <option value="weekly">Ugentlig</option>
-            <option value="monthly">Månedlig</option>
+            <option value="daily">{t('dashboard.daily')}</option>
+            <option value="moving10">{t('dashboard.moving10')}</option>
+            <option value="weekly">{t('dashboard.weekly')}</option>
+            <option value="monthly">{t('dashboard.monthly')}</option>
           </select>
           <button onClick={resetZoom} className="secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>
-            🔍 Nulstil
+            🔍 {t('dashboard.resetZoom')}
           </button>
           <button onClick={handleDownload} className="secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>
-            📥 Download
+            📥 {t('dashboard.download')}
           </button>
           <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: 'auto' }}>
-            💡 Scroll: zoom • Træk: panorér
+            💡 {t('dashboard.zoomHelp')}
           </span>
         </div>
         <Line 

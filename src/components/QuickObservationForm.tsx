@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createObservation, createTreatment, getAllHives, getAllApiaries } from '../db/repository'
 import { Hive, Apiary } from '../db/database'
 import { getTodayString } from '../utils/dateUtils'
@@ -17,6 +18,7 @@ const QuickObservationForm = ({
   onSuccess,
   onCancel
 }: QuickObservationFormProps) => {
+  const { t } = useTranslation()
   const [hives, setHives] = useState<Hive[]>([])
   const [apiaries, setApiaries] = useState<Apiary[]>([])
   const [hiveId, setHiveId] = useState(defaultHiveId || '')
@@ -60,7 +62,7 @@ const QuickObservationForm = ({
     setError('')
 
     if (!hiveId) {
-      setError('Vælg venligst et bistade')
+      setError(t('quickObservation.selectHive'))
       return
     }
 
@@ -79,13 +81,13 @@ const QuickObservationForm = ({
         const trayDaysNum = parseInt(trayDays)
 
         if (isNaN(miteCountNum) || miteCountNum < 0) {
-          setError('Antal mider skal være et positivt tal')
+          setError(t('quickObservation.errorMiteCount'))
           setIsSubmitting(false)
           return
         }
 
         if (isNaN(trayDaysNum) || trayDaysNum < 1) {
-          setError('Antal dage skal være mindst 1')
+          setError(t('quickObservation.errorTrayDays'))
           setIsSubmitting(false)
           return
         }
@@ -110,7 +112,7 @@ const QuickObservationForm = ({
         onSuccess()
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Der opstod en fejl')
+      setError(err instanceof Error ? err.message : t('quickObservation.errorGeneric'))
     } finally {
       setIsSubmitting(false)
     }
@@ -120,7 +122,7 @@ const QuickObservationForm = ({
     return (
       <div className="quick-form">
         <p className="empty-state">
-          Du har ingen aktive bistader. Opret først et bistade under "Bistader".
+          {t('hives.noHives')}
         </p>
       </div>
     )
@@ -128,12 +130,12 @@ const QuickObservationForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="quick-form">
-      <h2>Ny registrering</h2>
+      <h2>{t('quickObservation.title')}</h2>
 
       {error && <div className="error-message">{error}</div>}
 
       <div className="form-group">
-        <label htmlFor="hiveId">Bistade</label>
+        <label htmlFor="hiveId">{t('quickObservation.hiveLabel')}</label>
         <select
           id="hiveId"
           value={hiveId}
@@ -149,7 +151,7 @@ const QuickObservationForm = ({
       </div>
 
       <div className="form-group">
-        <label>Type registrering</label>
+        <label>{t('quickObservation.typeLabel')}</label>
         <div className="radio-group">
           <label className="radio-label">
             <input
@@ -158,7 +160,7 @@ const QuickObservationForm = ({
               checked={registrationType === 'observation'}
               onChange={(e) => setRegistrationType(e.target.value as RegistrationType)}
             />
-            <span>Måling (mider)</span>
+            <span>{t('quickObservation.measurement')}</span>
           </label>
           <label className="radio-label">
             <input
@@ -167,13 +169,13 @@ const QuickObservationForm = ({
               checked={registrationType === 'treatment'}
               onChange={(e) => setRegistrationType(e.target.value as RegistrationType)}
             />
-            <span>Behandling</span>
+            <span>{t('quickObservation.treatment')}</span>
           </label>
         </div>
       </div>
 
       <div className="form-group">
-        <label htmlFor="date">Dato</label>
+        <label htmlFor="date">{t('quickObservation.dateLabel')}</label>
         <input
           type="date"
           id="date"
@@ -187,7 +189,7 @@ const QuickObservationForm = ({
         <>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="miteCount">Antal mider</label>
+              <label htmlFor="miteCount">{t('quickObservation.miteCountLabel')}</label>
               <input
                 type="number"
                 id="miteCount"
@@ -201,7 +203,7 @@ const QuickObservationForm = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="trayDays">Dage i familien</label>
+              <label htmlFor="trayDays">{t('quickObservation.trayDaysLabel')}</label>
               <input
                 type="number"
                 id="trayDays"
@@ -216,7 +218,7 @@ const QuickObservationForm = ({
         </>
       ) : (
         <div className="form-group">
-          <label htmlFor="treatmentType">Behandlingstype</label>
+          <label htmlFor="treatmentType">{t('quickObservation.productLabel')}</label>
           <select
             id="treatmentType"
             value={treatmentType}
@@ -235,7 +237,7 @@ const QuickObservationForm = ({
       )}
 
       <div className="form-group">
-        <label htmlFor="notes">Noter (valgfrit)</label>
+        <label htmlFor="notes">{t('quickObservation.notesLabel')}</label>
         <textarea
           id="notes"
           value={notes}
@@ -246,11 +248,11 @@ const QuickObservationForm = ({
 
       <div className="form-actions">
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Gemmer...' : 'Gem registrering'}
+          {isSubmitting ? t('quickObservation.submitting') : t('quickObservation.submitButton')}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="secondary">
-            Annullér
+            {t('quickObservation.cancelButton')}
           </button>
         )}
       </div>
