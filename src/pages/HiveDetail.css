@@ -110,6 +110,85 @@
   height: 400px;
 }
 
+.yearly-summary-section {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.yearly-summary-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.yearly-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.yearly-summary-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 2px solid #fbbf24;
+}
+
+.yearly-summary-year {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.yearly-summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.yearly-summary-value .unit {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #78716c;
+}
+
+.yearly-summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yearly-summary-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.yearly-summary-detail .label {
+  color: #78716c;
+  font-weight: 500;
+}
+
+.yearly-summary-detail .value {
+  font-weight: 600;
+  color: #1c1917;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.yearly-summary-detail .warning-icon {
+  font-size: 1rem;
+  cursor: help;
+}
+
 .empty-chart {
   background-color: white;
   border-radius: 12px;

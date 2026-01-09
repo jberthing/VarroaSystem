@@ -42,3 +42,70 @@ export const getMitesPerDayColor = (mitesPerDay: number): string => {
   if (mitesPerDay >= 5) return '#f59e0b' // yellow
   return '#10b981' // green
 }
+
+export interface YearlyAverageResult {
+  year: number
+  averageMitesPerDay: number
+  totalObservations: number
+  sampledDays: number
+  isLowSampleCount: boolean
+}
+
+/**
+ * Calculate average mite drop per day for a specific year
+ * @param observations - Array of observations for a hive
+ * @param year - The year to calculate for (defaults to current year)
+ * @param minSampleDays - Minimum number of sampled days to avoid warning (default: 12)
+ * @returns YearlyAverageResult with average, sample counts, and warning flag
+ */
+export const calculateYearlyAverage = (
+  observations: Observation[],
+  year: number = new Date().getFullYear(),
+  minSampleDays: number = 12
+): YearlyAverageResult => {
+  // Handle undefined or null observations
+  if (!observations || !Array.isArray(observations)) {
+    return {
+      year,
+      averageMitesPerDay: 0,
+      totalObservations: 0,
+      sampledDays: 0,
+      isLowSampleCount: true
+    }
+  }
+
+  // Filter observations for the specified year
+  const yearObservations = observations.filter(obs => {
+    const obsYear = new Date(obs.date).getFullYear()
+    return obsYear === year
+  })
+
+  if (yearObservations.length === 0) {
+    return {
+      year,
+      averageMitesPerDay: 0,
+      totalObservations: 0,
+      sampledDays: 0,
+      isLowSampleCount: true
+    }
+  }
+
+  // Calculate total mites and total days
+  let totalMites = 0
+  let totalDays = 0
+
+  yearObservations.forEach(obs => {
+    totalMites += obs.miteCount
+    totalDays += obs.trayDays
+  })
+
+  const averageMitesPerDay = totalDays > 0 ? parseFloat((totalMites / totalDays).toFixed(2)) : 0
+
+  return {
+    year,
+    averageMitesPerDay,
+    totalObservations: yearObservations.length,
+    sampledDays: totalDays,
+    isLowSampleCount: totalDays < minSampleDays
+  }
+}
