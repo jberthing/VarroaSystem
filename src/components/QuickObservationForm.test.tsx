@@ -20,7 +20,7 @@ describe('QuickObservationForm Integration Tests', () => {
     vi.mocked(repository.getAllHives).mockResolvedValue([
       {
         id: 'hive1',
-        name: 'Stade 1',
+        name: 'Stade A',
         apiaryId: 'apiary1',
         queenYear: 2025,
         notes: '',
@@ -28,7 +28,7 @@ describe('QuickObservationForm Integration Tests', () => {
       },
       {
         id: 'hive2',
-        name: 'Stade 2',
+        name: 'Stade B',
         apiaryId: 'apiary1',
         queenYear: 2024,
         notes: '',
@@ -51,7 +51,7 @@ describe('QuickObservationForm Integration Tests', () => {
     
     // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
     });
     
     // Check that form elements are present
@@ -68,8 +68,8 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Check that hives are displayed with apiary prefix
-    expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/bigård 1 - stade 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
+    expect(screen.getByText(/bigård 1 - stade b/i)).toBeInTheDocument();
   });
 
   it('should submit an observation with valid data', async () => {
@@ -82,7 +82,7 @@ describe('QuickObservationForm Integration Tests', () => {
     
     // Wait for form to load
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
     });
     
     // Fill in the form for observation
@@ -118,7 +118,7 @@ describe('QuickObservationForm Integration Tests', () => {
     render(<QuickObservationForm />);
     
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
     });
     
     // Try to submit with invalid (empty) mite count
@@ -140,7 +140,7 @@ describe('QuickObservationForm Integration Tests', () => {
     render(<QuickObservationForm />);
     
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
     });
     
     // Fill in mite count
@@ -169,7 +169,7 @@ describe('QuickObservationForm Integration Tests', () => {
     render(<QuickObservationForm onSuccess={mockOnSuccess} />);
     
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
     });
     
     // Switch to treatment mode
@@ -202,7 +202,7 @@ describe('QuickObservationForm Integration Tests', () => {
     render(<QuickObservationForm onCancel={mockOnCancel} />);
     
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
     });
     
     // Click cancel button
@@ -216,7 +216,7 @@ describe('QuickObservationForm Integration Tests', () => {
     render(<QuickObservationForm defaultHiveId="hive2" />);
     
     await waitFor(() => {
-      expect(screen.getByText(/bigård 1 - stade 2/i)).toBeInTheDocument();
+      expect(screen.getByText(/bigård 1 - stade b/i)).toBeInTheDocument();
     });
     
     // Verify hive2 is selected
