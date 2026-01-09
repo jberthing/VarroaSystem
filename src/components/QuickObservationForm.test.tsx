@@ -24,7 +24,8 @@ describe('QuickObservationForm Integration Tests', () => {
         apiaryId: 'apiary1',
         queenYear: 2025,
         notes: '',
-        isActive: true
+        isActive: true,
+        createdAt: Date.now()
       },
       {
         id: 'hive2',
@@ -32,7 +33,17 @@ describe('QuickObservationForm Integration Tests', () => {
         apiaryId: 'apiary1',
         queenYear: 2024,
         notes: '',
-        isActive: true
+        isActive: true,
+        createdAt: Date.now()
+      },
+      {
+        id: 'hive3',
+        name: 'Stade C',
+        apiaryId: 'apiary2',
+        queenYear: 2023,
+        notes: '',
+        isActive: true,
+        createdAt: Date.now()
       }
     ]);
     
@@ -41,7 +52,15 @@ describe('QuickObservationForm Integration Tests', () => {
         id: 'apiary1',
         name: 'Bigård 1',
         location: 'Test Location',
-        isActive: true
+        isActive: true,
+        createdAt: Date.now()
+      },
+      {
+        id: 'apiary2',
+        name: 'Bigård 2',
+        location: 'Test Location 2',
+        isActive: true,
+        createdAt: Date.now()
       }
     ]);
   });
