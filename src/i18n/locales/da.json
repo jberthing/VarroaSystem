@@ -29,8 +29,8 @@
     "noObservations": "Ingen registreringer endnu",
     "yearlyAverage": "Årsgennemsnit",
     "lowSampleWarning": "Kun {{days}} dages prøvetagning i år",
-    "days": "dage",
-    "observations": "obs.",
+    "days": "monitoreringsdage",
+    "observations": "Observationer",
     "chartsFor": "Grafer for",
     "loadingCharts": "Indlæser grafer...",
     "noDataToShow": "Ingen data at vise",
@@ -213,8 +213,8 @@
     "addFirstTreatment": "Tilføj første behandling",
     "yearlyAverage": "Årsgennemsnit",
     "lowSampleWarning": "Kun {{days}} dages prøvetagning i år",
-    "daysUnit": "dage",
-    "observationsCount": "obs."
+    "daysUnit": "Monitoreringsdage",
+    "observationsCount": "Observationer"
   },
   "quickObservation": {
     "title": "Ny registrering",
@@ -237,5 +237,14 @@
     "errorTrayDays": "Antal dage skal være mindst 1",
     "errorProduct": "Produkt navn er påkrævet for behandlinger",
     "errorGeneric": "Der opstod en fejl ved gem af registreringen"
+  },
+  "treatments": {
+    "oxalicAcid": "Oxalsyre",
+    "formicAcid": "Myresyre",
+    "thymol": "Thymol",
+    "apiguard": "Apiguard",
+    "apiLifeVar": "ApiLife Var",
+    "droneBroodRemoval": "Dronelarve udskæring",
+    "other": "Andet"
   }
 }

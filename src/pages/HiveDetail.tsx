@@ -602,13 +602,13 @@ const HiveDetail = () => {
                                 onChange={(e) => setEditForm({ ...editForm, treatmentType: e.target.value })}
                                 style={{ width: '150px' }}
                               >
-                                <option value="Oxalsyre">Oxalsyre</option>
-                                <option value="Myresyre">Myresyre</option>
-                                <option value="Thymol">Thymol</option>
-                                <option value="Apiguard">Apiguard</option>
-                                <option value="ApiLife Var">ApiLife Var</option>
-                                <option value="Dronelarve udskæring">Dronelarve udskæring</option>
-                                <option value="Andet">Andet</option>
+                                <option value="Oxalsyre">{t('treatments.oxalicAcid')}</option>
+                                <option value="Myresyre">{t('treatments.formicAcid')}</option>
+                                <option value="Thymol">{t('treatments.thymol')}</option>
+                                <option value="Apiguard">{t('treatments.apiguard')}</option>
+                                <option value="ApiLife Var">{t('treatments.apiLifeVar')}</option>
+                                <option value="Dronelarve udskæring">{t('treatments.droneBroodRemoval')}</option>
+                                <option value="Andet">{t('treatments.other')}</option>
                               </select>
                             </td>
                             <td>

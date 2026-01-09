@@ -29,8 +29,8 @@
     "noObservations": "Noch keine Beobachtungen",
     "yearlyAverage": "Jahresdurchschnitt",
     "lowSampleWarning": "Nur {{days}} Tage Probenahme in diesem Jahr",
-    "days": "Tage",
-    "observations": "Beob.",
+    "days": "Probentage",
+    "observations": "Messungen",
     "chartsFor": "Diagramme für",
     "loadingCharts": "Lade Diagramme...",
     "noDataToShow": "Keine Daten anzuzeigen",
@@ -212,8 +212,8 @@
     "addFirstTreatment": "Erste Behandlung hinzufügen",
     "yearlyAverage": "Jahresdurchschnitt",
     "lowSampleWarning": "Nur {{days}} Tage Probenahme in diesem Jahr",
-    "daysUnit": "Tage",
-    "observationsCount": "Beob."
+    "daysUnit": "Probentage",
+    "observationsCount": "Messungen"
   },
   "quickObservation": {
     "title": "Neue Beobachtung",
@@ -235,5 +235,15 @@
     "errorMiteCount": "Milbenanzahl muss eine positive Zahl sein",
     "errorTrayDays": "Tage müssen mindestens 1 sein",
     "errorProduct": "Produktname ist für Behandlungen erforderlich",
-    "errorGeneric": "Beim Speichern der Beobachtung ist ein Fehler aufgetreten"  }
+    "errorGeneric": "Beim Speichern der Beobachtung ist ein Fehler aufgetreten"
+  },
+  "treatments": {
+    "oxalicAcid": "Oxalsäure",
+    "formicAcid": "Ameisensäure",
+    "thymol": "Thymol",
+    "apiguard": "Apiguard",
+    "apiLifeVar": "ApiLife Var",
+    "droneBroodRemoval": "Drohnenbrut-Entfernung",
+    "other": "Andere"
+  }
 }

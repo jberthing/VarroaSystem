@@ -29,8 +29,8 @@
     "noObservations": "No observations yet",
     "yearlyAverage": "Yearly average",
     "lowSampleWarning": "Only {{days}} days sampling this year",
-    "days": "days",
-    "observations": "obs.",
+    "days": "sample days",
+    "observations": "measurements",
     "chartsFor": "Charts for",
     "loadingCharts": "Loading charts...",
     "noDataToShow": "No data to display",
@@ -213,8 +213,8 @@
     "addFirstTreatment": "Add first treatment",
     "yearlyAverage": "Yearly average",
     "lowSampleWarning": "Only {{days}} days of sampling this year",
-    "daysUnit": "days",
-    "observationsCount": "obs."
+    "daysUnit": "sample days",
+    "observationsCount": "measurements"
   },
   "quickObservation": {
     "title": "New observation",
@@ -237,5 +237,14 @@
     "errorTrayDays": "Days must be at least 1",
     "errorProduct": "Product name is required for treatments",
     "errorGeneric": "An error occurred while saving the observation"
+  },
+  "treatments": {
+    "oxalicAcid": "Oxalic acid",
+    "formicAcid": "Formic acid",
+    "thymol": "Thymol",
+    "apiguard": "Apiguard",
+    "apiLifeVar": "ApiLife Var",
+    "droneBroodRemoval": "Drone brood removal",
+    "other": "Other"
   }
 }
