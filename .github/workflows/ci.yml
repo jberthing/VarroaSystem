@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
     - name: Checkout code
@@ -19,20 +20,20 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgbm-dev libnss3 libxss1 libxtst6 xauth xvfb
         
     - name: Install dependencies
       run: npm ci
       
     - name: Run tests
-      run: npm test -- --run
+      run: npm test -- --run --reporter=verbose --no-coverage
+      env:
+        CI: true
+        NODE_ENV: test
       
     - name: Build
       run: npm run build
-      
-    - name: Upload coverage (optional)
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-report
-        path: coverage/
-        retention-days: 30

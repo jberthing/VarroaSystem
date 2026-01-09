@@ -194,7 +194,7 @@ src/
 
 ## 📝 Licens
 
-Dette projekt er udviklet som et værktøj til biavlere.
+Dette projekt er udviklet som et værktøj til biavlere - under MIT licens.
 
 ## 👨‍💻 Support
 

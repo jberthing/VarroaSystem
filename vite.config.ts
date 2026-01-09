@@ -6,9 +6,12 @@ export default defineConfig({
   base: '/VarroaSystem/',
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: 'happy-dom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    pool: 'forks',
+    isolate: false,
+    fileParallelism: false,
   },
   plugins: [
     react(),

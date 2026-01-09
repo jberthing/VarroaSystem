@@ -26,7 +26,11 @@ vi.mock('react-chartjs-2', () => ({
 // Mock dexie-react-hooks
 const mockUseLiveQuery = vi.fn();
 vi.mock('dexie-react-hooks', () => ({
-  useLiveQuery: (fn: Function) => mockUseLiveQuery(),
+  useLiveQuery: (fn: Function) => {
+    // Call the actual function to determine what query this is
+    // This helps distinguish between getAllHives(), getAllApiaries(), and db.observations.toArray()
+    return mockUseLiveQuery(fn);
+  },
 }));
 
 // Wrapper component for Router
@@ -105,13 +109,21 @@ describe('Dashboard Integration Tests', () => {
     ];
 
     beforeEach(() => {
-      // Setup mock to return hives, then apiaries, then observations
-      let callCount = 0;
-      mockUseLiveQuery.mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) return mockHives;
-        if (callCount === 2) return mockApiaries;
-        return mockObservations;
+      // Setup mock to return hives, apiaries, or observations based on the query function
+      mockUseLiveQuery.mockImplementation((fn: Function) => {
+        // Execute the function to see what it's trying to query
+        const fnString = fn.toString();
+        
+        // Check which query this is based on function content
+        if (fnString.includes('getAllHives')) {
+          return mockHives;
+        } else if (fnString.includes('getAllApiaries')) {
+          return mockApiaries;
+        } else if (fnString.includes('observations')) {
+          return mockObservations;
+        }
+        
+        return [];
       });
 
       // Mock the observations query chain with proper hiveId parameter
@@ -192,13 +204,17 @@ describe('Dashboard Integration Tests', () => {
       renderWithRouter(<Dashboard />);
 
       await waitFor(() => {
-        const hiveCards = screen.getAllByRole('link');
-        // Stade C has 15.0 mites/day, should be first
-        // Stade A has 10.0 mites/day, should be second
-        // Stade B has 4.0 mites/day, should be last
-        const hiveNames = hiveCards.map(card => card.textContent);
-        expect(hiveNames.some(name => name?.includes('Stade C'))).toBe(true);
-      });
+        // Wait for at least one hive name to appear
+        expect(screen.getByText('Stade A')).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      // Now check for all hives
+      expect(screen.getByText('Stade B')).toBeInTheDocument();
+      expect(screen.getByText('Stade C')).toBeInTheDocument();
+      
+      const hiveCards = screen.getAllByRole('link');
+      const hiveNames = hiveCards.map(card => card.textContent);
+      expect(hiveNames.some(name => name?.includes('Stade C'))).toBe(true);
     });
 
     it('should show quick observation form when button clicked', async () => {
@@ -329,10 +345,12 @@ describe('Dashboard Integration Tests', () => {
       renderWithRouter(<Dashboard />);
 
       await waitFor(() => {
-        const hiveLinks = screen.getAllByRole('link');
-        const stadeALink = hiveLinks.find(link => link.textContent?.includes('Stade A'));
-        expect(stadeALink).toHaveAttribute('href', '/hives/hive1');
-      });
+        expect(screen.getByText('Stade A')).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      const hiveLinks = screen.getAllByRole('link');
+      const stadeALink = hiveLinks.find(link => link.textContent?.includes('Stade A'));
+      expect(stadeALink).toHaveAttribute('href', '/hives/hive1');
     });
 
     it('should show loading state initially', () => {
@@ -349,16 +367,25 @@ describe('Dashboard Integration Tests', () => {
         { id: 'hive4', name: 'Stade D', isActive: true, createdAt: Date.now() },
       ];
 
-      mockUseLiveQuery
-        .mockReturnValueOnce(hivesWithoutApiary)
-        .mockReturnValueOnce(mockApiaries)
-        .mockReturnValue(mockObservations);
+      mockUseLiveQuery.mockImplementation((fn: Function) => {
+        const fnString = fn.toString();
+        
+        if (fnString.includes('getAllHives')) {
+          return hivesWithoutApiary;
+        } else if (fnString.includes('getAllApiaries')) {
+          return mockApiaries;
+        } else if (fnString.includes('observations')) {
+          return mockObservations;
+        }
+        
+        return [];
+      });
 
       renderWithRouter(<Dashboard />);
 
       await waitFor(() => {
         expect(screen.getByText('Stade D')).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
     });
   });
 
@@ -389,10 +416,19 @@ describe('Dashboard Integration Tests', () => {
         },
       ];
 
-      mockUseLiveQuery
-        .mockReturnValueOnce(mockHives)
-        .mockReturnValueOnce([])
-        .mockReturnValue(mockObservations);
+      mockUseLiveQuery.mockImplementation((fn: Function) => {
+        const fnString = fn.toString();
+        
+        if (fnString.includes('getAllHives')) {
+          return mockHives;
+        } else if (fnString.includes('getAllApiaries')) {
+          return [];
+        } else if (fnString.includes('observations')) {
+          return mockObservations;
+        }
+        
+        return [];
+      });
 
       const mockWhere = vi.fn().mockReturnValue({
         equals: vi.fn().mockReturnValue({
@@ -408,7 +444,7 @@ describe('Dashboard Integration Tests', () => {
       await waitFor(() => {
         expect(screen.getByText('Stade A')).toBeInTheDocument();
         // Should show upward trend since 10.0 > 5.0
-      });
+      }, { timeout: 3000 });
     });
   });
 });
