@@ -52,7 +52,7 @@ h1 {
   height: 0;
 }
 
-.file-input-label {
+.file-input-button {
   display: inline-block;
   padding: 0.6em 1.2em;
   background-color: #fbbf24;
@@ -61,13 +61,17 @@ h1 {
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.25s;
+  border: none;
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
 }
 
-.file-input-label:hover {
+.file-input-button:hover {
   background-color: #f59e0b;
 }
 
-.file-input:disabled + .file-input-label {
+.file-input:disabled + .file-input-button {
   opacity: 0.5;
   cursor: not-allowed;
 }

@@ -169,6 +169,17 @@ export const getAllObservations = async (): Promise<Observation[]> => {
   return await db.observations.toArray()
 }
 
+export const getObservationByHiveAndDate = async (
+  hiveId: string,
+  date: string
+): Promise<Observation | undefined> => {
+  return await db.observations
+    .where('hiveId')
+    .equals(hiveId)
+    .and(obs => obs.date === date)
+    .first()
+}
+
 // Treatment operations
 export const createTreatment = async (
   hiveId: string,

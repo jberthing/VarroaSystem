@@ -5,6 +5,7 @@ import Apiaries from './pages/Apiaries'
 import Hives from './pages/Hives'
 import HiveDetail from './pages/HiveDetail'
 import ImportExport from './pages/ImportExport'
+import VarroDetectorImport from './pages/VarroDetectorImport'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="bigaarde" element={<Apiaries />} />
           <Route path="bistader" element={<Hives />} />
           <Route path="bistader/:id" element={<HiveDetail />} />
+          <Route path="varrodetector" element={<VarroDetectorImport />} />
           <Route path="import-eksport" element={<ImportExport />} />
         </Route>
       </Routes>
