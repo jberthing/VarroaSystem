@@ -18,7 +18,7 @@ import annotationPlugin from 'chartjs-plugin-annotation'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import { getHive, getObservationsForHive, getTreatmentsForHive, deleteObservation, deleteTreatment, updateObservation, updateTreatment } from '../db/repository'
 import { Hive, Treatment, Observation } from '../db/database'
-import { getMitesPerDayColor } from '../utils/calculations'
+import { getMitesPerDayColor, calculateYearlyAverage } from '../utils/calculations'
 import QuickObservationForm from '../components/QuickObservationForm'
 import './HiveDetail.css'
 
@@ -412,6 +412,46 @@ const HiveDetail = () => {
           </div>
           <div className="chart-container">
             <Line ref={(ref: any) => ref && setChartInstance(ref)} data={chartData} options={chartOptions} />
+          </div>
+
+          {/* Yearly Average Summary */}
+          <div className="yearly-summary-section">
+            <h2>Årsstatistik</h2>
+            <div className="yearly-summary-cards">
+              {[new Date().getFullYear(), new Date().getFullYear() - 1].map(year => {
+                const yearlyAvg = calculateYearlyAverage(observations, year)
+                if (yearlyAvg.totalObservations === 0) return null
+                
+                return (
+                  <div key={year} className="yearly-summary-card">
+                    <div className="yearly-summary-year">{year}</div>
+                    <div 
+                      className="yearly-summary-value" 
+                      style={{ color: getMitesPerDayColor(yearlyAvg.averageMitesPerDay) }}
+                    >
+                      {yearlyAvg.averageMitesPerDay.toFixed(1)} <span className="unit">mider/dag</span>
+                    </div>
+                    <div className="yearly-summary-details">
+                      <div className="yearly-summary-detail">
+                        <span className="label">Prøvedage:</span>
+                        <span className="value">
+                          {yearlyAvg.sampledDays}
+                          {yearlyAvg.isLowSampleCount && (
+                            <span className="warning-icon" title="Lavt antal prøvedage - kan påvirke nøjagtigheden">
+                              ⚠️
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="yearly-summary-detail">
+                        <span className="label">Observationer:</span>
+                        <span className="value">{yearlyAvg.totalObservations}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           <div className="observations-section">

@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/database'
 import { getAllHives, getAllApiaries, getObservationsForHive, getTreatmentsForHive } from '../db/repository'
 import { getDaysAgo } from '../utils/dateUtils'
-import { calculateTrend, getTrendIcon, getTrendColor, getMitesPerDayColor } from '../utils/calculations'
+import { calculateTrend, getTrendIcon, getTrendColor, getMitesPerDayColor, calculateYearlyAverage } from '../utils/calculations'
 import QuickObservationForm from '../components/QuickObservationForm'
 import {
   Chart as ChartJS,
@@ -55,6 +55,13 @@ const Dashboard = () => {
       latest: any
       previous: any
       trend: 'up' | 'down' | 'flat' | 'none'
+      yearlyAverage: {
+        year: number
+        averageMitesPerDay: number
+        totalObservations: number
+        sampledDays: number
+        isLowSampleCount: boolean
+      }
     }>
   >([])
 
@@ -96,7 +103,11 @@ const Dashboard = () => {
         const previous = hiveObservations[1]
         const trend = calculateTrend(latest, previous)
 
-        return { hive, latest, previous, trend }
+        // Calculate yearly average for current year using all observations
+        const allObservations = await getObservationsForHive(hive.id)
+        const yearlyAverage = calculateYearlyAverage(allObservations)
+
+        return { hive, latest, previous, trend, yearlyAverage }
       })
     )
 
@@ -247,7 +258,7 @@ const Dashboard = () => {
       {groupData.ungrouped ? (
         // Filtered view - no grouping
         <div className="hive-grid">
-          {groupData.ungrouped.map(({ hive, latest, trend }) => (
+          {groupData.ungrouped.map(({ hive, latest, trend, yearlyAverage }) => (
             <Link to={`/bistader/${hive.id}`} key={hive.id} className="hive-card-link">
               <div className="hive-card">
                 <div className="hive-card-header">
@@ -275,6 +286,24 @@ const Dashboard = () => {
                         </span>
                       )}
                     </div>
+                    {yearlyAverage.totalObservations > 0 && (
+                      <div className="yearly-average">
+                        <div className="yearly-average-label">
+                          Årsgennemsnit {yearlyAverage.year}:
+                          {yearlyAverage.isLowSampleCount && (
+                            <span className="warning-icon" title={`Kun ${yearlyAverage.sampledDays} dages prøvetagning i år`}>
+                              ⚠️
+                            </span>
+                          )}
+                        </div>
+                        <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
+                          {yearlyAverage.averageMitesPerDay.toFixed(1)} mider/dag
+                        </div>
+                        <div className="yearly-average-meta">
+                          {yearlyAverage.sampledDays} dage • {yearlyAverage.totalObservations} obs.
+                        </div>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="no-data">Ingen registreringer endnu</div>
@@ -298,7 +327,7 @@ const Dashboard = () => {
                 </button>
               </div>
               <div className="hive-grid">
-                {groupHives.map(({ hive, latest, trend }) => (
+                {groupHives.map(({ hive, latest, trend, yearlyAverage }) => (
                   <Link to={`/bistader/${hive.id}`} key={hive.id} className="hive-card-link">
                     <div className="hive-card">
                       <div className="hive-card-header">
@@ -326,6 +355,24 @@ const Dashboard = () => {
                               </span>
                             )}
                           </div>
+                          {yearlyAverage.totalObservations > 0 && (
+                            <div className="yearly-average">
+                              <div className="yearly-average-label">
+                                Årsgennemsnit {yearlyAverage.year}:
+                                {yearlyAverage.isLowSampleCount && (
+                                  <span className="warning-icon" title={`Kun ${yearlyAverage.sampledDays} dages prøvetagning i år`}>
+                                    ⚠️
+                                  </span>
+                                )}
+                              </div>
+                              <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
+                                {yearlyAverage.averageMitesPerDay.toFixed(1)} mider/dag
+                              </div>
+                              <div className="yearly-average-meta">
+                                {yearlyAverage.sampledDays} dage • {yearlyAverage.totalObservations} obs.
+                              </div>
+                            </div>
+                          )}
                         </>
                       ) : (
                         <div className="no-data">Ingen registreringer endnu</div>

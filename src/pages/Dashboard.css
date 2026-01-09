@@ -142,6 +142,40 @@
   border-top: 1px solid #e5e7eb;
 }
 
+.yearly-average {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.yearly-average-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warning-icon {
+  font-size: 0.875rem;
+  cursor: help;
+}
+
+.yearly-average-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.yearly-average-meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
 .date {
   color: #6b7280;
   font-size: 0.875rem;

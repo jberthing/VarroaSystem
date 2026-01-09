@@ -121,6 +121,22 @@ export const getObservationsForHive = async (hiveId: string): Promise<Observatio
     .sortBy('date')
 }
 
+export const getObservationsForHiveByYear = async (
+  hiveId: string,
+  year: number
+): Promise<Observation[]> => {
+  const startDate = `${year}-01-01`
+  const endDate = `${year}-12-31`
+  
+  const observations = await db.observations
+    .where('hiveId')
+    .equals(hiveId)
+    .and(obs => obs.date >= startDate && obs.date <= endDate)
+    .sortBy('date')
+  
+  return observations
+}
+
 export const getLatestObservationForHive = async (
   hiveId: string
 ): Promise<Observation | undefined> => {
