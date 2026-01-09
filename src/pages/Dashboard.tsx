@@ -256,61 +256,80 @@ const Dashboard = () => {
       </div>
 
       {groupData.ungrouped ? (
-        // Filtered view - no grouping
-        <div className="hive-grid">
-          {groupData.ungrouped.map(({ hive, latest, trend, yearlyAverage }) => (
-            <Link to={`/bistader/${hive.id}`} key={hive.id} className="hive-card-link">
-              <div className="hive-card">
-                <div className="hive-card-header">
-                  <h3>{hive.name}</h3>
-                  {hive.location && <p className="hive-location">{hive.location}</p>}
-                </div>
+        // Filtered view - no grouping but show apiary header
+        <div>
+          {apiaryFilter !== 'all' && (
+            <div className="apiary-section-header">
+              <h2 className="apiary-section-title">
+                {apiaryFilter === 'none' 
+                  ? 'Uden bigård' 
+                  : apiaries?.find(a => a.id === apiaryFilter)?.name || 'Bigård'}
+              </h2>
+              {groupData.ungrouped.length > 0 && (
+                <button
+                  className="secondary"
+                  onClick={() => setShowChartsForApiary(apiaryFilter)}
+                >
+                  📊 Vis alle grafer
+                </button>
+              )}
+            </div>
+          )}
+          <div className="hive-grid">
+            {groupData.ungrouped.map(({ hive, latest, trend, yearlyAverage }) => (
+              <Link to={`/bistader/${hive.id}`} key={hive.id} className="hive-card-link">
+                <div className="hive-card">
+                  <div className="hive-card-header">
+                    <h3>{hive.name}</h3>
+                    {hive.location && <p className="hive-location">{hive.location}</p>}
+                  </div>
 
-                {latest ? (
-                  <>
-                    <div
-                      className="mites-per-day"
-                      style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
-                    >
-                      {latest.mitesPerDay.toFixed(1)}
-                      <span className="unit">mider/dag</span>
-                    </div>
-                    <div className="hive-card-footer">
-                      <span className="date">{latest.date}</span>
-                      {trend !== 'none' && (
-                        <span
-                          className="trend"
-                          style={{ color: getTrendColor(trend) }}
-                        >
-                          {getTrendIcon(trend)}
-                        </span>
-                      )}
-                    </div>
-                    {yearlyAverage.totalObservations > 0 && (
-                      <div className="yearly-average">
-                        <div className="yearly-average-label">
-                          Årsgennemsnit {yearlyAverage.year}:
-                          {yearlyAverage.isLowSampleCount && (
-                            <span className="warning-icon" title={`Kun ${yearlyAverage.sampledDays} dages prøvetagning i år`}>
-                              ⚠️
-                            </span>
-                          )}
-                        </div>
-                        <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
-                          {yearlyAverage.averageMitesPerDay.toFixed(1)} mider/dag
-                        </div>
-                        <div className="yearly-average-meta">
-                          {yearlyAverage.sampledDays} dage • {yearlyAverage.totalObservations} obs.
-                        </div>
+                  {latest ? (
+                    <>
+                      <div
+                        className="mites-per-day"
+                        style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
+                      >
+                        {latest.mitesPerDay.toFixed(1)}
+                        <span className="unit">mider/dag</span>
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="no-data">Ingen registreringer endnu</div>
-                )}
-              </div>
-            </Link>
-          ))}
+                      <div className="hive-card-footer">
+                        <span className="date">{latest.date}</span>
+                        {trend !== 'none' && (
+                          <span
+                            className="trend"
+                            style={{ color: getTrendColor(trend) }}
+                          >
+                            {getTrendIcon(trend)}
+                          </span>
+                        )}
+                      </div>
+                      {yearlyAverage.totalObservations > 0 && (
+                        <div className="yearly-average">
+                          <div className="yearly-average-label">
+                            Årsgennemsnit {yearlyAverage.year}:
+                            {yearlyAverage.isLowSampleCount && (
+                              <span className="warning-icon" title={`Kun ${yearlyAverage.sampledDays} dages prøvetagning i år`}>
+                                ⚠️
+                              </span>
+                            )}
+                          </div>
+                          <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
+                            {yearlyAverage.averageMitesPerDay.toFixed(1)} mider/dag
+                          </div>
+                          <div className="yearly-average-meta">
+                            {yearlyAverage.sampledDays} dage • {yearlyAverage.totalObservations} obs.
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="no-data">Ingen registreringer endnu</div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : (
         // Grouped view by apiary
@@ -393,8 +412,24 @@ const Dashboard = () => {
 
   function ApiaryChartsModal() {
     if (!showChartsForApiary) return null
-    const apiaryData = groupData.grouped?.[showChartsForApiary]
-    if (!apiaryData) return null
+    
+    // Handle both grouped and ungrouped views
+    let apiaryName: string
+    let hivesToShow: any[]
+    
+    if (apiaryFilter !== 'all' && showChartsForApiary === apiaryFilter) {
+      // Filtered view - use the ungrouped data
+      apiaryName = apiaryFilter === 'none' 
+        ? 'Uden bigård' 
+        : apiaries?.find(a => a.id === apiaryFilter)?.name || 'Bigård'
+      hivesToShow = groupData.ungrouped || []
+    } else {
+      // Grouped view
+      const apiaryData = groupData.grouped?.[showChartsForApiary]
+      if (!apiaryData) return null
+      apiaryName = apiaryData.apiaryName
+      hivesToShow = apiaryData.hives
+    }
 
     const chartRef = useRef<any>(null)
 
@@ -402,7 +437,7 @@ const Dashboard = () => {
       <div className="modal-overlay" onClick={() => setShowChartsForApiary(null)}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h2>Grafer for {apiaryData.apiaryName}</h2>
+            <h2>Grafer for {apiaryName}</h2>
             <div className="modal-actions">
               <button className="close-button" onClick={() => setShowChartsForApiary(null)}>
                 ✕
@@ -411,9 +446,9 @@ const Dashboard = () => {
           </div>
           <div className="modal-body">
             <CombinedApiaryChart 
-              hives={apiaryData.hives.map(({ hive }: any) => hive)} 
+              hives={hivesToShow.map((item: any) => item.hive || item)} 
               chartRef={chartRef}
-              apiaryName={apiaryData.apiaryName}
+              apiaryName={apiaryName}
             />
           </div>
         </div>

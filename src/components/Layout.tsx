@@ -18,6 +18,9 @@ const Layout = () => {
             <NavLink to="/bistader" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Bistader
             </NavLink>
+            <NavLink to="/varrodetector" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              VarroDetector
+            </NavLink>
             <NavLink to="/import-eksport" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Import/Eksport
             </NavLink>
@@ -29,7 +32,7 @@ const Layout = () => {
       </main>
       <footer className="footer">
         <div className="container">
-          <p className="version">Version {packageJson.version}</p>
+          <p className="version">Version {packageJson.version} • Udviklet af Jesper Berthing</p>
         </div>
       </footer>
     </div>

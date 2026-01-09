@@ -158,9 +158,6 @@ const ImportExport = () => {
           {importSuccess && <div className="success-message">{importSuccess}</div>}
 
           <div className="file-input-wrapper">
-            <label htmlFor="import-file" className="file-input-label">
-              {isProcessing ? 'Behandler...' : 'Vælg JSON backup fil'}
-            </label>
             <input
               type="file"
               id="import-file"
@@ -169,6 +166,9 @@ const ImportExport = () => {
               disabled={isProcessing}
               className="file-input"
             />
+            <label htmlFor="import-file" className="file-input-button">
+              {isProcessing ? 'Behandler...' : 'Importér JSON backup'}
+            </label>
           </div>
         </div>
 
