@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import '@testing-library/jest-dom/vitest';
 import Dashboard from './Dashboard';
 import * as repository from '../db/repository';
 import { db } from '../db/database';
@@ -114,16 +115,19 @@ describe('Dashboard Integration Tests', () => {
       });
 
       // Mock the observations query chain with proper hiveId parameter
-      vi.mocked(db.observations.where).mockImplementation((field: string) => ({
-        equals: (hiveId: string) => ({
-          reverse: () => ({
-            sortBy: (sortField: string) => {
-              const filtered = mockObservations.filter(obs => obs.hiveId === hiveId);
-              return Promise.resolve(filtered);
-            },
+      const mockWhere = vi.fn().mockImplementation((fieldOrCriteria: string | { [key: string]: any }) => {
+        return {
+          equals: (hiveId: string) => ({
+            reverse: () => ({
+              sortBy: () => {
+                const filtered = mockObservations.filter(obs => obs.hiveId === hiveId);
+                return Promise.resolve(filtered);
+              },
+            }),
           }),
-        }),
-      } as any));
+        };
+      });
+      vi.mocked(db.observations.where).mockImplementation(mockWhere as any);
 
       // Mock getAllHives for QuickObservationForm
       vi.mocked(repository.getAllHives).mockResolvedValue(mockHives);
