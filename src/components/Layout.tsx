@@ -1,30 +1,35 @@
 import { Outlet, NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from './LanguageSwitcher'
 import './Layout.css'
 import packageJson from '../../package.json'
 
 const Layout = () => {
+  const { t } = useTranslation()
+  
   return (
     <div className="layout">
       <header className="header">
-        <div className="container">
-          <h1 className="logo">🐝 Varroa Monitor</h1>
+        <div className="container header-content">
+          <h1 className="logo">🐝 {t('app.title')}</h1>
           <nav className="nav">
-            <NavLink to="/oversigt" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Oversigt
+            <NavLink to="/overview" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              {t('nav.overview')}
             </NavLink>
-            <NavLink to="/bigaarde" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Bigårde
+            <NavLink to="/apiaries" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              {t('nav.apiaries')}
             </NavLink>
-            <NavLink to="/bistader" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Bistader
+            <NavLink to="/hives" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              {t('nav.hives')}
             </NavLink>
             <NavLink to="/varrodetector" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              VarroDetector
+              {t('nav.varrodetector')}
             </NavLink>
             <NavLink to="/import-eksport" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Import/Eksport
+              {t('nav.importExport')}
             </NavLink>
           </nav>
+          <LanguageSwitcher />
         </div>
       </header>
       <main className="main">
@@ -32,7 +37,7 @@ const Layout = () => {
       </main>
       <footer className="footer">
         <div className="container">
-          <p className="version">Version {packageJson.version} • Udviklet af Jesper Berthing</p>
+          <p className="version">{t('app.version')} {packageJson.version} • {t('app.developedBy')}</p>
         </div>
       </footer>
     </div>

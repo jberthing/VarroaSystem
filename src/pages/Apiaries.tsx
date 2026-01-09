@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
 import { getAllApiaries, createApiary, updateApiary, getHivesForApiary } from '../db/repository'
 import './Apiaries.css'
 
 const Apiaries = () => {
+  const { t } = useTranslation()
   const apiaries = useLiveQuery(() => getAllApiaries(false), [])
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -29,7 +31,7 @@ const Apiaries = () => {
     setError('')
 
     if (!name.trim()) {
-      setError('Bigård navn er påkrævet')
+      setError(t('apiaries.nameRequired'))
       return
     }
 
@@ -45,7 +47,7 @@ const Apiaries = () => {
       setLocation('')
       setShowForm(false)
     } catch (err) {
-      setError('Der opstod en fejl')
+      setError(t('apiaries.error'))
     }
   }
 
@@ -71,7 +73,7 @@ const Apiaries = () => {
   if (!apiaries) {
     return (
       <div className="container">
-        <p>Indlæser...</p>
+        <p>{t('common.loading')}</p>
       </div>
     )
   }
@@ -82,46 +84,46 @@ const Apiaries = () => {
   return (
     <div className="container">
       <div className="apiaries-header">
-        <h1>Bigårde</h1>
+        <h1>{t('apiaries.title')}</h1>
         <button onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Annullér' : '+ Ny bigård'}
+          {showForm ? t('apiaries.cancel') : `+ ${t('apiaries.newApiary')}`}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="apiary-form">
-          <h2>{editingId ? 'Redigér bigård' : 'Ny bigård'}</h2>
+          <h2>{editingId ? t('apiaries.editApiary') : t('apiaries.newApiary')}</h2>
 
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="name">Bigård navn *</label>
+            <label htmlFor="name">{t('apiaries.nameLabel')} *</label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="f.eks. Bigård 1 eller Nordlige mark"
+              placeholder={t('apiaries.namePlaceholder')}
               required
               autoFocus
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="location">Adresse/beskrivelse (valgfrit)</label>
+            <label htmlFor="location">{t('apiaries.locationLabel')}</label>
             <input
               type="text"
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="f.eks. Strandvej 42, 8000 Aarhus"
+              placeholder={t('apiaries.locationPlaceholder')}
             />
           </div>
 
           <div className="form-actions">
-            <button type="submit">{editingId ? 'Gem ændringer' : 'Opret bigård'}</button>
+            <button type="submit">{editingId ? t('apiaries.saveChanges') : t('apiaries.createApiary')}</button>
             <button type="button" onClick={handleCancel} className="secondary">
-              Annullér
+              {t('apiaries.cancel')}
             </button>
           </div>
         </form>
@@ -129,8 +131,8 @@ const Apiaries = () => {
 
       {activeApiaries.length === 0 && !showForm ? (
         <div className="empty-state">
-          <p>Du har ingen bigårde endnu.</p>
-          <button onClick={() => setShowForm(true)}>Opret din første bigård</button>
+          <p>{t('apiaries.noApiaries')}</p>
+          <button onClick={() => setShowForm(true)}>{t('apiaries.createFirst')}</button>
         </div>
       ) : (
         <>
@@ -141,21 +143,21 @@ const Apiaries = () => {
                   <h3>{apiary.name}</h3>
                   {apiary.location && <p className="apiary-location">{apiary.location}</p>}
                   <p className="hive-count">
-                    {hiveCounts[apiary.id] || 0} aktive bistader
+                    {hiveCounts[apiary.id] || 0} {t('apiaries.activeHives')}
                   </p>
                 </div>
                 <div className="apiary-actions">
-                  <Link to={`/bistader?apiary=${apiary.id}`}>
-                    <button className="secondary">Se bistader</button>
+                  <Link to={`/hives?apiary=${apiary.id}`}>
+                    <button className="secondary">{t('apiaries.seeHives')}</button>
                   </Link>
                   <button onClick={() => handleEdit(apiary)} className="secondary">
-                    Redigér
+                    {t('apiaries.edit')}
                   </button>
                   <button
                     onClick={() => handleToggleActive(apiary.id, apiary.isActive)}
                     className="secondary"
                   >
-                    Arkivér
+                    {t('apiaries.archive')}
                   </button>
                 </div>
               </div>
@@ -164,7 +166,7 @@ const Apiaries = () => {
 
           {archivedApiaries.length > 0 && (
             <>
-              <h2 className="archived-title">Arkiverede bigårde</h2>
+              <h2 className="archived-title">{t('apiaries.archivedTitle')}</h2>
               <div className="apiaries-grid archived">
                 {archivedApiaries.map((apiary) => (
                   <div key={apiary.id} className="apiary-card">
@@ -177,7 +179,7 @@ const Apiaries = () => {
                         onClick={() => handleToggleActive(apiary.id, apiary.isActive)}
                         className="secondary"
                       >
-                        Gendan
+                        {t('apiaries.restore')}
                       </button>
                     </div>
                   </div>

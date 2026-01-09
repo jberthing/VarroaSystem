@@ -55,8 +55,8 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Check that form elements are present
-    expect(screen.getByLabelText(/dato/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /gem/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('quickObservation.dateLabel')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /quickObservation.submitButton/i })).toBeInTheDocument();
   });
 
   it('should load and display hives grouped by apiary', async () => {
@@ -86,8 +86,8 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Fill in the form for observation
-    const miteCountInput = screen.getByLabelText(/antal mider/i);
-    const trayDaysInput = screen.getByLabelText(/dage i familien/i);
+    const miteCountInput = screen.getByLabelText('quickObservation.miteCountLabel');
+    const trayDaysInput = screen.getByLabelText('quickObservation.trayDaysLabel');
     
     await user.clear(miteCountInput);
     await user.type(miteCountInput, '15');
@@ -96,7 +96,7 @@ describe('QuickObservationForm Integration Tests', () => {
     await user.type(trayDaysInput, '3');
     
     // Submit the form
-    const submitButton = screen.getByRole('button', { name: /gem/i });
+    const submitButton = screen.getByRole('button', { name: /quickObservation.submitButton/i });
     await user.click(submitButton);
     
     // Check that createObservation was called
@@ -122,10 +122,10 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Try to submit with invalid (empty) mite count
-    const miteCountInput = screen.getByLabelText(/antal mider/i);
+    const miteCountInput = screen.getByLabelText('quickObservation.miteCountLabel');
     await user.clear(miteCountInput);
     
-    const submitButton = screen.getByRole('button', { name: /gem/i });
+    const submitButton = screen.getByRole('button', { name: /quickObservation.submitButton/i });
     await user.click(submitButton);
     
     // The HTML5 validation should prevent submission
@@ -144,15 +144,15 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Fill in mite count
-    const miteCountInput = screen.getByLabelText(/antal mider/i);
+    const miteCountInput = screen.getByLabelText('quickObservation.miteCountLabel');
     await user.clear(miteCountInput);
     await user.type(miteCountInput, '10');
     
     // Clear tray days (leaving it empty should trigger validation)
-    const trayDaysInput = screen.getByLabelText(/dage i familien/i);
+    const trayDaysInput = screen.getByLabelText('quickObservation.trayDaysLabel');
     await user.clear(trayDaysInput);
     
-    const submitButton = screen.getByRole('button', { name: /gem/i });
+    const submitButton = screen.getByRole('button', { name: /quickObservation.submitButton/i });
     await user.click(submitButton);
     
     // HTML5 validation should prevent submission
@@ -173,14 +173,14 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Switch to treatment mode
-    const treatmentRadio = screen.getByLabelText(/behandling/i);
+    const treatmentRadio = screen.getByLabelText('quickObservation.treatment');
     await user.click(treatmentRadio);
     
     // Verify treatment-specific fields appear
-    expect(screen.getByLabelText(/behandlingstype/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('quickObservation.productLabel')).toBeInTheDocument();
     
     // Submit treatment
-    const submitButton = screen.getByRole('button', { name: /gem/i });
+    const submitButton = screen.getByRole('button', { name: /quickObservation.submitButton/i });
     await user.click(submitButton);
     
     // Check that createTreatment was called
@@ -206,7 +206,7 @@ describe('QuickObservationForm Integration Tests', () => {
     });
     
     // Click cancel button
-    const cancelButton = screen.getByRole('button', { name: /annullér/i });
+    const cancelButton = screen.getByRole('button', { name: 'quickObservation.cancelButton' });
     await user.click(cancelButton);
     
     expect(mockOnCancel).toHaveBeenCalled();

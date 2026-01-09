@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { exportAllData, importAllData, clearAllData, seedDemoData } from '../db/repository'
 import { downloadJSON, readFileAsText } from '../utils/fileUtils'
 import { Observation, Treatment } from '../db/database'
 import './ImportExport.css'
 
 const ImportExport = () => {
+  const { t } = useTranslation()
   const [importError, setImportError] = useState('')
   const [importSuccess, setImportSuccess] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
@@ -15,7 +17,7 @@ const ImportExport = () => {
       const timestamp = new Date().toISOString().split('T')[0]
       downloadJSON(data, `varroa-backup-${timestamp}.json`)
     } catch (err) {
-      alert('Fejl ved eksport: ' + (err instanceof Error ? err.message : 'Ukendt fejl'))
+      alert(t('importExport.exportError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
     }
   }
 
@@ -63,7 +65,7 @@ const ImportExport = () => {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
     } catch (err) {
-      alert('Fejl ved CSV eksport: ' + (err instanceof Error ? err.message : 'Ukendt fejl'))
+      alert(t('importExport.csvExportError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
     }
   }
 
@@ -81,18 +83,18 @@ const ImportExport = () => {
 
       // Basic validation
       if (!data.hives || !data.observations || !Array.isArray(data.hives) || !Array.isArray(data.observations)) {
-        throw new Error('Ugyldig filformat')
+        throw new Error(t('importExport.invalidFileFormat'))
       }
 
-      if (!confirm(`Dette vil erstatte alle dine nuværende data med ${data.hives.length} bistader og ${data.observations.length} registreringer. Er du sikker?`)) {
+      if (!confirm(t('importExport.confirmImport', { hives: data.hives.length, observations: data.observations.length }))) {
         setIsProcessing(false)
         return
       }
 
       await importAllData(data)
-      setImportSuccess(`Importeret ${data.hives.length} bistader og ${data.observations.length} registreringer`)
+      setImportSuccess(t('importExport.importSuccess', { hives: data.hives.length, observations: data.observations.length }))
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Kunne ikke læse eller importere filen')
+      setImportError(err instanceof Error ? err.message : t('importExport.importReadError'))
     } finally {
       setIsProcessing(false)
       // Reset file input
@@ -101,58 +103,56 @@ const ImportExport = () => {
   }
 
   const handleClearData = async () => {
-    if (!confirm('Dette vil slette ALLE dine bistader og registreringer permanent. Er du sikker?')) {
+    if (!confirm(t('importExport.confirmClearData'))) {
       return
     }
 
-    if (!confirm('Er du helt sikker? Denne handling kan ikke fortrydes!')) {
+    if (!confirm(t('importExport.confirmClearDataFinal'))) {
       return
     }
 
     try {
       await clearAllData()
-      alert('Alle data er blevet slettet')
+      alert(t('importExport.clearDataSuccess'))
     } catch (err) {
-      alert('Fejl ved sletning: ' + (err instanceof Error ? err.message : 'Ukendt fejl'))
+      alert(t('importExport.clearDataError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
     }
   }
 
   const handleSeedDemo = async () => {
-    if (!confirm('Dette vil erstatte alle dine data med demo-data. Er du sikker?')) {
+    if (!confirm(t('importExport.confirmSeedDemo'))) {
       return
     }
 
     try {
       await seedDemoData()
-      alert('Demo-data er blevet indlæst')
+      alert(t('importExport.seedDemoSuccess'))
     } catch (err) {
-      alert('Fejl ved indlæsning af demo-data: ' + (err instanceof Error ? err.message : 'Ukendt fejl'))
+      alert(t('importExport.seedDemoError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
     }
   }
 
   return (
     <div className="container">
-      <h1>Import & Eksport</h1>
+      <h1>{t('importExport.title')}</h1>
 
       <div className="import-export-section">
         <div className="section-card">
-          <h2>📥 Eksportér data</h2>
-          <p>Download en sikkerhedskopi af alle dine bistader og registreringer.</p>
+          <h2>📥 {t('importExport.exportData')}</h2>
+          <p>{t('importExport.exportDescription')}</p>
           <div className="button-group">
             <button onClick={handleExportJSON}>
-              Eksportér JSON (backup)
+              {t('importExport.exportJSON')}
             </button>
             <button onClick={handleExportCSV} className="secondary">
-              Eksportér CSV (Excel)
+              {t('importExport.exportCSV')}
             </button>
           </div>
         </div>
 
         <div className="section-card">
-          <h2>📤 Importér data</h2>
-          <p>
-            Gendan en tidligere backup. <strong>Dette vil erstatte alle dine nuværende data.</strong>
-          </p>
+          <h2>📤 {t('importExport.importData')}</h2>
+          <p dangerouslySetInnerHTML={{ __html: t('importExport.importDescription') }} />
 
           {importError && <div className="error-message">{importError}</div>}
           {importSuccess && <div className="success-message">{importSuccess}</div>}
@@ -167,37 +167,35 @@ const ImportExport = () => {
               className="file-input"
             />
             <label htmlFor="import-file" className="file-input-button">
-              {isProcessing ? 'Behandler...' : 'Importér JSON backup'}
+              {isProcessing ? t('importExport.processing') : t('importExport.importJSON')}
             </label>
           </div>
         </div>
 
         <div className="section-card">
-          <h2>🧪 Test data</h2>
-          <p>Indlæs demo-data til test og udvikling.</p>
+          <h2>🧪 {t('importExport.testData')}</h2>
+          <p>{t('importExport.testDataDescription')}</p>
           <button onClick={handleSeedDemo} className="secondary">
-            Indlæs demo-data
+            {t('importExport.loadDemoData')}
           </button>
         </div>
 
         <div className="section-card danger-zone">
-          <h2>⚠️ Farezone</h2>
-          <p>
-            Slet alle data permanent. <strong>Dette kan ikke fortrydes!</strong>
-          </p>
+          <h2>⚠️ {t('importExport.dangerZone')}</h2>
+          <p dangerouslySetInnerHTML={{ __html: t('importExport.dangerZoneDescription') }} />
           <button onClick={handleClearData} className="danger">
-            Slet alle data
+            {t('importExport.clearAllData')}
           </button>
         </div>
       </div>
 
       <div className="info-box">
-        <h3>ℹ️ Om backup</h3>
+        <h3>ℹ️ {t('importExport.aboutBackup')}</h3>
         <ul>
-          <li>JSON-filer kan importeres tilbage i denne app</li>
-          <li>CSV-filer kan åbnes i Excel eller Google Sheets</li>
-          <li>Alle data gemmes kun lokalt på din computer</li>
-          <li>Husk at lave regelmæssige backups!</li>
+          <li>{t('importExport.backupInfo1')}</li>
+          <li>{t('importExport.backupInfo2')}</li>
+          <li>{t('importExport.backupInfo3')}</li>
+          <li>{t('importExport.backupInfo4')}</li>
         </ul>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getAllHives, getAllApiaries, createHive, updateHive } from '../db/repository'
@@ -6,6 +7,7 @@ import { compressImage, getBase64Size } from '../utils/imageUtils'
 import './Hives.css'
 
 const Hives = () => {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const apiaryFilter = searchParams.get('apiary')
   
@@ -32,7 +34,7 @@ const Hives = () => {
     setError('')
 
     if (!name.trim()) {
-      setError('Bistade navn er påkrævet')
+      setError(t('hives.nameRequired'))
       return
     }
 
@@ -56,7 +58,7 @@ const Hives = () => {
       setImagePreview(undefined)
       setShowForm(false)
     } catch (err) {
-      setError('Der opstod en fejl')
+      setError(t('hives.error'))
     }
   }
 
@@ -82,7 +84,7 @@ const Hives = () => {
       const sizeKB = getBase64Size(compressed)
       
       if (sizeKB > 500) {
-        setError(`Billedet er for stort (${sizeKB.toFixed(0)} KB). Prøv et mindre billede.`)
+        setError(t('hives.imageTooLarge', { size: sizeKB.toFixed(0) }))
         setUploadingImage(false)
         return
       }
@@ -90,7 +92,7 @@ const Hives = () => {
       setImage(compressed)
       setImagePreview(compressed)
     } catch (err) {
-      setError('Kunne ikke uploade billede. Sørg for det er et gyldigt billede.')
+      setError(t('hives.imageUploadError'))
     } finally {
       setUploadingImage(false)
     }
@@ -154,32 +156,32 @@ const Hives = () => {
     <div className="container">
       <div className="hives-header">
         <div>
-          <h1>Bistader</h1>
+          <h1>{t('hives.title')}</h1>
           {selectedApiary && (
             <p className="breadcrumb">
-              <Link to="/bigaarde">Bigårde</Link> → {selectedApiary.name}
+              <Link to="/apiaries">{t('hives.breadcrumbApiaries')}</Link> → {selectedApiary.name}
             </p>
           )}
         </div>
         <button onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Annullér' : '+ Nyt bistade'}
+          {showForm ? t('hives.cancel') : `+ ${t('hives.newHive')}`}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="hive-form">
-          <h2>{editingId ? 'Redigér bistade' : 'Nyt bistade'}</h2>
+          <h2>{editingId ? t('hives.editHive') : t('hives.newHive')}</h2>
 
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="apiaryId">Bigård (valgfrit)</label>
+            <label htmlFor="apiaryId">{t('hives.apiaryLabel')}</label>
             <select
               id="apiaryId"
               value={apiaryId}
               onChange={(e) => setApiaryId(e.target.value)}
             >
-              <option value="">Ingen bigård</option>
+              <option value="">{t('hives.noApiary')}</option>
               {apiaries.map((apiary) => (
                 <option key={apiary.id} value={apiary.id}>
                   {apiary.name}
@@ -189,36 +191,36 @@ const Hives = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="name">Bistade navn *</label>
+            <label htmlFor="name">{t('hives.nameLabel')} *</label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="f.eks. Stade A"
+              placeholder={t('hives.namePlaceholder')}
               required
               autoFocus
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="location">Ekstra placeringsinfo (valgfrit)</label>
+            <label htmlFor="location">{t('hives.locationLabel')}</label>
             <input
               type="text"
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="f.eks. Ved egetræet"
+              placeholder={t('hives.locationPlaceholder')}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="image">Billede (valgfrit)</label>
+            <label htmlFor="image">{t('hives.imageLabel')}</label>
             {imagePreview && (
               <div className="image-preview">
                 <img src={imagePreview} alt="Preview" />
                 <button type="button" onClick={handleRemoveImage} className="remove-image-btn">
-                  ✕ Fjern billede
+                  ✕ {t('hives.removeImage')}
                 </button>
               </div>
             )}
@@ -231,14 +233,14 @@ const Hives = () => {
                 disabled={uploadingImage}
               />
             )}
-            {uploadingImage && <p className="upload-status">Komprimerer billede...</p>}
-            <p className="help-text">Billedet komprimeres automatisk til max 800x600px</p>
+            {uploadingImage && <p className="upload-status">{t('hives.compressingImage')}</p>}
+            <p className="help-text">{t('hives.imageHelp')}</p>
           </div>
 
           <div className="form-actions">
-            <button type="submit">{editingId ? 'Gem ændringer' : 'Opret bistade'}</button>
+            <button type="submit">{editingId ? t('hives.saveChanges') : t('hives.createHive')}</button>
             <button type="button" onClick={handleCancel} className="secondary">
-              Annullér
+              {t('hives.cancel')}
             </button>
           </div>
         </form>
@@ -246,8 +248,8 @@ const Hives = () => {
 
       {activeHives.length === 0 && !showForm ? (
         <div className="empty-state">
-          <p>Du har ingen aktive bistader endnu.</p>
-          <button onClick={() => setShowForm(true)}>Opret dit første bistade</button>
+          <p>{t('hives.noHives')}</p>
+          <button onClick={() => setShowForm(true)}>{t('hives.createFirst')}</button>
         </div>
       ) : (
         <>
@@ -265,7 +267,7 @@ const Hives = () => {
                 <div className="hives-list">
                   {groupedHives[apiaryId].map((hive) => (
                     <div key={hive.id} className="hive-item">
-                      <Link to={`/bistader/${hive.id}`} className="hive-info">
+                      <Link to={`/hives/${hive.id}`} className="hive-info">
                         {hive.image && (
                           <img src={hive.image} alt={hive.name} className="hive-thumbnail" />
                         )}
@@ -276,13 +278,13 @@ const Hives = () => {
                       </Link>
                       <div className="hive-actions">
                         <button onClick={() => handleEdit(hive)} className="secondary">
-                          Redigér
+                          {t('hives.edit')}
                         </button>
                         <button
                           onClick={() => handleToggleActive(hive.id, hive.isActive)}
                           className="secondary"
                         >
-                          Arkivér
+                          {t('hives.archive')}
                         </button>
                       </div>
                     </div>
@@ -295,11 +297,11 @@ const Hives = () => {
           {/* Hives without apiary */}
           {noApiaryHives.length > 0 && (
             <div className="apiary-section">
-              <h2 className="apiary-section-title">Uden bigård</h2>
+              <h2 className="apiary-section-title">{t('hives.withoutApiary')}</h2>
               <div className="hives-list">
                 {noApiaryHives.map((hive) => (
                   <div key={hive.id} className="hive-item">
-                    <Link to={`/bistader/${hive.id}`} className="hive-info">
+                    <Link to={`/hives/${hive.id}`} className="hive-info">
                       {hive.image && (
                         <img src={hive.image} alt={hive.name} className="hive-thumbnail" />
                       )}
@@ -310,13 +312,13 @@ const Hives = () => {
                     </Link>
                     <div className="hive-actions">
                       <button onClick={() => handleEdit(hive)} className="secondary">
-                        Redigér
+                        {t('hives.edit')}
                       </button>
                       <button
                         onClick={() => handleToggleActive(hive.id, hive.isActive)}
                         className="secondary"
                       >
-                        Arkivér
+                        {t('hives.archive')}
                       </button>
                     </div>
                   </div>
@@ -327,7 +329,7 @@ const Hives = () => {
 
           {archivedHives.length > 0 && (
             <>
-              <h2 className="archived-title">Arkiverede bistader</h2>
+              <h2 className="archived-title">{t('hives.archivedTitle')}</h2>
               <div className="hives-list archived">
                 {archivedHives.map((hive) => (
                   <div key={hive.id} className="hive-item">
@@ -340,7 +342,7 @@ const Hives = () => {
                         onClick={() => handleToggleActive(hive.id, hive.isActive)}
                         className="secondary"
                       >
-                        Gendan
+                        {t('hives.restore')}
                       </button>
                     </div>
                   </div>

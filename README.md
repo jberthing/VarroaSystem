@@ -11,6 +11,16 @@ En PWA (Progressive Web App) til monitering af Varroa mider for biavlere. Appen 
 - 💾 **Backup** - Eksportér og importér data som JSON eller CSV
 - 🔌 **Offline** - Fungerer uden internetforbindelse
 - 📱 **Mobilvenlig** - Responsivt design der virker på computer, tablet og mobil
+- 🌍 **Flersproget** - Understøtter dansk, engelsk og tysk med automatisk sprogvalg
+
+## 🌍 Sprog / Languages / Sprachen
+
+Appen er tilgængelig på flere sprog:
+- 🇩🇰 **Dansk** (Danish)
+- 🇬🇧 **Engelsk** (English)
+- 🇩🇪 **Tysk** (German)
+
+Sproget vælges automatisk baseret på din browsers indstillinger, men kan ændres manuelt i appen via sprogvælgeren i øverste højre hjørne (🇩🇰 🇬🇧 🇩🇪).
 
 ## 🚀 Kom i gang
 
@@ -135,6 +145,7 @@ npm run deploy
 - **Database**: Dexie.js (IndexedDB wrapper)
 - **Grafer**: Chart.js + react-chartjs-2
 - **PWA**: vite-plugin-pwa
+- **i18n**: i18next + react-i18next (Dansk, Engelsk, Tysk)
 
 ## 📁 Projektstruktur
 

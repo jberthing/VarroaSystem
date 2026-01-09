@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Line } from 'react-chartjs-2'
+import { useTranslation } from 'react-i18next'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,6 +39,7 @@ ChartJS.register(
 type ViewMode = 'daily' | 'moving10' | 'weekly' | 'monthly'
 
 const HiveDetail = () => {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [hive, setHive] = useState<Hive | null>(null)
@@ -70,18 +72,18 @@ const HiveDetail = () => {
     if (hiveData) {
       setHive(hiveData)
     } else {
-      navigate('/bistader')
+      navigate('/hives')
     }
   }
 
   const handleDelete = async (obsId: string) => {
-    if (confirm('Er du sikker på at du vil slette denne registrering?')) {
+    if (confirm(t('hiveDetail.confirmDeleteObservation'))) {
       await deleteObservation(obsId)
     }
   }
 
   const handleDeleteTreatment = async (treatmentId: string) => {
-    if (confirm('Er du sikker på at du vil slette denne behandling?')) {
+    if (confirm(t('hiveDetail.confirmDeleteTreatment'))) {
       await deleteTreatment(treatmentId)
     }
   }
@@ -333,8 +335,8 @@ const HiveDetail = () => {
     <div className="container">
       <div className="detail-header">
         <div>
-          <Link to="/bistader" className="back-link">
-            ← Tilbage til bistader
+          <Link to="/hives" className="back-link">
+            ← {t('hiveDetail.backToHives')}
           </Link>
           <h1>{hive.name}</h1>
           {hive.location && <p className="location">{hive.location}</p>}
@@ -346,11 +348,11 @@ const HiveDetail = () => {
             className="hive-detail-image" 
             onClick={() => setShowImageModal(true)}
             style={{ cursor: 'pointer' }}
-            title="Klik for at se i fuld størrelse"
+            title={t('hiveDetail.imageClickToView')}
           />
         )}
         <button onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Skjul formular' : '+ Ny registrering'}
+          {showForm ? t('hiveDetail.hideForm') : `+ ${t('hiveDetail.newObservation')}`}
         </button>
       </div>
 
@@ -375,25 +377,25 @@ const HiveDetail = () => {
 
       {observations.length === 0 ? (
         <div className="empty-chart">
-          <p>Ingen registreringer for dette bistade endnu.</p>
-          <button onClick={() => setShowForm(true)}>Tilføj første registrering</button>
+          <p>{t('hiveDetail.noObservations')}</p>
+          <button onClick={() => setShowForm(true)}>{t('hiveDetail.addFirst')}</button>
         </div>
       ) : (
         <>
           <div className="chart-controls" style={{ marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px' }}>
-            <label style={{ fontWeight: 500, fontSize: '13px' }}>Visning:</label>
+            <label style={{ fontWeight: 500, fontSize: '13px' }}>{t('hiveDetail.viewLabel')}:</label>
             <select 
               value={viewMode} 
               onChange={(e) => setViewMode(e.target.value as ViewMode)}
               style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '13px' }}
             >
-              <option value="daily">Daglig</option>
-              <option value="moving10">10-dages gns.</option>
-              <option value="weekly">Ugentlig</option>
-              <option value="monthly">Månedlig</option>
+              <option value="daily">{t('hiveDetail.daily')}</option>
+              <option value="moving10">{t('hiveDetail.moving10')}</option>
+              <option value="weekly">{t('hiveDetail.weekly')}</option>
+              <option value="monthly">{t('hiveDetail.monthly')}</option>
             </select>
             <button onClick={resetZoom} className="secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>
-              🔍 Nulstil
+              🔍 {t('hiveDetail.resetZoom')}
             </button>
             <button onClick={() => {
               if (chartInstance) {
@@ -404,10 +406,10 @@ const HiveDetail = () => {
                 link.click()
               }
             }} className="secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>
-              📥 Download
+              📥 {t('hiveDetail.download')}
             </button>
             <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: 'auto' }}>
-              💡 Scroll: zoom • Træk: panorér
+              💡 {t('hiveDetail.zoomHelp')}
             </span>
           </div>
           <div className="chart-container">
@@ -416,7 +418,7 @@ const HiveDetail = () => {
 
           {/* Yearly Average Summary */}
           <div className="yearly-summary-section">
-            <h2>Årsstatistik</h2>
+            <h2>{t('hiveDetail.yearlyAverage')}</h2>
             <div className="yearly-summary-cards">
               {[new Date().getFullYear(), new Date().getFullYear() - 1].map(year => {
                 const yearlyAvg = calculateYearlyAverage(observations, year)
@@ -429,22 +431,22 @@ const HiveDetail = () => {
                       className="yearly-summary-value" 
                       style={{ color: getMitesPerDayColor(yearlyAvg.averageMitesPerDay) }}
                     >
-                      {yearlyAvg.averageMitesPerDay.toFixed(1)} <span className="unit">mider/dag</span>
+                      {yearlyAvg.averageMitesPerDay.toFixed(1)} <span className="unit">{t('hiveDetail.mitesPerDay')}</span>
                     </div>
                     <div className="yearly-summary-details">
                       <div className="yearly-summary-detail">
-                        <span className="label">Prøvedage:</span>
+                        <span className="label">{t('hiveDetail.daysUnit')}:</span>
                         <span className="value">
                           {yearlyAvg.sampledDays}
                           {yearlyAvg.isLowSampleCount && (
-                            <span className="warning-icon" title="Lavt antal prøvedage - kan påvirke nøjagtigheden">
+                            <span className="warning-icon" title={t('hiveDetail.lowSampleWarning', { days: yearlyAvg.sampledDays })}>
                               ⚠️
                             </span>
                           )}
                         </span>
                       </div>
                       <div className="yearly-summary-detail">
-                        <span className="label">Observationer:</span>
+                        <span className="label">{t('hiveDetail.observations')}:</span>
                         <span className="value">{yearlyAvg.totalObservations}</span>
                       </div>
                     </div>
@@ -455,16 +457,16 @@ const HiveDetail = () => {
           </div>
 
           <div className="observations-section">
-            <h2>Målinger</h2>
+            <h2>{t('hiveDetail.observations')}</h2>
             <div className="observations-table">
               <table>
                 <thead>
                   <tr>
-                    <th>Dato</th>
-                    <th>Mider</th>
-                    <th>Dage</th>
-                    <th>Mider/dag</th>
-                    <th>Noter</th>
+                    <th>{t('hiveDetail.date')}</th>
+                    <th>{t('hiveDetail.mites')}</th>
+                    <th>{t('hiveDetail.days')}</th>
+                    <th>{t('hiveDetail.mitesPerDay')}</th>
+                    <th>{t('hiveDetail.notes')}</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -506,7 +508,7 @@ const HiveDetail = () => {
                               type="text"
                               value={editForm.notes}
                               onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                              placeholder="Noter"
+                              placeholder={t('hiveDetail.notesPlaceholder')}
                               style={{ width: '100%' }}
                             />
                           </td>
@@ -516,13 +518,13 @@ const HiveDetail = () => {
                               className="small"
                               style={{ marginRight: '4px' }}
                             >
-                              Gem
+                              {t('hiveDetail.save')}
                             </button>
                             <button
                               onClick={handleCancelEdit}
                               className="secondary small"
                             >
-                              Annuller
+                              {t('hiveDetail.cancel')}
                             </button>
                           </td>
                         </>
@@ -546,13 +548,13 @@ const HiveDetail = () => {
                               className="secondary small"
                               style={{ marginRight: '4px' }}
                             >
-                              Rediger
+                              {t('hiveDetail.edit')}
                             </button>
                             <button
-                              onClick={() => handleDelete(obs.id)}
+                              onClick={() => handleDeleteObservation(obs.id)}
                               className="danger small"
                             >
-                              Slet
+                              {t('hiveDetail.delete')}
                             </button>
                           </td>
                         </>
@@ -571,14 +573,14 @@ const HiveDetail = () => {
 
           {treatments.length > 0 && (
             <div className="observations-section">
-              <h2>Behandlinger</h2>
+              <h2>{t('hiveDetail.treatments')}</h2>
               <div className="observations-table">
                 <table>
                   <thead>
                     <tr>
-                      <th>Dato</th>
-                      <th>Type</th>
-                      <th>Noter</th>
+                      <th>{t('hiveDetail.date')}</th>
+                      <th>{t('hiveDetail.product')}</th>
+                      <th>{t('hiveDetail.notes')}</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -600,13 +602,13 @@ const HiveDetail = () => {
                                 onChange={(e) => setEditForm({ ...editForm, treatmentType: e.target.value })}
                                 style={{ width: '150px' }}
                               >
-                                <option value="Oxalsyre">Oxalsyre</option>
-                                <option value="Myresyre">Myresyre</option>
-                                <option value="Thymol">Thymol</option>
-                                <option value="Apiguard">Apiguard</option>
-                                <option value="ApiLife Var">ApiLife Var</option>
-                                <option value="Dronelarve udskæring">Dronelarve udskæring</option>
-                                <option value="Andet">Andet</option>
+                                <option value="Oxalsyre">{t('treatments.oxalicAcid')}</option>
+                                <option value="Myresyre">{t('treatments.formicAcid')}</option>
+                                <option value="Thymol">{t('treatments.thymol')}</option>
+                                <option value="Apiguard">{t('treatments.apiguard')}</option>
+                                <option value="ApiLife Var">{t('treatments.apiLifeVar')}</option>
+                                <option value="Dronelarve udskæring">{t('treatments.droneBroodRemoval')}</option>
+                                <option value="Andet">{t('treatments.other')}</option>
                               </select>
                             </td>
                             <td>
@@ -624,13 +626,13 @@ const HiveDetail = () => {
                                 className="small"
                                 style={{ marginRight: '4px' }}
                               >
-                                Gem
+                                {t('hiveDetail.save')}
                               </button>
                               <button
                                 onClick={handleCancelEdit}
                                 className="secondary small"
                               >
-                                Annuller
+                                {t('hiveDetail.cancel')}
                               </button>
                             </td>
                           </>
@@ -645,13 +647,13 @@ const HiveDetail = () => {
                                 className="secondary small"
                                 style={{ marginRight: '4px' }}
                               >
-                                Rediger
+                                {t('hiveDetail.edit')}
                               </button>
                               <button
                                 onClick={() => handleDeleteTreatment(treatment.id)}
                                 className="danger small"
                               >
-                                Slet
+                                {t('hiveDetail.delete')}
                               </button>
                             </td>
                           </>
