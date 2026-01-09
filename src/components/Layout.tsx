@@ -13,13 +13,13 @@ const Layout = () => {
         <div className="container header-content">
           <h1 className="logo">🐝 {t('app.title')}</h1>
           <nav className="nav">
-            <NavLink to="/oversigt" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/overview" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               {t('nav.overview')}
             </NavLink>
-            <NavLink to="/bigaarde" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/apiaries" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               {t('nav.apiaries')}
             </NavLink>
-            <NavLink to="/bistader" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/hives" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               {t('nav.hives')}
             </NavLink>
             <NavLink to="/varrodetector" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>

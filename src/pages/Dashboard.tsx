@@ -178,7 +178,7 @@ const Dashboard = () => {
         <div className="empty-dashboard">
           <h2>{t('dashboard.welcome')}</h2>
           <p>{t('dashboard.noHives')}</p>
-          <Link to="/bigaarde">
+          <Link to="/apiaries">
             <button>{t('dashboard.createFirstApiary')}</button>
           </Link>
         </div>
@@ -279,7 +279,7 @@ const Dashboard = () => {
           )}
           <div className="hive-grid">
             {groupData.ungrouped.map(({ hive, latest, trend, yearlyAverage }) => (
-              <Link to={`/bistader/${hive.id}`} key={hive.id} className="hive-card-link">
+              <Link to={`/hives/${hive.id}`} key={hive.id} className="hive-card-link">
                 <div className="hive-card">
                   <div className="hive-card-header">
                     <h3>{hive.name}</h3>
@@ -349,7 +349,7 @@ const Dashboard = () => {
               </div>
               <div className="hive-grid">
                 {groupHives.map(({ hive, latest, trend, yearlyAverage }) => (
-                  <Link to={`/bistader/${hive.id}`} key={hive.id} className="hive-card-link">
+                  <Link to={`/hives/${hive.id}`} key={hive.id} className="hive-card-link">
                     <div className="hive-card">
                       <div className="hive-card-header">
                         <h3>{hive.name}</h3>

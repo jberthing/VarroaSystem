@@ -12,11 +12,11 @@ function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/oversigt" replace />} />
-          <Route path="oversigt" element={<Dashboard />} />
-          <Route path="bigaarde" element={<Apiaries />} />
-          <Route path="bistader" element={<Hives />} />
-          <Route path="bistader/:id" element={<HiveDetail />} />
+          <Route index element={<Navigate to="/overview" replace />} />
+          <Route path="overview" element={<Dashboard />} />
+          <Route path="apiaries" element={<Apiaries />} />
+          <Route path="hives" element={<Hives />} />
+          <Route path="hives/:id" element={<HiveDetail />} />
           <Route path="varrodetector" element={<VarroDetectorImport />} />
           <Route path="import-eksport" element={<ImportExport />} />
         </Route>

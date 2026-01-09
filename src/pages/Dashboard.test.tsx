@@ -327,7 +327,7 @@ describe('Dashboard Integration Tests', () => {
       await waitFor(() => {
         const hiveLinks = screen.getAllByRole('link');
         const stadeALink = hiveLinks.find(link => link.textContent?.includes('Stade A'));
-        expect(stadeALink).toHaveAttribute('href', '/bistader/hive1');
+        expect(stadeALink).toHaveAttribute('href', '/hives/hive1');
       });
     });
 

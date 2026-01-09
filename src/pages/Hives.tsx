@@ -159,7 +159,7 @@ const Hives = () => {
           <h1>{t('hives.title')}</h1>
           {selectedApiary && (
             <p className="breadcrumb">
-              <Link to="/bigaarde">{t('hives.breadcrumbApiaries')}</Link> → {selectedApiary.name}
+              <Link to="/apiaries">{t('hives.breadcrumbApiaries')}</Link> → {selectedApiary.name}
             </p>
           )}
         </div>
@@ -267,7 +267,7 @@ const Hives = () => {
                 <div className="hives-list">
                   {groupedHives[apiaryId].map((hive) => (
                     <div key={hive.id} className="hive-item">
-                      <Link to={`/bistader/${hive.id}`} className="hive-info">
+                      <Link to={`/hives/${hive.id}`} className="hive-info">
                         {hive.image && (
                           <img src={hive.image} alt={hive.name} className="hive-thumbnail" />
                         )}
@@ -301,7 +301,7 @@ const Hives = () => {
               <div className="hives-list">
                 {noApiaryHives.map((hive) => (
                   <div key={hive.id} className="hive-item">
-                    <Link to={`/bistader/${hive.id}`} className="hive-info">
+                    <Link to={`/hives/${hive.id}`} className="hive-info">
                       {hive.image && (
                         <img src={hive.image} alt={hive.name} className="hive-thumbnail" />
                       )}

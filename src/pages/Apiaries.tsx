@@ -147,7 +147,7 @@ const Apiaries = () => {
                   </p>
                 </div>
                 <div className="apiary-actions">
-                  <Link to={`/bistader?apiary=${apiary.id}`}>
+                  <Link to={`/hives?apiary=${apiary.id}`}>
                     <button className="secondary">{t('apiaries.seeHives')}</button>
                   </Link>
                   <button onClick={() => handleEdit(apiary)} className="secondary">

@@ -72,7 +72,7 @@ const HiveDetail = () => {
     if (hiveData) {
       setHive(hiveData)
     } else {
-      navigate('/bistader')
+      navigate('/hives')
     }
   }
 
@@ -335,7 +335,7 @@ const HiveDetail = () => {
     <div className="container">
       <div className="detail-header">
         <div>
-          <Link to="/bistader" className="back-link">
+          <Link to="/hives" className="back-link">
             ← {t('hiveDetail.backToHives')}
           </Link>
           <h1>{hive.name}</h1>
