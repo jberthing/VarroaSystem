@@ -551,7 +551,7 @@ const HiveDetail = () => {
                               {t('hiveDetail.edit')}
                             </button>
                             <button
-                              onClick={() => handleDeleteObservation(obs.id)}
+                              onClick={() => handleDelete(obs.id)}
                               className="danger small"
                             >
                               {t('hiveDetail.delete')}
