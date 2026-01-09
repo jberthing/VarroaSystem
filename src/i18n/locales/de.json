@@ -28,9 +28,9 @@
     "mitesPerDay": "Milben/Tag",
     "noObservations": "Noch keine Beobachtungen",
     "yearlyAverage": "Jahresdurchschnitt",
-    "lowSampleWarning": "Nur {{days}} Tage Probenahme in diesem Jahr",
-    "days": "Probentage",
-    "observations": "Messungen",
+    "lowSampleWarning": "Nur {{days}} Überwachungstage in diesem Jahr",
+    "days": "Überwachungstage",
+    "observations": "Beobachtungen",
     "chartsFor": "Diagramme für",
     "loadingCharts": "Lade Diagramme...",
     "noDataToShow": "Keine Daten anzuzeigen",
@@ -211,9 +211,9 @@
     "noTreatments": "Noch keine Behandlungen registriert.",
     "addFirstTreatment": "Erste Behandlung hinzufügen",
     "yearlyAverage": "Jahresdurchschnitt",
-    "lowSampleWarning": "Nur {{days}} Tage Probenahme in diesem Jahr",
-    "daysUnit": "Probentage",
-    "observationsCount": "Messungen"
+    "lowSampleWarning": "Nur {{days}} Überwachungstage in diesem Jahr",
+    "daysUnit": "Überwachungstage",
+    "observationsCount": "Beobachtungen"
   },
   "quickObservation": {
     "title": "Neue Beobachtung",

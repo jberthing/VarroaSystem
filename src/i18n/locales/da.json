@@ -212,7 +212,7 @@
     "noTreatments": "Ingen behandlinger registreret endnu.",
     "addFirstTreatment": "Tilføj første behandling",
     "yearlyAverage": "Årsgennemsnit",
-    "lowSampleWarning": "Kun {{days}} dages prøvetagning i år",
+    "lowSampleWarning": "Kun {{days}} dages monitoreringsdage i år",
     "daysUnit": "Monitoreringsdage",
     "observationsCount": "Observationer"
   },

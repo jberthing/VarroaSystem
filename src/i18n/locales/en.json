@@ -28,9 +28,9 @@
     "mitesPerDay": "mites/day",
     "noObservations": "No observations yet",
     "yearlyAverage": "Yearly average",
-    "lowSampleWarning": "Only {{days}} days sampling this year",
-    "days": "sample days",
-    "observations": "measurements",
+    "lowSampleWarning": "Only {{days}} monitoring days this year",
+    "days": "monitoring days",
+    "observations": "Observations",
     "chartsFor": "Charts for",
     "loadingCharts": "Loading charts...",
     "noDataToShow": "No data to display",
@@ -212,9 +212,9 @@
     "noTreatments": "No treatments registered yet.",
     "addFirstTreatment": "Add first treatment",
     "yearlyAverage": "Yearly average",
-    "lowSampleWarning": "Only {{days}} days of sampling this year",
-    "daysUnit": "sample days",
-    "observationsCount": "measurements"
+    "lowSampleWarning": "Only {{days}} monitoring days this year",
+    "daysUnit": "Monitoring days",
+    "observationsCount": "Observations"
   },
   "quickObservation": {
     "title": "New observation",
