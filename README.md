@@ -22,7 +22,18 @@ Appen er tilgængelig på flere sprog:
 
 Sproget vælges automatisk baseret på din browsers indstillinger, men kan ændres manuelt i appen via sprogvælgeren i øverste højre hjørne (🇩🇰 🇬🇧 🇩🇪).
 
-## 🚀 Kom i gang
+## � Screenshots
+
+### Dashboard oversigt
+![Dashboard](public/dashboard.png)
+
+### Observationer og behandlinger
+![Observations and Treatment](public/observations_and_treatment.png)
+
+### Mider pr. dag over tid
+![Overview - Mites per Day](public/overview-mites_pr_day.png)
+
+## �🚀 Kom i gang
 
 ### 📦 Installér appen (anbefalet)
 
