@@ -31,6 +31,7 @@
     "lowSampleWarning": "Kun {{days}} dages prøvetagning i år",
     "days": "monitoreringsdage",
     "observations": "Observationer",
+    "totalMites": "Total mider",
     "chartsFor": "Grafer for",
     "loadingCharts": "Indlæser grafer...",
     "noDataToShow": "Ingen data at vise",
@@ -214,7 +215,8 @@
     "yearlyAverage": "Årsgennemsnit",
     "lowSampleWarning": "Kun {{days}} dages monitoreringsdage i år",
     "daysUnit": "Monitoreringsdage",
-    "observationsCount": "Observationer"
+    "observationsCount": "Observationer",
+    "totalMites": "Total mider"
   },
   "quickObservation": {
     "title": "Ny registrering",

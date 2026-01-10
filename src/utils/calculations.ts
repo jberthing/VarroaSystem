@@ -49,6 +49,7 @@ export interface YearlyAverageResult {
   totalObservations: number
   sampledDays: number
   isLowSampleCount: boolean
+  totalMiteCount: number
 }
 
 /**
@@ -70,7 +71,8 @@ export const calculateYearlyAverage = (
       averageMitesPerDay: 0,
       totalObservations: 0,
       sampledDays: 0,
-      isLowSampleCount: true
+      isLowSampleCount: true,
+      totalMiteCount: 0
     }
   }
 
@@ -86,7 +88,8 @@ export const calculateYearlyAverage = (
       averageMitesPerDay: 0,
       totalObservations: 0,
       sampledDays: 0,
-      isLowSampleCount: true
+      isLowSampleCount: true,
+      totalMiteCount: 0
     }
   }
 
@@ -105,6 +108,7 @@ export const calculateYearlyAverage = (
     year,
     averageMitesPerDay,
     totalObservations: yearObservations.length,
+    totalMiteCount: totalMites,
     sampledDays: totalDays,
     isLowSampleCount: totalDays < minSampleDays
   }

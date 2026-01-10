@@ -31,6 +31,7 @@
     "lowSampleWarning": "Nur {{days}} Überwachungstage in diesem Jahr",
     "days": "Überwachungstage",
     "observations": "Beobachtungen",
+    "totalMites": "Gesamtzahl Milben",
     "chartsFor": "Diagramme für",
     "loadingCharts": "Lade Diagramme...",
     "noDataToShow": "Keine Daten anzuzeigen",
@@ -213,7 +214,9 @@
     "yearlyAverage": "Jahresdurchschnitt",
     "lowSampleWarning": "Nur {{days}} Überwachungstage in diesem Jahr",
     "daysUnit": "Überwachungstage",
-    "observationsCount": "Beobachtungen"
+    "observationsCount": "Beobachtungen",
+    "totalMites": "Gesamtzahl Milben",
+    "totalMites": "Gesamtzahl Milben"
   },
   "quickObservation": {
     "title": "Neue Beobachtung",
