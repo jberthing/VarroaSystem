@@ -449,6 +449,10 @@ const HiveDetail = () => {
                         <span className="label">{t('hiveDetail.observations')}:</span>
                         <span className="value">{yearlyAvg.totalObservations}</span>
                       </div>
+                      <div className="yearly-summary-detail">
+                        <span className="label">{t('hiveDetail.totalMites')}:</span>
+                        <span className="value">{yearlyAvg.totalMiteCount}</span>
+                      </div>
                     </div>
                   </div>
                 )

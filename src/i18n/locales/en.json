@@ -31,6 +31,7 @@
     "lowSampleWarning": "Only {{days}} monitoring days this year",
     "days": "monitoring days",
     "observations": "Observations",
+    "totalMites": "Total mites",
     "chartsFor": "Charts for",
     "loadingCharts": "Loading charts...",
     "noDataToShow": "No data to display",
@@ -214,7 +215,8 @@
     "yearlyAverage": "Yearly average",
     "lowSampleWarning": "Only {{days}} monitoring days this year",
     "daysUnit": "Monitoring days",
-    "observationsCount": "Observations"
+    "observationsCount": "Observations",
+    "totalMites": "Total mites"
   },
   "quickObservation": {
     "title": "New observation",

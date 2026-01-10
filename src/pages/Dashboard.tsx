@@ -63,6 +63,7 @@ const Dashboard = () => {
         totalObservations: number
         sampledDays: number
         isLowSampleCount: boolean
+        totalMiteCount: number
       }
     }>
   >([])
@@ -322,6 +323,9 @@ const Dashboard = () => {
                           <div className="yearly-average-meta">
                             {yearlyAverage.sampledDays} {t('dashboard.days')} • {yearlyAverage.totalObservations} {t('dashboard.observations')}
                           </div>
+                          <div className="yearly-average-meta">
+                            {t('dashboard.totalMites')}: {yearlyAverage.totalMiteCount}
+                          </div>
                         </div>
                       )}
                     </>
@@ -391,6 +395,9 @@ const Dashboard = () => {
                               </div>
                               <div className="yearly-average-meta">
                                 {yearlyAverage.sampledDays} {t('dashboard.days')} • {yearlyAverage.totalObservations} {t('dashboard.observations')}
+                              </div>
+                              <div className="yearly-average-meta">
+                                {t('dashboard.totalMites')}: {yearlyAverage.totalMiteCount}
                               </div>
                             </div>
                           )}
