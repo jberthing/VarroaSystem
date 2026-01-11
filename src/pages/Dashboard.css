@@ -93,68 +93,114 @@
 }
 
 .hive-card {
-  background-color: white;
+  display: flex;
+  background: white;
   border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
   cursor: pointer;
-  border: 2px solid transparent;
 }
 
 .hive-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hive-status-bar {
+  width: 6px;
+  flex-shrink: 0;
+}
+
+.hive-card.good .hive-status-bar { background: #22c55e; }
+.hive-card.warning .hive-status-bar { background: #eab308; }
+.hive-card.danger .hive-status-bar { background: #f97316; }
+.hive-card.critical .hive-status-bar { background: #ef4444; }
+.hive-card.no-data .hive-status-bar { background: #d1d5db; }
+
+.hive-card-content {
+  flex: 1;
+  padding: 1.25rem;
+}
+
+.hive-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .hive-card-header h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  color: #1f2937;
+  margin: 0;
+}
+
+.trend {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .hive-location {
   color: #6b7280;
   font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
 }
 
-.mites-per-day {
-  font-size: 3rem;
-  font-weight: 700;
-  margin: 1rem 0;
+.hive-stats {
+  margin-top: 1rem;
+}
+
+.hive-main-stat {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
 }
 
-.mites-per-day .unit {
-  font-size: 1rem;
-  font-weight: 400;
+.hive-mites-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.hive-unit {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.hive-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.85rem;
   color: #6b7280;
 }
 
-.hive-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+.hive-date {
+  color: #6b7280;
 }
 
-.yearly-average {
+.hive-count {
+  color: #6b7280;
+}
+
+.hive-yearly {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
 }
 
-.yearly-average-label {
+.hive-yearly-header {
+  margin-bottom: 0.5rem;
+}
+
+.hive-yearly-label {
   font-size: 0.75rem;
   color: #6b7280;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -165,32 +211,33 @@
   cursor: help;
 }
 
-.yearly-average-value {
+.hive-yearly-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.hive-yearly-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.hive-yearly-value {
   font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.yearly-average-meta {
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-.date {
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.trend {
-  font-size: 1.5rem;
   font-weight: 700;
+  color: #1f2937;
+}
+
+.hive-yearly-unit {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .no-data {
   color: #9ca3af;
   font-style: italic;
-  padding: 2rem 0;
-  text-align: center;
+  padding: 1rem 0;
 }
 
 .empty-dashboard {

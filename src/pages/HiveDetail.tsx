@@ -426,7 +426,14 @@ const HiveDetail = () => {
                 
                 return (
                   <div key={year} className="yearly-summary-card">
-                    <div className="yearly-summary-year">{year}</div>
+                    <div className="yearly-summary-year">
+                      {year}
+                      {yearlyAvg.isLowSampleCount && (
+                        <span className="warning-icon" title={t('hiveDetail.lowSampleWarning', { days: yearlyAvg.sampledDays })}>
+                          ⚠️
+                        </span>
+                      )}
+                    </div>
                     <div 
                       className="yearly-summary-value" 
                       style={{ color: getMitesPerDayColor(yearlyAvg.averageMitesPerDay) }}
@@ -438,11 +445,6 @@ const HiveDetail = () => {
                         <span className="label">{t('hiveDetail.daysUnit')}:</span>
                         <span className="value">
                           {yearlyAvg.sampledDays}
-                          {yearlyAvg.isLowSampleCount && (
-                            <span className="warning-icon" title={t('hiveDetail.lowSampleWarning', { days: yearlyAvg.sampledDays })}>
-                              ⚠️
-                            </span>
-                          )}
                         </span>
                       </div>
                       <div className="yearly-summary-detail">

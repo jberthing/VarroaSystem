@@ -39,6 +39,13 @@ ChartJS.register(
 
 type TimeFilter = 'all' | '7' | '30'
 
+const getStatusLevel = (mitesPerDay: number): 'good' | 'warning' | 'danger' | 'critical' => {
+  if (mitesPerDay < 1) return 'good'
+  if (mitesPerDay < 3) return 'warning'
+  if (mitesPerDay < 10) return 'danger'
+  return 'critical'
+}
+
 const Dashboard = () => {
   const { t } = useTranslation()
   const [showQuickForm, setShowQuickForm] = useState(false)
@@ -281,57 +288,72 @@ const Dashboard = () => {
           <div className="hive-grid">
             {groupData.ungrouped.map(({ hive, latest, trend, yearlyAverage }) => (
               <Link to={`/hives/${hive.id}`} key={hive.id} className="hive-card-link">
-                <div className="hive-card">
-                  <div className="hive-card-header">
-                    <h3>{hive.name}</h3>
+                <div className={`hive-card ${latest ? getStatusLevel(latest.mitesPerDay) : 'no-data'}`}>
+                  <div className="hive-status-bar" />
+                  <div className="hive-card-content">
+                    <div className="hive-card-header">
+                      <h3>{hive.name}</h3>
+                      {trend !== 'none' && latest && (
+                        <span
+                          className="trend"
+                          style={{ color: getTrendColor(trend) }}
+                        >
+                          {getTrendIcon(trend)}
+                        </span>
+                      )}
+                    </div>
                     {hive.location && <p className="hive-location">{hive.location}</p>}
-                  </div>
 
-                  {latest ? (
-                    <>
-                      <div
-                        className="mites-per-day"
-                        style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
-                      >
-                        {latest.mitesPerDay.toFixed(1)}
-                        <span className="unit">{t('dashboard.mitesPerDay')}</span>
-                      </div>
-                      <div className="hive-card-footer">
-                        <span className="date">{latest.date}</span>
-                        {trend !== 'none' && (
+                    {latest ? (
+                      <div className="hive-stats">
+                        <div className="hive-main-stat">
                           <span
-                            className="trend"
-                            style={{ color: getTrendColor(trend) }}
+                            className="hive-mites-value"
+                            style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
                           >
-                            {getTrendIcon(trend)}
+                            {latest.mitesPerDay.toFixed(1)}
                           </span>
+                          <span className="hive-unit">{t('dashboard.mitesPerDay')}</span>
+                        </div>
+                        <div className="hive-meta">
+                          <span className="hive-date">{latest.date}</span>
+                          <span className="hive-count">{latest.miteCount} {t('dashboard.mitesCounted')}</span>
+                        </div>
+
+                        {yearlyAverage.totalObservations > 0 && (
+                          <div className="hive-yearly">
+                            <div className="hive-yearly-header">
+                              <span className="hive-yearly-label">
+                                {t('dashboard.yearlyAverage')} {yearlyAverage.year}
+                                {yearlyAverage.isLowSampleCount && (
+                                  <span className="warning-icon" title={t('dashboard.lowSampleWarning', { days: yearlyAverage.sampledDays })}>
+                                    ⚠️
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <div className="hive-yearly-stats">
+                              <div className="hive-yearly-stat">
+                                <span
+                                  className="hive-yearly-value"
+                                  style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}
+                                >
+                                  {yearlyAverage.averageMitesPerDay.toFixed(1)}
+                                </span>
+                                <span className="hive-yearly-unit">{t('dashboard.avgMitesPerDay')}</span>
+                              </div>
+                              <div className="hive-yearly-stat">
+                                <span className="hive-yearly-value">{yearlyAverage.totalMiteCount}</span>
+                                <span className="hive-yearly-unit">{t('dashboard.mitesTotal')}</span>
+                              </div>
+                            </div>
+                          </div>
                         )}
                       </div>
-                      {yearlyAverage.totalObservations > 0 && (
-                        <div className="yearly-average">
-                          <div className="yearly-average-label">
-                            {t('dashboard.yearlyAverage')} {yearlyAverage.year}:
-                            {yearlyAverage.isLowSampleCount && (
-                              <span className="warning-icon" title={t('dashboard.lowSampleWarning', { days: yearlyAverage.sampledDays })}>
-                                ⚠️
-                              </span>
-                            )}
-                          </div>
-                          <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
-                            {yearlyAverage.averageMitesPerDay.toFixed(1)} {t('dashboard.mitesPerDay')}
-                          </div>
-                          <div className="yearly-average-meta">
-                            {yearlyAverage.sampledDays} {t('dashboard.days')} • {yearlyAverage.totalObservations} {t('dashboard.observations')}
-                          </div>
-                          <div className="yearly-average-meta">
-                            {t('dashboard.totalMites')}: {yearlyAverage.totalMiteCount}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="no-data">{t('dashboard.noObservations')}</div>
-                  )}
+                    ) : (
+                      <div className="no-data">{t('dashboard.noObservations')}</div>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
@@ -354,57 +376,72 @@ const Dashboard = () => {
               <div className="hive-grid">
                 {groupHives.map(({ hive, latest, trend, yearlyAverage }) => (
                   <Link to={`/hives/${hive.id}`} key={hive.id} className="hive-card-link">
-                    <div className="hive-card">
-                      <div className="hive-card-header">
-                        <h3>{hive.name}</h3>
+                    <div className={`hive-card ${latest ? getStatusLevel(latest.mitesPerDay) : 'no-data'}`}>
+                      <div className="hive-status-bar" />
+                      <div className="hive-card-content">
+                        <div className="hive-card-header">
+                          <h3>{hive.name}</h3>
+                          {trend !== 'none' && latest && (
+                            <span
+                              className="trend"
+                              style={{ color: getTrendColor(trend) }}
+                            >
+                              {getTrendIcon(trend)}
+                            </span>
+                          )}
+                        </div>
                         {hive.location && <p className="hive-location">{hive.location}</p>}
-                      </div>
 
-                      {latest ? (
-                        <>
-                          <div
-                            className="mites-per-day"
-                            style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
-                          >
-                            {latest.mitesPerDay.toFixed(1)}
-                            <span className="unit">{t('dashboard.mitesPerDay')}</span>
-                          </div>
-                          <div className="hive-card-footer">
-                            <span className="date">{latest.date}</span>
-                            {trend !== 'none' && (
+                        {latest ? (
+                          <div className="hive-stats">
+                            <div className="hive-main-stat">
                               <span
-                                className="trend"
-                                style={{ color: getTrendColor(trend) }}
+                                className="hive-mites-value"
+                                style={{ color: getMitesPerDayColor(latest.mitesPerDay) }}
                               >
-                                {getTrendIcon(trend)}
+                                {latest.mitesPerDay.toFixed(1)}
                               </span>
+                              <span className="hive-unit">{t('dashboard.mitesPerDay')}</span>
+                            </div>
+                            <div className="hive-meta">
+                              <span className="hive-date">{latest.date}</span>
+                              <span className="hive-count">{latest.miteCount} {t('dashboard.mitesCounted')}</span>
+                            </div>
+
+                            {yearlyAverage.totalObservations > 0 && (
+                              <div className="hive-yearly">
+                                <div className="hive-yearly-header">
+                                  <span className="hive-yearly-label">
+                                    {t('dashboard.yearlyAverage')} {yearlyAverage.year}
+                                    {yearlyAverage.isLowSampleCount && (
+                                      <span className="warning-icon" title={t('dashboard.lowSampleWarning', { days: yearlyAverage.sampledDays })}>
+                                        ⚠️
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="hive-yearly-stats">
+                                  <div className="hive-yearly-stat">
+                                    <span
+                                      className="hive-yearly-value"
+                                      style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}
+                                    >
+                                      {yearlyAverage.averageMitesPerDay.toFixed(1)}
+                                    </span>
+                                    <span className="hive-yearly-unit">{t('dashboard.avgMitesPerDay')}</span>
+                                  </div>
+                                  <div className="hive-yearly-stat">
+                                    <span className="hive-yearly-value">{yearlyAverage.totalMiteCount}</span>
+                                    <span className="hive-yearly-unit">{t('dashboard.mitesTotal')}</span>
+                                  </div>
+                                </div>
+                              </div>
                             )}
                           </div>
-                          {yearlyAverage.totalObservations > 0 && (
-                            <div className="yearly-average">
-                              <div className="yearly-average-label">
-                                {t('dashboard.yearlyAverage')} {yearlyAverage.year}:
-                                {yearlyAverage.isLowSampleCount && (
-                                  <span className="warning-icon" title={t('dashboard.lowSampleWarning', { days: yearlyAverage.sampledDays })}>
-                                    ⚠️
-                                  </span>
-                                )}
-                              </div>
-                              <div className="yearly-average-value" style={{ color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay) }}>
-                                {yearlyAverage.averageMitesPerDay.toFixed(1)} {t('dashboard.mitesPerDay')}
-                              </div>
-                              <div className="yearly-average-meta">
-                                {yearlyAverage.sampledDays} {t('dashboard.days')} • {yearlyAverage.totalObservations} {t('dashboard.observations')}
-                              </div>
-                              <div className="yearly-average-meta">
-                                {t('dashboard.totalMites')}: {yearlyAverage.totalMiteCount}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="no-data">{t('dashboard.noObservations')}</div>
-                      )}
+                        ) : (
+                          <div className="no-data">{t('dashboard.noObservations')}</div>
+                        )}
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -546,7 +583,7 @@ const Dashboard = () => {
 
       // Create datasets for each hive with time-series data
       const datasets = hivesData.map(({ hive, observations, color }) => {
-        const aggregatedObs = aggregateData(observations, viewMode)
+        const aggregatedObs = aggregateData([...observations].reverse(), viewMode)
         
         return {
           label: hive.name,
