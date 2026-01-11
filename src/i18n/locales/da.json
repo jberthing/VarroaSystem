@@ -28,6 +28,9 @@
     "mitesPerDay": "mider/dag",
     "noObservations": "Ingen registreringer endnu",
     "yearlyAverage": "Årsgennemsnit",
+    "mitesCounted": "mider talt",
+    "avgMitesPerDay": "gns. mider/dag",
+    "mitesTotal": "mider ialt",
     "lowSampleWarning": "Kun {{days}} dages prøvetagning i år",
     "days": "monitoreringsdage",
     "observations": "Observationer",
@@ -216,7 +219,7 @@
     "lowSampleWarning": "Kun {{days}} dages monitoreringsdage i år",
     "daysUnit": "Monitoreringsdage",
     "observationsCount": "Observationer",
-    "totalMites": "Total mider"
+    "totalMites": "Mider ialt"
   },
   "quickObservation": {
     "title": "Ny registrering",
