@@ -1,6 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import compression from 'vite-plugin-compression'
+import { visualizer } from 'rollup-plugin-visualizer'
+import inspect from 'vite-plugin-inspect'
+import restart from 'vite-plugin-restart'
+import { createHtmlPlugin } from 'vite-plugin-html'
 
 export default defineConfig({
   base: '/VarroaSystem/',
@@ -15,6 +20,31 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    restart({
+      restart: ['vite.config.ts']
+    }),
+    compression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'gzip',
+      ext: '.gz',
+    }),
+    compression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotli',
+      ext: '.br',
+    }),
+    visualizer({
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'dist/stats.html'
+    }),
+    inspect(),
+    createHtmlPlugin(),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],

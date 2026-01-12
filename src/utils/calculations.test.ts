@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  calculateTrend, 
-  getTrendIcon, 
-  getTrendColor, 
-  getMitesPerDayColor 
-} from './calculations';
+import { calculateTrend, getTrendIcon, getTrendColor, getMitesPerDayColor } from './calculations';
 import type { Observation } from '../db/database';
 
 describe('calculations', () => {
@@ -18,9 +13,9 @@ describe('calculations', () => {
         daysSinceLast: 3,
         mitesPerDay: 3.33,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       expect(calculateTrend(undefined, previous)).toBe('none');
     });
 
@@ -33,9 +28,9 @@ describe('calculations', () => {
         daysSinceLast: 4,
         mitesPerDay: 3.75,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       expect(calculateTrend(latest, undefined)).toBe('none');
     });
 
@@ -48,9 +43,9 @@ describe('calculations', () => {
         daysSinceLast: 3,
         mitesPerDay: 3.0,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       const latest: Observation = {
         id: '2',
         hiveId: 'hive1',
@@ -59,9 +54,9 @@ describe('calculations', () => {
         daysSinceLast: 4,
         mitesPerDay: 5.0,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       expect(calculateTrend(latest, previous)).toBe('up');
     });
 
@@ -74,9 +69,9 @@ describe('calculations', () => {
         daysSinceLast: 4,
         mitesPerDay: 5.0,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       const latest: Observation = {
         id: '2',
         hiveId: 'hive1',
@@ -85,9 +80,9 @@ describe('calculations', () => {
         daysSinceLast: 3,
         mitesPerDay: 3.0,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       expect(calculateTrend(latest, previous)).toBe('down');
     });
 
@@ -100,9 +95,9 @@ describe('calculations', () => {
         daysSinceLast: 3,
         mitesPerDay: 3.0,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       const latest: Observation = {
         id: '2',
         hiveId: 'hive1',
@@ -111,9 +106,9 @@ describe('calculations', () => {
         daysSinceLast: 4,
         mitesPerDay: 3.25,
         notes: '',
-        images: []
+        images: [],
       };
-      
+
       expect(calculateTrend(latest, previous)).toBe('flat');
     });
   });

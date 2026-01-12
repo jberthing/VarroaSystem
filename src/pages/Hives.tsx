@@ -1,156 +1,156 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { Link, useSearchParams } from 'react-router-dom'
-import { getAllHives, getAllApiaries, createHive, updateHive } from '../db/repository'
-import { compressImage, getBase64Size } from '../utils/imageUtils'
-import './Hives.css'
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Link, useSearchParams } from 'react-router-dom';
+import { getAllHives, getAllApiaries, createHive, updateHive } from '../db/repository';
+import { compressImage, getBase64Size } from '../utils/imageUtils';
+import './Hives.css';
 
 const Hives = () => {
-  const { t } = useTranslation()
-  const [searchParams] = useSearchParams()
-  const apiaryFilter = searchParams.get('apiary')
-  
-  const hives = useLiveQuery(() => getAllHives(false), [])
-  const apiaries = useLiveQuery(() => getAllApiaries(true), [])
-  const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [apiaryId, setApiaryId] = useState('')
-  const [location, setLocation] = useState('')
-  const [image, setImage] = useState<string | undefined>(undefined)
-  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined)
-  const [uploadingImage, setUploadingImage] = useState(false)
-  const [error, setError] = useState('')
+  const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const apiaryFilter = searchParams.get('apiary');
+
+  const hives = useLiveQuery(() => getAllHives(false), []);
+  const apiaries = useLiveQuery(() => getAllApiaries(true), []);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [apiaryId, setApiaryId] = useState('');
+  const [location, setLocation] = useState('');
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (apiaryFilter && !apiaryId) {
-      setApiaryId(apiaryFilter)
+      setApiaryId(apiaryFilter);
     }
-  }, [apiaryFilter])
+  }, [apiaryFilter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     if (!name.trim()) {
-      setError(t('hives.nameRequired'))
-      return
+      setError(t('hives.nameRequired'));
+      return;
     }
 
     try {
       if (editingId) {
-        await updateHive(editingId, { 
-          name, 
+        await updateHive(editingId, {
+          name,
           apiaryId: apiaryId || undefined,
           location: location || undefined,
-          image: image
-        })
-        setEditingId(null)
+          image: image,
+        });
+        setEditingId(null);
       } else {
-        await createHive(name, apiaryId || undefined, location || undefined, image)
+        await createHive(name, apiaryId || undefined, location || undefined, image);
       }
 
-      setName('')
-      setApiaryId('')
-      setLocation('')
-      setImage(undefined)
-      setImagePreview(undefined)
-      setShowForm(false)
+      setName('');
+      setApiaryId('');
+      setLocation('');
+      setImage(undefined);
+      setImagePreview(undefined);
+      setShowForm(false);
     } catch (err) {
-      setError(t('hives.error'))
+      setError(t('hives.error'));
     }
-  }
+  };
 
   const handleEdit = (hive: any) => {
-    setEditingId(hive.id)
-    setName(hive.name)
-    setApiaryId(hive.apiaryId || '')
-    setLocation(hive.location || '')
-    setImage(hive.image)
-    setImagePreview(hive.image)
-    setShowForm(true)
-  }
+    setEditingId(hive.id);
+    setName(hive.name);
+    setApiaryId(hive.apiaryId || '');
+    setLocation(hive.location || '');
+    setImage(hive.image);
+    setImagePreview(hive.image);
+    setShowForm(true);
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setUploadingImage(true)
-    setError('')
+    setUploadingImage(true);
+    setError('');
 
     try {
-      const compressed = await compressImage(file)
-      const sizeKB = getBase64Size(compressed)
-      
+      const compressed = await compressImage(file);
+      const sizeKB = getBase64Size(compressed);
+
       if (sizeKB > 500) {
-        setError(t('hives.imageTooLarge', { size: sizeKB.toFixed(0) }))
-        setUploadingImage(false)
-        return
+        setError(t('hives.imageTooLarge', { size: sizeKB.toFixed(0) }));
+        setUploadingImage(false);
+        return;
       }
 
-      setImage(compressed)
-      setImagePreview(compressed)
+      setImage(compressed);
+      setImagePreview(compressed);
     } catch (err) {
-      setError(t('hives.imageUploadError'))
+      setError(t('hives.imageUploadError'));
     } finally {
-      setUploadingImage(false)
+      setUploadingImage(false);
     }
-  }
+  };
 
   const handleRemoveImage = () => {
-    setImage(undefined)
-    setImagePreview(undefined)
-  }
+    setImage(undefined);
+    setImagePreview(undefined);
+  };
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
-    await updateHive(id, { isActive: !isActive })
-  }
+    await updateHive(id, { isActive: !isActive });
+  };
 
   const handleCancel = () => {
-    setShowForm(false)
-    setEditingId(null)
-    setName('')
-    setApiaryId('')
-    setLocation('')
-    setImage(undefined)
-    setImagePreview(undefined)
-    setError('')
-  }
+    setShowForm(false);
+    setEditingId(null);
+    setName('');
+    setApiaryId('');
+    setLocation('');
+    setImage(undefined);
+    setImagePreview(undefined);
+    setError('');
+  };
 
   if (!hives || !apiaries) {
     return (
       <div className="container">
         <p>Indlæser...</p>
       </div>
-    )
+    );
   }
 
   // Filter and group hives
-  let filteredHives = hives
+  let filteredHives = hives;
   if (apiaryFilter) {
-    filteredHives = hives.filter(h => h.apiaryId === apiaryFilter)
+    filteredHives = hives.filter((h) => h.apiaryId === apiaryFilter);
   }
 
-  const activeHives = filteredHives.filter((h) => h.isActive)
-  const archivedHives = filteredHives.filter((h) => !h.isActive)
+  const activeHives = filteredHives.filter((h) => h.isActive);
+  const archivedHives = filteredHives.filter((h) => !h.isActive);
 
   // Group hives by apiary
-  const groupedHives: Record<string, any[]> = {}
-  const noApiaryHives: any[] = []
-  
-  activeHives.forEach(hive => {
+  const groupedHives: Record<string, any[]> = {};
+  const noApiaryHives: any[] = [];
+
+  activeHives.forEach((hive) => {
     if (hive.apiaryId) {
       if (!groupedHives[hive.apiaryId]) {
-        groupedHives[hive.apiaryId] = []
+        groupedHives[hive.apiaryId] = [];
       }
-      groupedHives[hive.apiaryId].push(hive)
+      groupedHives[hive.apiaryId].push(hive);
     } else {
-      noApiaryHives.push(hive)
+      noApiaryHives.push(hive);
     }
-  })
+  });
 
-  const selectedApiary = apiaryFilter ? apiaries.find(a => a.id === apiaryFilter) : null
+  const selectedApiary = apiaryFilter ? apiaries.find((a) => a.id === apiaryFilter) : null;
 
   return (
     <div className="container">
@@ -176,11 +176,7 @@ const Hives = () => {
 
           <div className="form-group">
             <label htmlFor="apiaryId">{t('hives.apiaryLabel')}</label>
-            <select
-              id="apiaryId"
-              value={apiaryId}
-              onChange={(e) => setApiaryId(e.target.value)}
-            >
+            <select id="apiaryId" value={apiaryId} onChange={(e) => setApiaryId(e.target.value)}>
               <option value="">{t('hives.noApiary')}</option>
               {apiaries.map((apiary) => (
                 <option key={apiary.id} value={apiary.id}>
@@ -238,7 +234,9 @@ const Hives = () => {
           </div>
 
           <div className="form-actions">
-            <button type="submit">{editingId ? t('hives.saveChanges') : t('hives.createHive')}</button>
+            <button type="submit">
+              {editingId ? t('hives.saveChanges') : t('hives.createHive')}
+            </button>
             <button type="button" onClick={handleCancel} className="secondary">
               {t('hives.cancel')}
             </button>
@@ -254,15 +252,17 @@ const Hives = () => {
       ) : (
         <>
           {/* Group by apiaries */}
-          {Object.keys(groupedHives).map(apiaryId => {
-            const apiary = apiaries.find(a => a.id === apiaryId)
-            if (!apiary) return null
-            
+          {Object.keys(groupedHives).map((apiaryId) => {
+            const apiary = apiaries.find((a) => a.id === apiaryId);
+            if (!apiary) return null;
+
             return (
               <div key={apiaryId} className="apiary-section">
                 <h2 className="apiary-section-title">
                   {apiary.name}
-                  {apiary.location && <span className="apiary-location-small"> • {apiary.location}</span>}
+                  {apiary.location && (
+                    <span className="apiary-location-small"> • {apiary.location}</span>
+                  )}
                 </h2>
                 <div className="hives-list">
                   {groupedHives[apiaryId].map((hive) => (
@@ -291,7 +291,7 @@ const Hives = () => {
                   ))}
                 </div>
               </div>
-            )
+            );
           })}
 
           {/* Hives without apiary */}
@@ -353,7 +353,7 @@ const Hives = () => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Hives
+export default Hives;

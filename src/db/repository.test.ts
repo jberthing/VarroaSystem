@@ -88,12 +88,7 @@ describe('repository', () => {
     it('should calculate mitesPerDay correctly', async () => {
       vi.mocked(db.observations.add).mockResolvedValue(undefined);
 
-      const result = await repository.createObservation(
-        'hive-123',
-        '2026-01-07',
-        10,
-        3
-      );
+      const result = await repository.createObservation('hive-123', '2026-01-07', 10, 3);
 
       expect(result.mitesPerDay).toBe(3.33);
     });
@@ -101,42 +96,32 @@ describe('repository', () => {
     it('should round mitesPerDay to 2 decimal places', async () => {
       vi.mocked(db.observations.add).mockResolvedValue(undefined);
 
-      const result = await repository.createObservation(
-        'hive-123',
-        '2026-01-07',
-        100,
-        7
-      );
+      const result = await repository.createObservation('hive-123', '2026-01-07', 100, 7);
 
       // 100 / 7 = 14.285714... should round to 14.29
       expect(result.mitesPerDay).toBe(14.29);
     });
 
     it('should throw error when trayDays is less than 1', async () => {
-      await expect(
-        repository.createObservation('hive-123', '2026-01-07', 10, 0)
-      ).rejects.toThrow('Antal dage skal være mindst 1');
+      await expect(repository.createObservation('hive-123', '2026-01-07', 10, 0)).rejects.toThrow(
+        'Antal dage skal være mindst 1'
+      );
 
-      await expect(
-        repository.createObservation('hive-123', '2026-01-07', 10, -1)
-      ).rejects.toThrow('Antal dage skal være mindst 1');
+      await expect(repository.createObservation('hive-123', '2026-01-07', 10, -1)).rejects.toThrow(
+        'Antal dage skal være mindst 1'
+      );
     });
 
     it('should throw error when miteCount is negative', async () => {
-      await expect(
-        repository.createObservation('hive-123', '2026-01-07', -5, 3)
-      ).rejects.toThrow('Antal mider kan ikke være negativt');
+      await expect(repository.createObservation('hive-123', '2026-01-07', -5, 3)).rejects.toThrow(
+        'Antal mider kan ikke være negativt'
+      );
     });
 
     it('should allow zero mite count', async () => {
       vi.mocked(db.observations.add).mockResolvedValue(undefined);
 
-      const result = await repository.createObservation(
-        'hive-123',
-        '2026-01-07',
-        0,
-        3
-      );
+      const result = await repository.createObservation('hive-123', '2026-01-07', 0, 3);
 
       expect(result.miteCount).toBe(0);
       expect(result.mitesPerDay).toBe(0);
@@ -145,12 +130,7 @@ describe('repository', () => {
     it('should create observation without notes', async () => {
       vi.mocked(db.observations.add).mockResolvedValue(undefined);
 
-      const result = await repository.createObservation(
-        'hive-123',
-        '2026-01-07',
-        15,
-        3
-      );
+      const result = await repository.createObservation('hive-123', '2026-01-07', 15, 3);
 
       expect(result.notes).toBeUndefined();
     });
@@ -159,12 +139,7 @@ describe('repository', () => {
       vi.mocked(db.observations.add).mockResolvedValue(undefined);
       const beforeTime = Date.now();
 
-      const result = await repository.createObservation(
-        'hive-123',
-        '2026-01-07',
-        15,
-        3
-      );
+      const result = await repository.createObservation('hive-123', '2026-01-07', 15, 3);
 
       const afterTime = Date.now();
       expect(result.createdAt).toBeGreaterThanOrEqual(beforeTime);
@@ -270,11 +245,7 @@ describe('repository', () => {
     it('should create apiary with all fields', async () => {
       vi.mocked(db.apiaries.add).mockResolvedValue(undefined);
 
-      const result = await repository.createApiary(
-        'Test Bigård',
-        'Test Location',
-        'base64image'
-      );
+      const result = await repository.createApiary('Test Bigård', 'Test Location', 'base64image');
 
       expect(result).toMatchObject({
         id: 'test-uuid-123',
@@ -364,11 +335,7 @@ describe('repository', () => {
     it('should create treatment without notes', async () => {
       vi.mocked(db.treatments.add).mockResolvedValue(undefined);
 
-      const result = await repository.createTreatment(
-        'hive-123',
-        '2026-01-07',
-        'Myresyre'
-      );
+      const result = await repository.createTreatment('hive-123', '2026-01-07', 'Myresyre');
 
       expect(result.notes).toBeUndefined();
     });
@@ -399,7 +366,7 @@ describe('repository', () => {
       const result = await repository.getAllApiaries(true);
 
       expect(result).toHaveLength(2);
-      expect(result.every(a => a.isActive)).toBe(true);
+      expect(result.every((a) => a.isActive)).toBe(true);
     });
   });
 
@@ -427,7 +394,7 @@ describe('repository', () => {
       const result = await repository.getAllHives(true);
 
       expect(result).toHaveLength(2);
-      expect(result.every(h => h.isActive)).toBe(true);
+      expect(result.every((h) => h.isActive)).toBe(true);
     });
   });
 });

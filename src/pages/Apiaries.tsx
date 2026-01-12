@@ -1,85 +1,85 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { Link } from 'react-router-dom'
-import { getAllApiaries, createApiary, updateApiary, getHivesForApiary } from '../db/repository'
-import './Apiaries.css'
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Link } from 'react-router-dom';
+import { getAllApiaries, createApiary, updateApiary, getHivesForApiary } from '../db/repository';
+import './Apiaries.css';
 
 const Apiaries = () => {
-  const { t } = useTranslation()
-  const apiaries = useLiveQuery(() => getAllApiaries(false), [])
-  const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [location, setLocation] = useState('')
-  const [error, setError] = useState('')
-  const [hiveCounts, setHiveCounts] = useState<Record<string, number>>({})
+  const { t } = useTranslation();
+  const apiaries = useLiveQuery(() => getAllApiaries(false), []);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
+  const [error, setError] = useState('');
+  const [hiveCounts, setHiveCounts] = useState<Record<string, number>>({});
 
   // Load hive counts for each apiary
   useLiveQuery(async () => {
-    if (!apiaries) return
-    const counts: Record<string, number> = {}
+    if (!apiaries) return;
+    const counts: Record<string, number> = {};
     for (const apiary of apiaries) {
-      const hives = await getHivesForApiary(apiary.id)
-      counts[apiary.id] = hives.filter(h => h.isActive).length
+      const hives = await getHivesForApiary(apiary.id);
+      counts[apiary.id] = hives.filter((h) => h.isActive).length;
     }
-    setHiveCounts(counts)
-  }, [apiaries])
+    setHiveCounts(counts);
+  }, [apiaries]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     if (!name.trim()) {
-      setError(t('apiaries.nameRequired'))
-      return
+      setError(t('apiaries.nameRequired'));
+      return;
     }
 
     try {
       if (editingId) {
-        await updateApiary(editingId, { name, location: location || undefined })
-        setEditingId(null)
+        await updateApiary(editingId, { name, location: location || undefined });
+        setEditingId(null);
       } else {
-        await createApiary(name, location || undefined)
+        await createApiary(name, location || undefined);
       }
 
-      setName('')
-      setLocation('')
-      setShowForm(false)
+      setName('');
+      setLocation('');
+      setShowForm(false);
     } catch (err) {
-      setError(t('apiaries.error'))
+      setError(t('apiaries.error'));
     }
-  }
+  };
 
   const handleEdit = (apiary: any) => {
-    setEditingId(apiary.id)
-    setName(apiary.name)
-    setLocation(apiary.location || '')
-    setShowForm(true)
-  }
+    setEditingId(apiary.id);
+    setName(apiary.name);
+    setLocation(apiary.location || '');
+    setShowForm(true);
+  };
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
-    await updateApiary(id, { isActive: !isActive })
-  }
+    await updateApiary(id, { isActive: !isActive });
+  };
 
   const handleCancel = () => {
-    setShowForm(false)
-    setEditingId(null)
-    setName('')
-    setLocation('')
-    setError('')
-  }
+    setShowForm(false);
+    setEditingId(null);
+    setName('');
+    setLocation('');
+    setError('');
+  };
 
   if (!apiaries) {
     return (
       <div className="container">
         <p>{t('common.loading')}</p>
       </div>
-    )
+    );
   }
 
-  const activeApiaries = apiaries.filter((a) => a.isActive)
-  const archivedApiaries = apiaries.filter((a) => !a.isActive)
+  const activeApiaries = apiaries.filter((a) => a.isActive);
+  const archivedApiaries = apiaries.filter((a) => !a.isActive);
 
   return (
     <div className="container">
@@ -121,7 +121,9 @@ const Apiaries = () => {
           </div>
 
           <div className="form-actions">
-            <button type="submit">{editingId ? t('apiaries.saveChanges') : t('apiaries.createApiary')}</button>
+            <button type="submit">
+              {editingId ? t('apiaries.saveChanges') : t('apiaries.createApiary')}
+            </button>
             <button type="button" onClick={handleCancel} className="secondary">
               {t('apiaries.cancel')}
             </button>
@@ -190,7 +192,7 @@ const Apiaries = () => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Apiaries
+export default Apiaries;
