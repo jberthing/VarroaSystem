@@ -1,131 +1,118 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { createObservation, createTreatment, getAllHives, getAllApiaries } from '../db/repository'
-import { Hive, Apiary } from '../db/database'
-import { getTodayString } from '../utils/dateUtils'
-import './QuickObservationForm.css'
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { createObservation, createTreatment, getAllHives, getAllApiaries } from '../db/repository';
+import { Hive, Apiary } from '../db/database';
+import { getTodayString } from '../utils/dateUtils';
+import './QuickObservationForm.css';
 
 interface QuickObservationFormProps {
-  defaultHiveId?: string
-  onSuccess?: () => void
-  onCancel?: () => void
+  defaultHiveId?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-type RegistrationType = 'observation' | 'treatment'
+type RegistrationType = 'observation' | 'treatment';
 
 const QuickObservationForm = ({
   defaultHiveId,
   onSuccess,
-  onCancel
+  onCancel,
 }: QuickObservationFormProps) => {
-  const { t } = useTranslation()
-  const [hives, setHives] = useState<Hive[]>([])
-  const [apiaries, setApiaries] = useState<Apiary[]>([])
-  const [hiveId, setHiveId] = useState(defaultHiveId || '')
-  const [registrationType, setRegistrationType] = useState<RegistrationType>('observation')
-  const [date, setDate] = useState(getTodayString())
-  const [miteCount, setMiteCount] = useState('')
-  const [trayDays, setTrayDays] = useState('3')
-  const [treatmentType, setTreatmentType] = useState('Oxalsyre')
-  const [notes, setNotes] = useState('')
-  const [error, setError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { t } = useTranslation();
+  const [hives, setHives] = useState<Hive[]>([]);
+  const [apiaries, setApiaries] = useState<Apiary[]>([]);
+  const [hiveId, setHiveId] = useState(defaultHiveId || '');
+  const [registrationType, setRegistrationType] = useState<RegistrationType>('observation');
+  const [date, setDate] = useState(getTodayString());
+  const [miteCount, setMiteCount] = useState('');
+  const [trayDays, setTrayDays] = useState('3');
+  const [treatmentType, setTreatmentType] = useState('Oxalsyre');
+  const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    loadHives()
-    loadApiaries()
-  }, [])
+    loadHives();
+    loadApiaries();
+  }, []);
 
   const loadHives = async () => {
-    const allHives = await getAllHives(true)
-    setHives(allHives)
+    const allHives = await getAllHives(true);
+    setHives(allHives);
     if (!defaultHiveId && allHives.length > 0) {
-      setHiveId(allHives[0].id)
+      setHiveId(allHives[0].id);
     }
-  }
+  };
 
   const loadApiaries = async () => {
-    const allApiaries = await getAllApiaries(true)
-    setApiaries(allApiaries)
-  }
+    const allApiaries = await getAllApiaries(true);
+    setApiaries(allApiaries);
+  };
 
   const getHiveDisplayName = (hive: Hive) => {
-    const apiary = apiaries.find(a => a.id === hive.apiaryId)
+    const apiary = apiaries.find((a) => a.id === hive.apiaryId);
     if (apiary) {
-      return `${apiary.name} - ${hive.name}`
+      return `${apiary.name} - ${hive.name}`;
     }
-    return hive.name
-  }
+    return hive.name;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     if (!hiveId) {
-      setError(t('quickObservation.selectHive'))
-      return
+      setError(t('quickObservation.selectHive'));
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       if (registrationType === 'treatment') {
-        await createTreatment(
-          hiveId,
-          date,
-          treatmentType,
-          notes || undefined
-        )
+        await createTreatment(hiveId, date, treatmentType, notes || undefined);
       } else {
-        const miteCountNum = parseInt(miteCount)
-        const trayDaysNum = parseInt(trayDays)
+        const miteCountNum = parseInt(miteCount);
+        const trayDaysNum = parseInt(trayDays);
 
         if (isNaN(miteCountNum) || miteCountNum < 0) {
-          setError(t('quickObservation.errorMiteCount'))
-          setIsSubmitting(false)
-          return
+          setError(t('quickObservation.errorMiteCount'));
+          setIsSubmitting(false);
+          return;
         }
 
         if (isNaN(trayDaysNum) || trayDaysNum < 1) {
-          setError(t('quickObservation.errorTrayDays'))
-          setIsSubmitting(false)
-          return
+          setError(t('quickObservation.errorTrayDays'));
+          setIsSubmitting(false);
+          return;
         }
 
-        await createObservation(
-          hiveId,
-          date,
-          miteCountNum,
-          trayDaysNum,
-          notes || undefined
-        )
+        await createObservation(hiveId, date, miteCountNum, trayDaysNum, notes || undefined);
       }
 
       // Reset form
-      setMiteCount('')
-      setTrayDays('3')
-      setTreatmentType('Oxalsyre')
-      setNotes('')
-      setDate(getTodayString())
+      setMiteCount('');
+      setTrayDays('3');
+      setTreatmentType('Oxalsyre');
+      setNotes('');
+      setDate(getTodayString());
 
       if (onSuccess) {
-        onSuccess()
+        onSuccess();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('quickObservation.errorGeneric'))
+      setError(err instanceof Error ? err.message : t('quickObservation.errorGeneric'));
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (hives.length === 0) {
     return (
       <div className="quick-form">
-        <p className="empty-state">
-          {t('hives.noHives')}
-        </p>
+        <p className="empty-state">{t('hives.noHives')}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -238,12 +225,7 @@ const QuickObservationForm = ({
 
       <div className="form-group">
         <label htmlFor="notes">{t('quickObservation.notesLabel')}</label>
-        <textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={2}
-        />
+        <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
       </div>
 
       <div className="form-actions">
@@ -257,7 +239,7 @@ const QuickObservationForm = ({
         )}
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default QuickObservationForm
+export default QuickObservationForm;

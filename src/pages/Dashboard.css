@@ -112,11 +112,21 @@
   flex-shrink: 0;
 }
 
-.hive-card.good .hive-status-bar { background: #22c55e; }
-.hive-card.warning .hive-status-bar { background: #eab308; }
-.hive-card.danger .hive-status-bar { background: #f97316; }
-.hive-card.critical .hive-status-bar { background: #ef4444; }
-.hive-card.no-data .hive-status-bar { background: #d1d5db; }
+.hive-card.good .hive-status-bar {
+  background: #22c55e;
+}
+.hive-card.warning .hive-status-bar {
+  background: #eab308;
+}
+.hive-card.danger .hive-status-bar {
+  background: #f97316;
+}
+.hive-card.critical .hive-status-bar {
+  background: #ef4444;
+}
+.hive-card.no-data .hive-status-bar {
+  background: #d1d5db;
+}
 
 .hive-card-content {
   flex: 1;

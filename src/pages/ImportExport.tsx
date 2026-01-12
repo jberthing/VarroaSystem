@@ -1,136 +1,170 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { exportAllData, importAllData, clearAllData, seedDemoData } from '../db/repository'
-import { downloadJSON, readFileAsText } from '../utils/fileUtils'
-import { Observation, Treatment } from '../db/database'
-import './ImportExport.css'
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { exportAllData, importAllData, clearAllData, seedDemoData } from '../db/repository';
+import { downloadJSON, readFileAsText } from '../utils/fileUtils';
+import { Observation, Treatment } from '../db/database';
+import './ImportExport.css';
 
 const ImportExport = () => {
-  const { t } = useTranslation()
-  const [importError, setImportError] = useState('')
-  const [importSuccess, setImportSuccess] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
+  const { t } = useTranslation();
+  const [importError, setImportError] = useState('');
+  const [importSuccess, setImportSuccess] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleExportJSON = async () => {
     try {
-      const data = await exportAllData()
-      const timestamp = new Date().toISOString().split('T')[0]
-      downloadJSON(data, `varroa-backup-${timestamp}.json`)
+      const data = await exportAllData();
+      const timestamp = new Date().toISOString().split('T')[0];
+      downloadJSON(data, `varroa-backup-${timestamp}.json`);
     } catch (err) {
-      alert(t('importExport.exportError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
+      alert(
+        t('importExport.exportError') +
+          ': ' +
+          (err instanceof Error ? err.message : t('importExport.unknownError'))
+      );
     }
-  }
+  };
 
   const handleExportCSV = async () => {
     try {
-      const data = await exportAllData()
-      
+      const data = await exportAllData();
+
       // CSV header
-      let csv = 'Type,Bistade,Bigård,Placering,Dato,Antal mider,Dage,Mider pr. dag,Behandling,Produkt,Noter\n'
+      let csv =
+        'Type,Bistade,Bigård,Placering,Dato,Antal mider,Dage,Mider pr. dag,Behandling,Produkt,Noter\n';
 
       // Create a map of hive IDs to names and apiary IDs
-      const hiveMap = new Map(data.hives.map((h) => [h.id, h]))
-      const apiaryMap = new Map(data.apiaries.map((a) => [a.id, a.name]))
+      const hiveMap = new Map(data.hives.map((h) => [h.id, h]));
+      const apiaryMap = new Map(data.apiaries.map((a) => [a.id, a.name]));
 
       // Add observation rows
       data.observations.forEach((obs: Observation) => {
-        const hive = hiveMap.get(obs.hiveId)
-        const hiveName = hive?.name || 'Ukendt'
-        const apiaryName = hive?.apiaryId ? (apiaryMap.get(hive.apiaryId) || '') : ''
-        const location = hive?.location || ''
-        const notes = (obs.notes || '').replace(/"/g, '""')
-        
-        csv += `"Måling","${hiveName}","${apiaryName}","${location}","${obs.date}",${obs.miteCount},${obs.trayDays},${obs.mitesPerDay},"","","${notes}"\n`
-      })
+        const hive = hiveMap.get(obs.hiveId);
+        const hiveName = hive?.name || 'Ukendt';
+        const apiaryName = hive?.apiaryId ? apiaryMap.get(hive.apiaryId) || '' : '';
+        const location = hive?.location || '';
+        const notes = (obs.notes || '').replace(/"/g, '""');
+
+        csv += `"Måling","${hiveName}","${apiaryName}","${location}","${obs.date}",${obs.miteCount},${obs.trayDays},${obs.mitesPerDay},"","","${notes}"\n`;
+      });
 
       // Add treatment rows
       data.treatments.forEach((treatment: Treatment) => {
-        const hive = hiveMap.get(treatment.hiveId)
-        const hiveName = hive?.name || 'Ukendt'
-        const apiaryName = hive?.apiaryId ? (apiaryMap.get(hive.apiaryId) || '') : ''
-        const location = hive?.location || ''
-        const notes = (treatment.notes || '').replace(/"/g, '""')
-        
-        csv += `"Behandling","${hiveName}","${apiaryName}","${location}","${treatment.date}","","","","${treatment.treatmentType}","","${notes}"\n`
-      })
+        const hive = hiveMap.get(treatment.hiveId);
+        const hiveName = hive?.name || 'Ukendt';
+        const apiaryName = hive?.apiaryId ? apiaryMap.get(hive.apiaryId) || '' : '';
+        const location = hive?.location || '';
+        const notes = (treatment.notes || '').replace(/"/g, '""');
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      const timestamp = new Date().toISOString().split('T')[0]
-      link.href = url
-      link.download = `varroa-data-${timestamp}.csv`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+        csv += `"Behandling","${hiveName}","${apiaryName}","${location}","${treatment.date}","","","","${treatment.treatmentType}","","${notes}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().split('T')[0];
+      link.href = url;
+      link.download = `varroa-data-${timestamp}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (err) {
-      alert(t('importExport.csvExportError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
+      alert(
+        t('importExport.csvExportError') +
+          ': ' +
+          (err instanceof Error ? err.message : t('importExport.unknownError'))
+      );
     }
-  }
+  };
 
   const handleImportJSON = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setImportError('')
-    setImportSuccess('')
-    setIsProcessing(true)
+    setImportError('');
+    setImportSuccess('');
+    setIsProcessing(true);
 
     try {
-      const text = await readFileAsText(file)
-      const data = JSON.parse(text)
+      const text = await readFileAsText(file);
+      const data = JSON.parse(text);
 
       // Basic validation
-      if (!data.hives || !data.observations || !Array.isArray(data.hives) || !Array.isArray(data.observations)) {
-        throw new Error(t('importExport.invalidFileFormat'))
+      if (
+        !data.hives ||
+        !data.observations ||
+        !Array.isArray(data.hives) ||
+        !Array.isArray(data.observations)
+      ) {
+        throw new Error(t('importExport.invalidFileFormat'));
       }
 
-      if (!confirm(t('importExport.confirmImport', { hives: data.hives.length, observations: data.observations.length }))) {
-        setIsProcessing(false)
-        return
+      if (
+        !confirm(
+          t('importExport.confirmImport', {
+            hives: data.hives.length,
+            observations: data.observations.length,
+          })
+        )
+      ) {
+        setIsProcessing(false);
+        return;
       }
 
-      await importAllData(data)
-      setImportSuccess(t('importExport.importSuccess', { hives: data.hives.length, observations: data.observations.length }))
+      await importAllData(data);
+      setImportSuccess(
+        t('importExport.importSuccess', {
+          hives: data.hives.length,
+          observations: data.observations.length,
+        })
+      );
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : t('importExport.importReadError'))
+      setImportError(err instanceof Error ? err.message : t('importExport.importReadError'));
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
       // Reset file input
-      e.target.value = ''
+      e.target.value = '';
     }
-  }
+  };
 
   const handleClearData = async () => {
     if (!confirm(t('importExport.confirmClearData'))) {
-      return
+      return;
     }
 
     if (!confirm(t('importExport.confirmClearDataFinal'))) {
-      return
+      return;
     }
 
     try {
-      await clearAllData()
-      alert(t('importExport.clearDataSuccess'))
+      await clearAllData();
+      alert(t('importExport.clearDataSuccess'));
     } catch (err) {
-      alert(t('importExport.clearDataError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
+      alert(
+        t('importExport.clearDataError') +
+          ': ' +
+          (err instanceof Error ? err.message : t('importExport.unknownError'))
+      );
     }
-  }
+  };
 
   const handleSeedDemo = async () => {
     if (!confirm(t('importExport.confirmSeedDemo'))) {
-      return
+      return;
     }
 
     try {
-      await seedDemoData()
-      alert(t('importExport.seedDemoSuccess'))
+      await seedDemoData();
+      alert(t('importExport.seedDemoSuccess'));
     } catch (err) {
-      alert(t('importExport.seedDemoError') + ': ' + (err instanceof Error ? err.message : t('importExport.unknownError')))
+      alert(
+        t('importExport.seedDemoError') +
+          ': ' +
+          (err instanceof Error ? err.message : t('importExport.unknownError'))
+      );
     }
-  }
+  };
 
   return (
     <div className="container">
@@ -141,9 +175,7 @@ const ImportExport = () => {
           <h2>📥 {t('importExport.exportData')}</h2>
           <p>{t('importExport.exportDescription')}</p>
           <div className="button-group">
-            <button onClick={handleExportJSON}>
-              {t('importExport.exportJSON')}
-            </button>
+            <button onClick={handleExportJSON}>{t('importExport.exportJSON')}</button>
             <button onClick={handleExportCSV} className="secondary">
               {t('importExport.exportCSV')}
             </button>
@@ -199,7 +231,7 @@ const ImportExport = () => {
         </ul>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ImportExport
+export default ImportExport;

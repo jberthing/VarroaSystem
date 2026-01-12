@@ -26,7 +26,7 @@ vi.mock('react-chartjs-2', () => ({
 // Mock dexie-react-hooks
 const mockUseLiveQuery = vi.fn();
 vi.mock('dexie-react-hooks', () => ({
-  useLiveQuery: (fn: Function) => {
+  useLiveQuery: (fn: () => any) => {
     // Call the actual function to determine what query this is
     // This helps distinguish between getAllHives(), getAllApiaries(), and db.observations.toArray()
     return mockUseLiveQuery(fn);
@@ -110,10 +110,10 @@ describe('Dashboard Integration Tests', () => {
 
     beforeEach(() => {
       // Setup mock to return hives, apiaries, or observations based on the query function
-      mockUseLiveQuery.mockImplementation((fn: Function) => {
+      mockUseLiveQuery.mockImplementation((fn: () => any) => {
         // Execute the function to see what it's trying to query
         const fnString = fn.toString();
-        
+
         // Check which query this is based on function content
         if (fnString.includes('getAllHives')) {
           return mockHives;
@@ -122,28 +122,30 @@ describe('Dashboard Integration Tests', () => {
         } else if (fnString.includes('observations')) {
           return mockObservations;
         }
-        
+
         return [];
       });
 
       // Mock the observations query chain with proper hiveId parameter
-      const mockWhere = vi.fn().mockImplementation((fieldOrCriteria: string | { [key: string]: any }) => {
-        return {
-          equals: (hiveId: string) => ({
-            reverse: () => ({
-              sortBy: () => {
-                const filtered = mockObservations.filter(obs => obs.hiveId === hiveId);
-                return Promise.resolve(filtered);
-              },
+      const mockWhere = vi
+        .fn()
+        .mockImplementation((fieldOrCriteria: string | { [key: string]: any }) => {
+          return {
+            equals: (hiveId: string) => ({
+              reverse: () => ({
+                sortBy: () => {
+                  const filtered = mockObservations.filter((obs) => obs.hiveId === hiveId);
+                  return Promise.resolve(filtered);
+                },
+              }),
             }),
-          }),
-        };
-      });
+          };
+        });
       vi.mocked(db.observations.where).mockImplementation(mockWhere as any);
 
       // Mock getAllHives for QuickObservationForm
       vi.mocked(repository.getAllHives).mockResolvedValue(mockHives);
-      
+
       // Mock getAllApiaries for QuickObservationForm
       vi.mocked(repository.getAllApiaries).mockResolvedValue(mockApiaries);
     });
@@ -153,9 +155,14 @@ describe('Dashboard Integration Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByText('dashboard.title')).toBeInTheDocument();
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.newObservation');
-        })).toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' &&
+              content.includes('dashboard.newObservation')
+            );
+          })
+        ).toBeInTheDocument();
       });
     });
 
@@ -174,9 +181,13 @@ describe('Dashboard Integration Tests', () => {
 
       await waitFor(() => {
         // Check that label text contains the translation key
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'label' && content.includes('dashboard.apiary');
-        })).toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'label' && content.includes('dashboard.apiary')
+            );
+          })
+        ).toBeInTheDocument();
         expect(screen.getByText('dashboard.allApiaries')).toBeInTheDocument();
       });
     });
@@ -203,18 +214,21 @@ describe('Dashboard Integration Tests', () => {
     it('should sort hives by mites per day (highest first)', async () => {
       renderWithRouter(<Dashboard />);
 
-      await waitFor(() => {
-        // Wait for at least one hive name to appear
-        expect(screen.getByText('Stade A')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          // Wait for at least one hive name to appear
+          expect(screen.getByText('Stade A')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // Now check for all hives
       expect(screen.getByText('Stade B')).toBeInTheDocument();
       expect(screen.getByText('Stade C')).toBeInTheDocument();
-      
+
       const hiveCards = screen.getAllByRole('link');
-      const hiveNames = hiveCards.map(card => card.textContent);
-      expect(hiveNames.some(name => name?.includes('Stade C'))).toBe(true);
+      const hiveNames = hiveCards.map((card) => card.textContent);
+      expect(hiveNames.some((name) => name?.includes('Stade C'))).toBe(true);
     });
 
     it('should show quick observation form when button clicked', async () => {
@@ -222,20 +236,32 @@ describe('Dashboard Integration Tests', () => {
       renderWithRouter(<Dashboard />);
 
       await waitFor(() => {
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.newObservation');
-        })).toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' &&
+              content.includes('dashboard.newObservation')
+            );
+          })
+        ).toBeInTheDocument();
       });
 
       const formButton = screen.getByText((content, element) => {
-        return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.newObservation');
+        return (
+          element?.tagName.toLowerCase() === 'button' &&
+          content.includes('dashboard.newObservation')
+        );
       });
       await user.click(formButton);
 
       await waitFor(() => {
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm');
-        })).toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm')
+            );
+          })
+        ).toBeInTheDocument();
       });
     });
 
@@ -245,34 +271,57 @@ describe('Dashboard Integration Tests', () => {
 
       // Show form
       await waitFor(() => {
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.newObservation');
-        })).toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' &&
+              content.includes('dashboard.newObservation')
+            );
+          })
+        ).toBeInTheDocument();
       });
       const showButton = screen.getByText((content, element) => {
-        return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.newObservation');
+        return (
+          element?.tagName.toLowerCase() === 'button' &&
+          content.includes('dashboard.newObservation')
+        );
       });
       await user.click(showButton);
 
       await waitFor(() => {
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm');
-        })).toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm')
+            );
+          })
+        ).toBeInTheDocument();
       });
 
       // Hide form
       const hideButton = screen.getByText((content, element) => {
-        return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm');
+        return (
+          element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm')
+        );
       });
       await user.click(hideButton);
 
       await waitFor(() => {
-        expect(screen.getByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.newObservation');
-        })).toBeInTheDocument();
-        expect(screen.queryByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm');
-        })).not.toBeInTheDocument();
+        expect(
+          screen.getByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' &&
+              content.includes('dashboard.newObservation')
+            );
+          })
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByText((content, element) => {
+            return (
+              element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.hideForm')
+            );
+          })
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -283,7 +332,7 @@ describe('Dashboard Integration Tests', () => {
         // Find the select by ID since label text matching is tricky
         const apiarySelect = document.getElementById('apiaryFilter') as HTMLSelectElement;
         expect(apiarySelect).toBeInTheDocument();
-        
+
         // Should have "Alle bigårde" and "Uden bigård" options
         expect(screen.getByRole('option', { name: 'dashboard.allApiaries' })).toBeInTheDocument();
         // Note: The noApiary option appears to still show actual text "Uden bigård" in the component
@@ -335,7 +384,10 @@ describe('Dashboard Integration Tests', () => {
 
       await waitFor(() => {
         const graphButtons = screen.getAllByText((content, element) => {
-          return element?.tagName.toLowerCase() === 'button' && content.includes('dashboard.showAllCharts');
+          return (
+            element?.tagName.toLowerCase() === 'button' &&
+            content.includes('dashboard.showAllCharts')
+          );
         });
         expect(graphButtons.length).toBeGreaterThan(0);
       });
@@ -344,12 +396,15 @@ describe('Dashboard Integration Tests', () => {
     it('should link to hive detail page', async () => {
       renderWithRouter(<Dashboard />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Stade A')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Stade A')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       const hiveLinks = screen.getAllByRole('link');
-      const stadeALink = hiveLinks.find(link => link.textContent?.includes('Stade A'));
+      const stadeALink = hiveLinks.find((link) => link.textContent?.includes('Stade A'));
       expect(stadeALink).toHaveAttribute('href', '/hives/hive1');
     });
 
@@ -367,9 +422,9 @@ describe('Dashboard Integration Tests', () => {
         { id: 'hive4', name: 'Stade D', isActive: true, createdAt: Date.now() },
       ];
 
-      mockUseLiveQuery.mockImplementation((fn: Function) => {
+      mockUseLiveQuery.mockImplementation((fn: () => any) => {
         const fnString = fn.toString();
-        
+
         if (fnString.includes('getAllHives')) {
           return hivesWithoutApiary;
         } else if (fnString.includes('getAllApiaries')) {
@@ -377,22 +432,31 @@ describe('Dashboard Integration Tests', () => {
         } else if (fnString.includes('observations')) {
           return mockObservations;
         }
-        
+
         return [];
       });
 
       renderWithRouter(<Dashboard />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Stade D')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Stade D')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
   describe('Data Aggregation', () => {
     it('should calculate trends correctly', async () => {
       const mockHives = [
-        { id: 'hive1', name: 'Stade A', apiaryId: 'apiary1', isActive: true, createdAt: Date.now() },
+        {
+          id: 'hive1',
+          name: 'Stade A',
+          apiaryId: 'apiary1',
+          isActive: true,
+          createdAt: Date.now(),
+        },
       ];
 
       const mockObservations = [
@@ -416,9 +480,9 @@ describe('Dashboard Integration Tests', () => {
         },
       ];
 
-      mockUseLiveQuery.mockImplementation((fn: Function) => {
+      mockUseLiveQuery.mockImplementation((fn: () => any) => {
         const fnString = fn.toString();
-        
+
         if (fnString.includes('getAllHives')) {
           return mockHives;
         } else if (fnString.includes('getAllApiaries')) {
@@ -426,7 +490,7 @@ describe('Dashboard Integration Tests', () => {
         } else if (fnString.includes('observations')) {
           return mockObservations;
         }
-        
+
         return [];
       });
 
@@ -441,10 +505,13 @@ describe('Dashboard Integration Tests', () => {
 
       renderWithRouter(<Dashboard />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Stade A')).toBeInTheDocument();
-        // Should show upward trend since 10.0 > 5.0
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Stade A')).toBeInTheDocument();
+          // Should show upward trend since 10.0 > 5.0
+        },
+        { timeout: 3000 }
+      );
     });
   });
 });

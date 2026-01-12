@@ -1,55 +1,55 @@
-import { Observation } from '../db/database'
+import { Observation } from '../db/database';
 
 export const calculateTrend = (
   latest: Observation | undefined,
   previous: Observation | undefined
 ): 'up' | 'down' | 'flat' | 'none' => {
-  if (!latest || !previous) return 'none'
+  if (!latest || !previous) return 'none';
 
-  const diff = latest.mitesPerDay - previous.mitesPerDay
-  if (Math.abs(diff) < 0.5) return 'flat'
-  return diff > 0 ? 'up' : 'down'
-}
+  const diff = latest.mitesPerDay - previous.mitesPerDay;
+  if (Math.abs(diff) < 0.5) return 'flat';
+  return diff > 0 ? 'up' : 'down';
+};
 
 export const getTrendIcon = (trend: 'up' | 'down' | 'flat' | 'none'): string => {
   switch (trend) {
     case 'up':
-      return '↑'
+      return '↑';
     case 'down':
-      return '↓'
+      return '↓';
     case 'flat':
-      return '→'
+      return '→';
     default:
-      return ''
+      return '';
   }
-}
+};
 
 export const getTrendColor = (trend: 'up' | 'down' | 'flat' | 'none'): string => {
   switch (trend) {
     case 'up':
-      return '#ef4444'
+      return '#ef4444';
     case 'down':
-      return '#10b981'
+      return '#10b981';
     case 'flat':
-      return '#f59e0b'
+      return '#f59e0b';
     default:
-      return '#6b7280'
+      return '#6b7280';
   }
-}
+};
 
 export const getMitesPerDayColor = (mitesPerDay: number): string => {
-  if (mitesPerDay >= 10) return '#ef4444' // red
-  if (mitesPerDay >= 5) return '#f59e0b' // yellow
-  return '#10b981' // green
-}
+  if (mitesPerDay >= 10) return '#ef4444'; // red
+  if (mitesPerDay >= 5) return '#f59e0b'; // yellow
+  return '#10b981'; // green
+};
 
 export interface YearlyAverageResult {
-  year: number
-  averageMitesPerDay: number
-  totalObservations: number
-  sampledDays: number
-  isLowSampleCount: boolean
-  totalMiteCount: number
+  year: number;
+  averageMitesPerDay: number;
+  totalObservations: number;
+  sampledDays: number;
+  isLowSampleCount: boolean;
+  totalMiteCount: number;
 }
 
 /**
@@ -72,15 +72,15 @@ export const calculateYearlyAverage = (
       totalObservations: 0,
       sampledDays: 0,
       isLowSampleCount: true,
-      totalMiteCount: 0
-    }
+      totalMiteCount: 0,
+    };
   }
 
   // Filter observations for the specified year
-  const yearObservations = observations.filter(obs => {
-    const obsYear = new Date(obs.date).getFullYear()
-    return obsYear === year
-  })
+  const yearObservations = observations.filter((obs) => {
+    const obsYear = new Date(obs.date).getFullYear();
+    return obsYear === year;
+  });
 
   if (yearObservations.length === 0) {
     return {
@@ -89,20 +89,20 @@ export const calculateYearlyAverage = (
       totalObservations: 0,
       sampledDays: 0,
       isLowSampleCount: true,
-      totalMiteCount: 0
-    }
+      totalMiteCount: 0,
+    };
   }
 
   // Calculate total mites and total days
-  let totalMites = 0
-  let totalDays = 0
+  let totalMites = 0;
+  let totalDays = 0;
 
-  yearObservations.forEach(obs => {
-    totalMites += obs.miteCount
-    totalDays += obs.trayDays
-  })
+  yearObservations.forEach((obs) => {
+    totalMites += obs.miteCount;
+    totalDays += obs.trayDays;
+  });
 
-  const averageMitesPerDay = totalDays > 0 ? parseFloat((totalMites / totalDays).toFixed(2)) : 0
+  const averageMitesPerDay = totalDays > 0 ? parseFloat((totalMites / totalDays).toFixed(2)) : 0;
 
   return {
     year,
@@ -110,6 +110,6 @@ export const calculateYearlyAverage = (
     totalObservations: yearObservations.length,
     totalMiteCount: totalMites,
     sampledDays: totalDays,
-    isLowSampleCount: totalDays < minSampleDays
-  }
-}
+    isLowSampleCount: totalDays < minSampleDays,
+  };
+};

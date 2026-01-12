@@ -1,11 +1,11 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Layout from './components/Layout'
-import Dashboard from './pages/Dashboard'
-import Apiaries from './pages/Apiaries'
-import Hives from './pages/Hives'
-import HiveDetail from './pages/HiveDetail'
-import ImportExport from './pages/ImportExport'
-import VarroDetectorImport from './pages/VarroDetectorImport'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Apiaries from './pages/Apiaries';
+import Hives from './pages/Hives';
+import HiveDetail from './pages/HiveDetail';
+import ImportExport from './pages/ImportExport';
+import VarroDetectorImport from './pages/VarroDetectorImport';
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
         </Route>
       </Routes>
     </HashRouter>
-  )
+  );
 }
 
-export default App
+export default App;

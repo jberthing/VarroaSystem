@@ -1,203 +1,208 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { createObservation, getObservationByHiveAndDate, getAllApiaries, getHivesForApiary } from '../db/repository'
-import { readFileAsText } from '../utils/fileUtils'
-import { Apiary, Hive } from '../db/database'
-import { parseVarroDetectorCSV, VarroDetectorRow } from '../utils/csvParser'
-import { db } from '../db/database'
-import './VarroDetectorImport.css'
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  createObservation,
+  getObservationByHiveAndDate,
+  getAllApiaries,
+  getHivesForApiary,
+} from '../db/repository';
+import { readFileAsText } from '../utils/fileUtils';
+import { Apiary, Hive } from '../db/database';
+import { parseVarroDetectorCSV, VarroDetectorRow } from '../utils/csvParser';
+import { db } from '../db/database';
+import './VarroDetectorImport.css';
 
 interface HiveMapping {
-  csvRow: VarroDetectorRow
-  matchedHiveId: string | null
-  matchedHiveName: string | null
-  isAutoMatched: boolean
+  csvRow: VarroDetectorRow;
+  matchedHiveId: string | null;
+  matchedHiveName: string | null;
+  isAutoMatched: boolean;
 }
 
 const VarroDetectorImport = () => {
-  const { t } = useTranslation()
-  const [apiaries, setApiaries] = useState<Apiary[]>([])
-  const [selectedApiaryId, setSelectedApiaryId] = useState<string>('')
-  const [apiaryHives, setApiaryHives] = useState<Hive[]>([])
-  const [csvData, setCsvData] = useState<VarroDetectorRow[]>([])
-  const [hiveMappings, setHiveMappings] = useState<HiveMapping[]>([])
-  const [observationDate, setObservationDate] = useState<string>('')
-  const [trayDays, setTrayDays] = useState<number>(7)
-  const [importError, setImportError] = useState('')
-  const [importSuccess, setImportSuccess] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
+  const { t } = useTranslation();
+  const [apiaries, setApiaries] = useState<Apiary[]>([]);
+  const [selectedApiaryId, setSelectedApiaryId] = useState<string>('');
+  const [apiaryHives, setApiaryHives] = useState<Hive[]>([]);
+  const [csvData, setCsvData] = useState<VarroDetectorRow[]>([]);
+  const [hiveMappings, setHiveMappings] = useState<HiveMapping[]>([]);
+  const [observationDate, setObservationDate] = useState<string>('');
+  const [trayDays, setTrayDays] = useState<number>(7);
+  const [importError, setImportError] = useState('');
+  const [importSuccess, setImportSuccess] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    loadApiaries()
-  }, [])
+    loadApiaries();
+  }, []);
 
   const loadApiaries = async () => {
-    const allApiaries = await getAllApiaries(true)
-    setApiaries(allApiaries)
-  }
+    const allApiaries = await getAllApiaries(true);
+    setApiaries(allApiaries);
+  };
 
   const handleApiaryChange = async (apiaryId: string) => {
-    setSelectedApiaryId(apiaryId)
-    setImportError('')
-    setCsvData([])
-    setHiveMappings([])
-    
+    setSelectedApiaryId(apiaryId);
+    setImportError('');
+    setCsvData([]);
+    setHiveMappings([]);
+
     if (apiaryId) {
-      const hives = await getHivesForApiary(apiaryId)
-      setApiaryHives(hives)
+      const hives = await getHivesForApiary(apiaryId);
+      setApiaryHives(hives);
     } else {
-      setApiaryHives([])
+      setApiaryHives([]);
     }
-  }
+  };
 
   const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setImportError('')
-    setImportSuccess('')
+    setImportError('');
+    setImportSuccess('');
 
     if (!selectedApiaryId) {
-      setImportError(t('varrodetector.selectApiaryFirst'))
-      e.target.value = ''
-      return
+      setImportError(t('varrodetector.selectApiaryFirst'));
+      e.target.value = '';
+      return;
     }
 
     try {
-      const text = await readFileAsText(file)
-      const rows = parseVarroDetectorCSV(text)
-      setCsvData(rows)
+      const text = await readFileAsText(file);
+      const rows = parseVarroDetectorCSV(text);
+      setCsvData(rows);
 
       // Auto-match hives by name
-      const mappings: HiveMapping[] = rows.map(row => {
+      const mappings: HiveMapping[] = rows.map((row) => {
         const matchedHive = apiaryHives.find(
-          h => h.name.toLowerCase() === row.folderName.toLowerCase()
-        )
+          (h) => h.name.toLowerCase() === row.folderName.toLowerCase()
+        );
         return {
           csvRow: row,
           matchedHiveId: matchedHive?.id || null,
           matchedHiveName: matchedHive?.name || null,
-          isAutoMatched: !!matchedHive
-        }
-      })
+          isAutoMatched: !!matchedHive,
+        };
+      });
 
-      setHiveMappings(mappings)
+      setHiveMappings(mappings);
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : t('varrodetector.csvReadError'))
-      setCsvData([])
-      setHiveMappings([])
+      setImportError(err instanceof Error ? err.message : t('varrodetector.csvReadError'));
+      setCsvData([]);
+      setHiveMappings([]);
     } finally {
-      e.target.value = ''
+      e.target.value = '';
     }
-  }
+  };
 
   const handleMappingChange = (index: number, hiveId: string) => {
-    const updatedMappings = [...hiveMappings]
-    const selectedHive = apiaryHives.find(h => h.id === hiveId)
+    const updatedMappings = [...hiveMappings];
+    const selectedHive = apiaryHives.find((h) => h.id === hiveId);
     updatedMappings[index] = {
       ...updatedMappings[index],
       matchedHiveId: hiveId || null,
       matchedHiveName: selectedHive?.name || null,
-      isAutoMatched: false
-    }
-    setHiveMappings(updatedMappings)
-  }
+      isAutoMatched: false,
+    };
+    setHiveMappings(updatedMappings);
+  };
 
   const handleImport = async () => {
-    setImportError('')
-    setImportSuccess('')
+    setImportError('');
+    setImportSuccess('');
 
     // Validation
     if (!observationDate) {
-      setImportError(t('varrodetector.enterObservationDate'))
-      return
+      setImportError(t('varrodetector.enterObservationDate'));
+      return;
     }
 
     if (trayDays < 1 || trayDays > 365) {
-      setImportError(t('varrodetector.daysRangeError'))
-      return
+      setImportError(t('varrodetector.daysRangeError'));
+      return;
     }
 
-    const unmappedRows = hiveMappings.filter(m => !m.matchedHiveId)
+    const unmappedRows = hiveMappings.filter((m) => !m.matchedHiveId);
     if (unmappedRows.length > 0) {
-      setImportError(t('varrodetector.unmappedRowsError', { count: unmappedRows.length }))
-      return
+      setImportError(t('varrodetector.unmappedRowsError', { count: unmappedRows.length }));
+      return;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
 
     try {
       // Check for conflicts
-      const conflicts: { hiveName: string; date: string }[] = []
-      
+      const conflicts: { hiveName: string; date: string }[] = [];
+
       for (const mapping of hiveMappings) {
-        if (!mapping.matchedHiveId) continue
-        
-        const existing = await getObservationByHiveAndDate(mapping.matchedHiveId, observationDate)
+        if (!mapping.matchedHiveId) continue;
+
+        const existing = await getObservationByHiveAndDate(mapping.matchedHiveId, observationDate);
         if (existing) {
           conflicts.push({
             hiveName: mapping.matchedHiveName || mapping.csvRow.folderName,
-            date: observationDate
-          })
+            date: observationDate,
+          });
         }
       }
 
       // Handle conflicts
       if (conflicts.length > 0) {
-        const conflictList = conflicts.map(c => `- ${c.hiveName} (${c.date})`).join('\n')
-        const message = `${t('varrodetector.conflictMessage', { date: observationDate })}:\n\n${conflictList}\n\n${t('varrodetector.replaceConfirm')}`
-        
+        const conflictList = conflicts.map((c) => `- ${c.hiveName} (${c.date})`).join('\n');
+        const message = `${t('varrodetector.conflictMessage', { date: observationDate })}:\n\n${conflictList}\n\n${t('varrodetector.replaceConfirm')}`;
+
         if (!confirm(message)) {
-          setIsProcessing(false)
-          return
+          setIsProcessing(false);
+          return;
         }
 
         // Delete existing observations
         for (const mapping of hiveMappings) {
-          if (!mapping.matchedHiveId) continue
-          const existing = await getObservationByHiveAndDate(mapping.matchedHiveId, observationDate)
+          if (!mapping.matchedHiveId) continue;
+          const existing = await getObservationByHiveAndDate(
+            mapping.matchedHiveId,
+            observationDate
+          );
           if (existing) {
-            await db.observations.delete(existing.id)
+            await db.observations.delete(existing.id);
           }
         }
       }
 
       // Import observations
-      let importedCount = 0
+      let importedCount = 0;
       for (const mapping of hiveMappings) {
-        if (!mapping.matchedHiveId) continue
-        
+        if (!mapping.matchedHiveId) continue;
+
         await createObservation(
           mapping.matchedHiveId,
           observationDate,
           mapping.csvRow.numVarroaMites,
           trayDays
-        )
-        importedCount++
+        );
+        importedCount++;
       }
 
-      setImportSuccess(t('varrodetector.importSuccess', { count: importedCount }))
-      
+      setImportSuccess(t('varrodetector.importSuccess', { count: importedCount }));
+
       // Reset form
-      setCsvData([])
-      setHiveMappings([])
-      setObservationDate('')
-      setTrayDays(7)
-      
+      setCsvData([]);
+      setHiveMappings([]);
+      setObservationDate('');
+      setTrayDays(7);
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : t('varrodetector.importError'))
+      setImportError(err instanceof Error ? err.message : t('varrodetector.importError'));
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   return (
     <div className="container">
       <div className="header-section">
         <h1>🔬 {t('varrodetector.title')}</h1>
-        <p className="subtitle">
-          {t('varrodetector.subtitle')}
-        </p>
+        <p className="subtitle">{t('varrodetector.subtitle')}</p>
       </div>
 
       <div className="info-card">
@@ -226,7 +231,7 @@ const VarroDetectorImport = () => {
               className="form-select"
             >
               <option value="">{t('varrodetector.selectApiaryPlaceholder')}</option>
-              {apiaries.map(apiary => (
+              {apiaries.map((apiary) => (
                 <option key={apiary.id} value={apiary.id}>
                   {apiary.name}
                 </option>
@@ -253,8 +258,8 @@ const VarroDetectorImport = () => {
                     className="file-input"
                   />
                   <label htmlFor="csv-file" className="file-upload-button">
-                    {csvData.length > 0 
-                      ? `✓ ${t('varrodetector.rowsLoaded', { count: csvData.length })}` 
+                    {csvData.length > 0
+                      ? `✓ ${t('varrodetector.rowsLoaded', { count: csvData.length })}`
                       : `📄 ${t('varrodetector.selectCSVFile')}`}
                   </label>
                 </div>
@@ -311,7 +316,10 @@ const VarroDetectorImport = () => {
                         </thead>
                         <tbody>
                           {hiveMappings.map((mapping, index) => (
-                            <tr key={index} className={mapping.matchedHiveId ? 'mapped' : 'unmapped'}>
+                            <tr
+                              key={index}
+                              className={mapping.matchedHiveId ? 'mapped' : 'unmapped'}
+                            >
                               <td className="folder-name">{mapping.csvRow.folderName}</td>
                               <td className="number">{mapping.csvRow.numVarroaMites}</td>
                               <td className="number">{mapping.csvRow.numImages}</td>
@@ -321,15 +329,22 @@ const VarroDetectorImport = () => {
                                   onChange={(e) => handleMappingChange(index, e.target.value)}
                                   className="hive-select"
                                 >
-                                  <option value="">{t('varrodetector.selectHivePlaceholder')}</option>
-                                  {apiaryHives.map(hive => (
+                                  <option value="">
+                                    {t('varrodetector.selectHivePlaceholder')}
+                                  </option>
+                                  {apiaryHives.map((hive) => (
                                     <option key={hive.id} value={hive.id}>
                                       {hive.name}
                                     </option>
                                   ))}
                                 </select>
                                 {mapping.isAutoMatched && (
-                                  <span className="auto-match-badge" title={t('varrodetector.autoMatched')}>✓</span>
+                                  <span
+                                    className="auto-match-badge"
+                                    title={t('varrodetector.autoMatched')}
+                                  >
+                                    ✓
+                                  </span>
                                 )}
                               </td>
                             </tr>
@@ -347,23 +362,29 @@ const VarroDetectorImport = () => {
                         <div className="summary-item">
                           <span className="summary-label">{t('varrodetector.readyToImport')}:</span>
                           <span className="summary-value success">
-                            {hiveMappings.filter(m => m.matchedHiveId).length}
+                            {hiveMappings.filter((m) => m.matchedHiveId).length}
                           </span>
                         </div>
                         <div className="summary-item">
                           <span className="summary-label">{t('varrodetector.missingLink')}:</span>
                           <span className="summary-value error">
-                            {hiveMappings.filter(m => !m.matchedHiveId).length}
+                            {hiveMappings.filter((m) => !m.matchedHiveId).length}
                           </span>
                         </div>
                       </div>
-                      
+
                       <button
                         onClick={handleImport}
-                        disabled={isProcessing || !observationDate || hiveMappings.some(m => !m.matchedHiveId)}
+                        disabled={
+                          isProcessing ||
+                          !observationDate ||
+                          hiveMappings.some((m) => !m.matchedHiveId)
+                        }
                         className="import-button"
                       >
-                        {isProcessing ? `⏳ ${t('varrodetector.importing')}` : `✓ ${t('varrodetector.importObservations')}`}
+                        {isProcessing
+                          ? `⏳ ${t('varrodetector.importing')}`
+                          : `✓ ${t('varrodetector.importObservations')}`}
                       </button>
                     </div>
                   </div>
@@ -374,7 +395,7 @@ const VarroDetectorImport = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VarroDetectorImport
+export default VarroDetectorImport;

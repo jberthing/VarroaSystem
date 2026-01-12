@@ -35,7 +35,7 @@
   font-weight: normal;
 }
 
-.radio-label input[type="radio"] {
+.radio-label input[type='radio'] {
   width: auto;
   margin: 0;
   cursor: pointer;

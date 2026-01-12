@@ -179,7 +179,8 @@
   "common": {
     "loading": "Laden...",
     "error": "Fehler",
-    "success": "Erfolg"  },
+    "success": "Erfolg"
+  },
   "hiveDetail": {
     "backToHives": "Zurück zu Bienenstöcken",
     "imageClickToView": "Klicken Sie, um in voller Größe anzuzeigen",

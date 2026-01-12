@@ -2,23 +2,23 @@
 export default {
   use: () => ({
     use: () => ({
-      init: () => Promise.resolve()
-    })
+      init: () => Promise.resolve(),
+    }),
   }),
   t: (key: string) => key,
   changeLanguage: () => Promise.resolve(),
-  language: 'da'
-}
+  language: 'da',
+};
 
 export const useTranslation = () => ({
   t: (key: string) => key,
   i18n: {
     changeLanguage: () => Promise.resolve(),
-    language: 'da'
-  }
-})
+    language: 'da',
+  },
+});
 
 export const initReactI18next = {
   type: '3rdParty',
-  init: () => {}
-}
+  init: () => {},
+};
