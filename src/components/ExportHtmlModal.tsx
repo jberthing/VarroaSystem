@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useTranslation } from 'react-i18next';
 import { db } from '../db/database';
 import {
   getAllApiaries,
@@ -19,6 +20,7 @@ interface ExportHtmlModalProps {
 }
 
 const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) => {
+  const { t } = useTranslation();
   const [selectedApiaries, setSelectedApiaries] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,7 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
 
   const handleExport = async () => {
     if (selectedApiaries.length === 0) {
-      setError('Please select at least one apiary');
+      setError(t('importExport.exportHtmlModal.selectAtLeastOne'));
       return;
     }
 
@@ -121,11 +123,16 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
 
       const count = selectedApiaries.length;
       setSuccess(
-        `✓ Successfully exported ${count} apiary(ies) with ${totalHives} hive(s) as interactive HTML app`
+        t('importExport.exportHtmlModal.success', {
+          count: count,
+          hives: totalHives,
+        })
       );
       setSelectedApiaries([]);
     } catch (err) {
-      setError(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError(t('importExport.exportHtmlModal.exportFailed', {
+        error: err instanceof Error ? err.message : 'Unknown error'
+      }));
     } finally {
       setIsExporting(false);
     }
@@ -145,7 +152,7 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
     <div className="export-html-modal-overlay" onClick={handleClose}>
       <div className="export-html-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>📊 Export to Interactive HTML</h2>
+          <h2>📊 {t('importExport.exportHtmlModal.title')}</h2>
           <button className="modal-close" onClick={handleClose}>
             ✕
           </button>
@@ -153,11 +160,11 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
 
         <div className="modal-content">
           <p className="modal-description">
-            Export your apiary data as a fully interactive web application with charts and navigation
+            {t('importExport.exportHtmlModal.description')}
           </p>
 
           <div className="form-group">
-            <h3>Select Apiaries</h3>
+            <h3>{t('importExport.exportHtmlModal.selectApiaries')}</h3>
             <div className="apiary-selection">
               <label>
                 <input
@@ -168,7 +175,7 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
                   onChange={selectAll}
                   disabled={isExporting || !apiaries || apiaries.length === 0}
                 />
-                <strong>Select All</strong>
+                <strong>{t('importExport.exportHtmlModal.selectAll')}</strong>
               </label>
             </div>
 
@@ -188,7 +195,7 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
             ))}
 
             {!apiaries || apiaries.length === 0 ? (
-              <p className="no-apiaries-message">No apiaries found. Create one first!</p>
+              <p className="no-apiaries-message">{t('importExport.exportHtmlModal.noApiaries')}</p>
             ) : null}
           </div>
 
@@ -196,11 +203,11 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
             <div className="apiary-info">
               <div className="info-box">
                 <div className="info-item">
-                  <span className="info-label">Selected Apiaries:</span>
+                  <span className="info-label">{t('importExport.exportHtmlModal.selectedApiaries')}</span>
                   <span className="info-value">{selectedApiaries.length}</span>
                 </div>
                 <div className="info-item">
-                  <span className="info-label">Total Hives:</span>
+                  <span className="info-label">{t('importExport.exportHtmlModal.totalHives')}</span>
                   <span className="info-value">
                     {hives?.filter((h) => selectedApiaries.includes(h.apiaryId || '')).length || 0}
                   </span>
@@ -213,13 +220,13 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
           {success && <div className="alert alert-success">{success}</div>}
 
           <div className="features-info">
-            <h4>What's included:</h4>
+            <h4>{t('importExport.exportHtmlModal.whatsIncluded')}</h4>
             <ul>
-              <li>✓ Full interactive web application (no server needed)</li>
-              <li>✓ Same look and feel as Varroa Monitor</li>
-              <li>✓ Interactive Chart.js graphs with trends</li>
-              <li>✓ Complete observation and treatment history</li>
-              <li>✓ Works completely offline</li>
+              <li>✓ {t('importExport.exportHtmlModal.feature1')}</li>
+              <li>✓ {t('importExport.exportHtmlModal.feature2')}</li>
+              <li>✓ {t('importExport.exportHtmlModal.feature3')}</li>
+              <li>✓ {t('importExport.exportHtmlModal.feature4')}</li>
+              <li>✓ {t('importExport.exportHtmlModal.feature5')}</li>
             </ul>
           </div>
         </div>
@@ -230,14 +237,14 @@ const ExportHtmlModal = ({ isOpen, onClose, language }: ExportHtmlModalProps) =>
             onClick={handleClose}
             disabled={isExporting}
           >
-            Cancel
+            {t('importExport.exportHtmlModal.cancel')}
           </button>
           <button
             className="btn btn-primary"
             onClick={handleExport}
             disabled={selectedApiaries.length === 0 || isExporting}
           >
-            {isExporting ? 'Generating...' : '📥 Export Interactive App'}
+            {isExporting ? t('importExport.exportHtmlModal.exporting') : `📥 ${t('importExport.exportHtmlModal.export')}`}
           </button>
         </div>
       </div>

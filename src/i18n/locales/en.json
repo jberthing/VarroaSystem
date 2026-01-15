@@ -54,6 +54,7 @@
     "exportDescription": "Download a backup of all your hives and observations.",
     "exportJSON": "Export JSON (backup)",
     "exportCSV": "Export CSV (Excel)",
+    "exportHTML": "Export to HTML",
     "importData": "Import data",
     "importDescription": "Restore a previous backup. <strong>This will replace all your current data.</strong>",
     "importJSON": "Import JSON backup",
@@ -82,7 +83,28 @@
     "clearDataError": "Error deleting data",
     "confirmSeedDemo": "This will replace all your data with demo data. Are you sure?",
     "seedDemoSuccess": "Demo data has been loaded",
-    "seedDemoError": "Error loading demo data"
+    "seedDemoError": "Error loading demo data",
+    "exportHtmlModal": {
+      "title": "Export to Interactive HTML",
+      "description": "Export your apiary data as a fully interactive web application with charts and navigation",
+      "selectApiaries": "Select Apiaries",
+      "selectAll": "Select All",
+      "noApiaries": "No apiaries found. Create one first!",
+      "selectedApiaries": "Selected Apiaries:",
+      "totalHives": "Total Hives:",
+      "whatsIncluded": "What's included:",
+      "feature1": "Full interactive web application (no server needed)",
+      "feature2": "Same look and feel as Varroa Monitor",
+      "feature3": "Interactive Chart.js graphs with trends",
+      "feature4": "Complete observation and treatment history",
+      "feature5": "Works completely offline",
+      "cancel": "Cancel",
+      "export": "Export Interactive App",
+      "exporting": "Generating...",
+      "selectAtLeastOne": "Please select at least one apiary",
+      "success": "✓ Successfully exported {{count}} apiary(ies) with {{hives}} hive(s) as interactive HTML app",
+      "exportFailed": "Export failed: {{error}}"
+    }
   },
   "apiaries": {
     "title": "Apiaries",

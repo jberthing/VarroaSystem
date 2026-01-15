@@ -182,7 +182,7 @@ const ImportExport = () => {
               {t('importExport.exportCSV')}
             </button>
             <button onClick={() => setIsExportHtmlModalOpen(true)} className="secondary">
-              📊 Export to HTML
+              📊 {t('importExport.exportHTML')}
             </button>
           </div>
         </div>

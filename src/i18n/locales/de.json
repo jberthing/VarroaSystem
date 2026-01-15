@@ -55,6 +55,7 @@
     "exportDescription": "Laden Sie eine Sicherungskopie aller Ihrer Bienenstöcke und Beobachtungen herunter.",
     "exportJSON": "JSON exportieren (Backup)",
     "exportCSV": "CSV exportieren (Excel)",
+    "exportHTML": "In HTML exportieren",
     "importData": "Daten importieren",
     "importDescription": "Stellen Sie ein früheres Backup wieder her. <strong>Dies ersetzt alle Ihre aktuellen Daten.</strong>",
     "importJSON": "JSON Backup importieren",
@@ -83,7 +84,28 @@
     "clearDataError": "Fehler beim Löschen der Daten",
     "confirmSeedDemo": "Dies ersetzt alle Ihre Daten durch Demodaten. Sind Sie sicher?",
     "seedDemoSuccess": "Demodaten wurden geladen",
-    "seedDemoError": "Fehler beim Laden der Demodaten"
+    "seedDemoError": "Fehler beim Laden der Demodaten",
+    "exportHtmlModal": {
+      "title": "In interaktives HTML exportieren",
+      "description": "Exportieren Sie Ihre Bienenstockdaten als vollständig interaktive Webanwendung mit Diagrammen und Navigation",
+      "selectApiaries": "Bienenstände auswählen",
+      "selectAll": "Alle auswählen",
+      "noApiaries": "Keine Bienenstände gefunden. Erstellen Sie zuerst einen!",
+      "selectedApiaries": "Ausgewählte Bienenstände:",
+      "totalHives": "Insgesamt Bienenstöcke:",
+      "whatsIncluded": "Was ist enthalten:",
+      "feature1": "Vollständig interaktive Webanwendung (kein Server erforderlich)",
+      "feature2": "Gleiches Aussehen und Verhalten wie Varroa Monitor",
+      "feature3": "Interaktive Chart.js-Diagramme mit Trends",
+      "feature4": "Kompletter Verlauf von Beobachtungen und Behandlungen",
+      "feature5": "Funktioniert vollständig offline",
+      "cancel": "Abbrechen",
+      "export": "Interaktive App exportieren",
+      "exporting": "Wird generiert...",
+      "selectAtLeastOne": "Bitte wählen Sie mindestens einen Bienenstand aus",
+      "success": "✓ {{count}} Bienenstand(ände) mit {{hives}} Bienenstock(stöcke) erfolgreich als interaktive HTML-App exportiert",
+      "exportFailed": "Export fehlgeschlagen: {{error}}"
+    }
   },
   "apiaries": {
     "title": "Bienenstände",

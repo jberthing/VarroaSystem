@@ -54,6 +54,7 @@
     "exportDescription": "Download en sikkerhedskopi af alle dine bistader og registreringer.",
     "exportJSON": "Eksportér JSON (backup)",
     "exportCSV": "Eksportér CSV (Excel)",
+    "exportHTML": "Eksportér til HTML",
     "importData": "Importér data",
     "importDescription": "Gendan en tidligere backup. <strong>Dette vil erstatte alle dine nuværende data.</strong>",
     "importJSON": "Importér JSON backup",
@@ -82,7 +83,28 @@
     "clearDataError": "Fejl ved sletning",
     "confirmSeedDemo": "Dette vil erstatte alle dine data med demo-data. Er du sikker?",
     "seedDemoSuccess": "Demo-data er blevet indlæst",
-    "seedDemoError": "Fejl ved indlæsning af demo-data"
+    "seedDemoError": "Fejl ved indlæsning af demo-data",
+    "exportHtmlModal": {
+      "title": "Eksporter til Interaktiv HTML",
+      "description": "Eksporter dine bigårds data som en fuldt interaktiv webapplikation med grafer og navigation",
+      "selectApiaries": "Vælg Bigårde",
+      "selectAll": "Vælg Alt",
+      "noApiaries": "Ingen bigårde fundet. Opret en først!",
+      "selectedApiaries": "Valgte Bigårde:",
+      "totalHives": "Samlede Bistader:",
+      "whatsIncluded": "Hvad er inkluderet:",
+      "feature1": "Fuldt interaktiv webapplikation (ingen server påkrævet)",
+      "feature2": "Samme udseende som Varroa Monitor",
+      "feature3": "Interaktive Chart.js grafer med trends",
+      "feature4": "Komplet histories af observationer og behandlinger",
+      "feature5": "Fungerer helt offline",
+      "cancel": "Annullér",
+      "export": "Eksporter Interaktiv App",
+      "exporting": "Genererer...",
+      "selectAtLeastOne": "Vælg venligst mindst en bigård",
+      "success": "✓ Succesfuldt eksporteret {{count}} bigård(e) med {{hives}} bistad(er) som interaktiv HTML app",
+      "exportFailed": "Eksport fejlede: {{error}}"
+    }
   },
   "apiaries": {
     "title": "Bigårde",
