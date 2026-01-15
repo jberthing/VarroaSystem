@@ -3,13 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { exportAllData, importAllData, clearAllData, seedDemoData } from '../db/repository';
 import { downloadJSON, readFileAsText } from '../utils/fileUtils';
 import { Observation, Treatment } from '../db/database';
+import ExportHtmlModal from '../components/ExportHtmlModal';
 import './ImportExport.css';
 
 const ImportExport = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isExportHtmlModalOpen, setIsExportHtmlModalOpen] = useState(false);
 
   const handleExportJSON = async () => {
     try {
@@ -179,6 +181,9 @@ const ImportExport = () => {
             <button onClick={handleExportCSV} className="secondary">
               {t('importExport.exportCSV')}
             </button>
+            <button onClick={() => setIsExportHtmlModalOpen(true)} className="secondary">
+              📊 Export to HTML
+            </button>
           </div>
         </div>
 
@@ -230,6 +235,12 @@ const ImportExport = () => {
           <li>{t('importExport.backupInfo4')}</li>
         </ul>
       </div>
+
+      <ExportHtmlModal
+        isOpen={isExportHtmlModalOpen}
+        onClose={() => setIsExportHtmlModalOpen(false)}
+        language={i18n.language}
+      />
     </div>
   );
 };
