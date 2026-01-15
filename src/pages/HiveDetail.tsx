@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import i18n from "i18next";
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Line } from 'react-chartjs-2';
@@ -272,7 +273,7 @@ const HiveDetail = () => {
         callbacks: {
           title: function (context: any) {
             const date = new Date(context[0].parsed.x);
-            return date.toLocaleDateString('da-DK', {
+            return date.toLocaleDateString(i18n.resolvedLanguage, {
               weekday: 'short',
               year: 'numeric',
               month: 'short',

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
+import i18n from "i18next";
 import { db } from '../db/database';
 import {
   getAllHives,
@@ -707,7 +708,7 @@ const Dashboard = () => {
           callbacks: {
             title: function (context: any) {
               const date = new Date(context[0].parsed.x);
-              return date.toLocaleDateString('da-DK', {
+              return date.toLocaleDateString(i18n.resolvedLanguage, {
                 weekday: 'short',
                 year: 'numeric',
                 month: 'short',
