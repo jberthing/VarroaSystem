@@ -772,7 +772,7 @@ const Dashboard = () => {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Mider pr. dag',
+            text: `${t('dashboard.mitesPerDay')}`,
           },
         },
       },

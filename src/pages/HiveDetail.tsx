@@ -8,6 +8,7 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   PointElement,
   LineElement,
   Title,
@@ -35,6 +36,7 @@ import './HiveDetail.css';
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   PointElement,
   LineElement,
   Title,
@@ -334,10 +336,9 @@ const HiveDetail = () => {
         },
       },
       y: {
-        beginAtZero: true,
         title: {
           display: true,
-          text: 'Mider pr. dag',
+          text: `${t('hiveDetail.mitesPerDay')}`,
         },
       },
     },

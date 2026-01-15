@@ -9,7 +9,8 @@
     "apiaries": "Bigårde",
     "hives": "Bistader",
     "varrodetector": "VarroDetector",
-    "importExport": "Import/Eksport"
+    "importExport": "Import/Eksport",
+    "exportHtml": "Eksporter HTML"
   },
   "dashboard": {
     "title": "Oversigt",
@@ -25,7 +26,7 @@
     "allApiaries": "Alle bigårde",
     "noApiary": "Uden bigård",
     "showAllCharts": "Vis alle grafer",
-    "mitesPerDay": "mider/dag",
+    "mitesPerDay": "Mider pr. dag",
     "noObservations": "Ingen registreringer endnu",
     "yearlyAverage": "Årsgennemsnit",
     "mitesCounted": "mider talt",
@@ -197,6 +198,7 @@
     "download": "Download",
     "zoomHelp": "Scroll: zoom • Træk: panorér",
     "mitesPerDay": "Mider/dag",
+    "mitesPerDay2": "Mider pr. dag",
     "observations": "Observationer",
     "date": "Dato",
     "mites": "Mider",

@@ -9,7 +9,8 @@
     "apiaries": "Bienenstände",
     "hives": "Bienenstöcke",
     "varrodetector": "VarroDetector",
-    "importExport": "Import/Export"
+    "importExport": "Import/Export",
+    "exportHtml": "HTML exportieren"
   },
   "dashboard": {
     "title": "Übersicht",
@@ -26,6 +27,7 @@
     "noApiary": "Kein Bienenstand",
     "showAllCharts": "Alle Diagramme anzeigen",
     "mitesPerDay": "Milben/Tag",
+    "mitesPerDay2": "Milben pro Tag",
     "noObservations": "Noch keine Beobachtungen",
     "yearlyAverage": "Jahresdurchschnitt",
     "mitesCounted": "Milben gezählt",
@@ -197,6 +199,7 @@
     "download": "Herunterladen",
     "zoomHelp": "Scrollen: Zoom • Ziehen: Schwenken",
     "mitesPerDay": "Milben/Tag",
+    "mitesPerDay2": "Milben pro Tag",
     "observations": "Beobachtungen",
     "date": "Datum",
     "mites": "Milben",

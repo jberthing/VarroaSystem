@@ -9,7 +9,8 @@
     "apiaries": "Apiaries",
     "hives": "Hives",
     "varrodetector": "VarroDetector",
-    "importExport": "Import/Export"
+    "importExport": "Import/Export",
+    "exportHtml": "Export HTML"
   },
   "dashboard": {
     "title": "Overview",
@@ -25,7 +26,7 @@
     "allApiaries": "All apiaries",
     "noApiary": "No apiary",
     "showAllCharts": "Show all charts",
-    "mitesPerDay": "mites/day",
+    "mitesPerDay": "Mites pr. day",
     "noObservations": "No observations yet",
     "yearlyAverage": "Yearly average",
     "mitesCounted": "mites counted",
@@ -197,6 +198,7 @@
     "download": "Download",
     "zoomHelp": "Scroll: zoom • Drag: pan",
     "mitesPerDay": "Mites/day",
+    "mitesPerDay2": "Mites pr. day",
     "observations": "Observations",
     "date": "Date",
     "mites": "Mites",
