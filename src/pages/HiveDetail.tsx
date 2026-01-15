@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import i18n from "i18next";
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Line } from 'react-chartjs-2';
@@ -7,6 +8,7 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   PointElement,
   LineElement,
   Title,
@@ -34,6 +36,7 @@ import './HiveDetail.css';
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   PointElement,
   LineElement,
   Title,
@@ -259,17 +262,20 @@ const HiveDetail = () => {
       },
       title: {
         display: true,
-        text: 'Mider pr. dag over tid',
+        text: `${hive.name} - ${t('hiveDetail.mitesPerDay')}`,
         font: {
           size: 16,
           weight: 600 as const,
         },
       },
       tooltip: {
+        mode: 'index' as const,
+        intersect: false,
+        axis: 'x' as const,
         callbacks: {
           title: function (context: any) {
             const date = new Date(context[0].parsed.x);
-            return date.toLocaleDateString('da-DK', {
+            return date.toLocaleDateString(i18n.resolvedLanguage, {
               weekday: 'short',
               year: 'numeric',
               month: 'short',
@@ -277,7 +283,7 @@ const HiveDetail = () => {
             });
           },
           label: function (context: any) {
-            return `Mider/dag: ${context.parsed.y.toFixed(2)}`;
+            return `${t('hiveDetail.mitesPerDay')}: ${context.parsed.y.toFixed(2)}`;
           },
         },
       },
@@ -330,10 +336,9 @@ const HiveDetail = () => {
         },
       },
       y: {
-        beginAtZero: true,
         title: {
           display: true,
-          text: 'Mider pr. dag',
+          text: `${t('hiveDetail.mitesPerDay')}`,
         },
       },
     },

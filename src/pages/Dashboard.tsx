@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
+import i18n from "i18next";
 import { db } from '../db/database';
 import {
   getAllHives,
@@ -697,14 +698,17 @@ const Dashboard = () => {
         },
         title: {
           display: true,
-          text: `${apiaryName} - Mider pr. dag`,
+          text: `${apiaryName} - ${t('dashboard.mitesPerDay')}`,
           font: { size: 16, weight: 'bold' as const },
         },
         tooltip: {
+          mode: 'nearest' as const,
+          axis: 'x' as const,
+          intersect: false,
           callbacks: {
             title: function (context: any) {
               const date = new Date(context[0].parsed.x);
-              return date.toLocaleDateString('da-DK', {
+              return date.toLocaleDateString(i18n.resolvedLanguage, {
                 weekday: 'short',
                 year: 'numeric',
                 month: 'short',
@@ -712,7 +716,7 @@ const Dashboard = () => {
               });
             },
             label: function (context: any) {
-              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} mider/dag`;
+              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${t('dashboard.mitesPerDay')}`;
             },
           },
         },
@@ -768,7 +772,7 @@ const Dashboard = () => {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Mider pr. dag',
+            text: `${t('dashboard.mitesPerDay')}`,
           },
         },
       },
