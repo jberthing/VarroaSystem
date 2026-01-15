@@ -33,12 +33,24 @@ export const generateStandaloneHTMLApp = async (
     minute: '2-digit',
   });
 
-  // Prepare data for embedding in HTML
+  // Prepare data for embedding in HTML (exclude sensitive data and images to reduce file size)
+  const stripSensitiveData = (obj: any) => {
+    if (!obj) return obj;
+    const { photo, picture, image, imageData, image64, photoData, notes, location, addedBy, createdBy, updatedBy, ...rest } = obj;
+    return rest;
+  };
+
   const allData = exportDatas.map((data) => ({
-    apiary: data.apiary,
-    hives: data.hives,
-    observations: Array.from(data.observations.entries()),
-    treatments: Array.from(data.treatments.entries()),
+    apiary: stripSensitiveData(data.apiary),
+    hives: data.hives.map(hive => stripSensitiveData(hive)),
+    observations: Array.from(data.observations.entries()).map(([id, obs]) => [
+      id,
+      obs.map(o => stripSensitiveData(o))
+    ]),
+    treatments: Array.from(data.treatments.entries()).map(([id, treat]) => [
+      id,
+      treat.map(t => stripSensitiveData(t))
+    ]),
     yearlyAverages: Array.from(data.yearlyAverages.entries()),
   }));
 
