@@ -259,13 +259,16 @@ const HiveDetail = () => {
       },
       title: {
         display: true,
-        text: 'Mider pr. dag over tid',
+        text: `${hive.name} - ${t('hiveDetail.mitesPerDay')}`,
         font: {
           size: 16,
           weight: 600 as const,
         },
       },
       tooltip: {
+        mode: 'index' as const,
+        intersect: false,
+        axis: 'x' as const,
         callbacks: {
           title: function (context: any) {
             const date = new Date(context[0].parsed.x);
@@ -277,7 +280,7 @@ const HiveDetail = () => {
             });
           },
           label: function (context: any) {
-            return `Mider/dag: ${context.parsed.y.toFixed(2)}`;
+            return `${t('hiveDetail.mitesPerDay')}: ${context.parsed.y.toFixed(2)}`;
           },
         },
       },
