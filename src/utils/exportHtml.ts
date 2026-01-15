@@ -509,16 +509,30 @@ export const generateStandaloneHTMLApp = async (
       const data = DATA[currentApiaryIndex];
       const colors = ['#fbbf24', '#60a5fa', '#34d399', '#f87171', '#a78bfa', '#fb923c'];
 
-      // Prepare datasets for all hives
+      // Get all unique dates across all hives
+      const allDates = new Set();
+      data.hives.forEach(hive => {
+        const hiveObs = data.observations.find(([id]) => id === hive.id)?.[1] || [];
+        hiveObs.forEach(o => allDates.add(o.date));
+      });
+      const labels = Array.from(allDates).sort().map(d => formatDate(d));
+
+      // Prepare datasets for all hives - align data with dates
       const datasets = data.hives.map((hive, idx) => {
         const hiveObs = data.observations.find(([id]) => id === hive.id)?.[1] || [];
-        const sorted = hiveObs.slice().sort((a, b) => 
-          new Date(a.date).getTime() - new Date(b.date).getTime()
-        );
+        
+        // Create a map of date -> mitesPerDay for quick lookup
+        const obsMap = {};
+        hiveObs.forEach(o => {
+          obsMap[o.date] = o.mitesPerDay;
+        });
+
+        // Map data aligned with all dates
+        const chartData = Array.from(allDates).sort().map(date => obsMap[date] ?? null);
 
         return {
           label: hive.name,
-          data: sorted.map(o => o.mitesPerDay),
+          data: chartData,
           borderColor: colors[idx % colors.length],
           backgroundColor: colors[idx % colors.length] + '22',
           borderWidth: 2,
@@ -526,14 +540,6 @@ export const generateStandaloneHTMLApp = async (
           fill: true
         };
       });
-
-      // Get all unique dates across all hives
-      const allDates = new Set();
-      data.hives.forEach(hive => {
-        const hiveObs = data.observations.find(([id]) => id === hive.id)?.[1] || [];
-        hiveObs.forEach(o => allDates.add(formatDate(o.date)));
-      });
-      const labels = Array.from(allDates).sort();
 
       const ctx = canvas.getContext('2d');
       const chart = new Chart(ctx, {
