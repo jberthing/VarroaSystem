@@ -22,6 +22,31 @@ Appen er tilgængelig på flere sprog:
 
 Sproget vælges automatisk baseret på din browsers indstillinger, men kan ændres manuelt i appen via sprogvælgeren i øverste højre hjørne (🇩🇰 🇬🇧 🇩🇪).
 
+## ℹ️ Mider pr dag nivauer
+  <table>
+    <tr>
+      <td><span style="display:inline-block;width:12px;height:12px;background:#10b981;border-radius:2px;"></span></td>
+      <td><strong>God</strong></td>
+      <td>&lt; 3 mider / dag</td>
+    </tr>
+    <tr>
+      <td><span style="display:inline-block;width:12px;height:12px;background:#f59e0b;border-radius:2px;"></span></td>
+      <td><strong>Advarsel</strong></td>
+      <td>3–5 mider / dag</td>
+    </tr>
+    <tr>
+      <td><span style="display:inline-block;width:12px;height:12px;background:#ef4444;border-radius:2px;"></span></td>
+      <td><strong>Fare</strong></td>
+      <td>5–10 mider / dag</td>
+    </tr>
+    <tr>
+      <td><span style="display:inline-block;width:12px;height:12px;background:#7f1d1d;border-radius:2px;"></span></td>
+      <td><strong>Kritisk</strong></td>
+      <td>&gt; 10 mider / dag</td>
+    </tr>
+  </table>
+
+
 ## � Screenshots
 
 ### Dashboard oversigt

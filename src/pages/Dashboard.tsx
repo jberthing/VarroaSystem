@@ -52,8 +52,8 @@ ChartJS.register(
 type TimeFilter = 'all' | '7' | '30';
 
 const getStatusLevel = (mitesPerDay: number): 'good' | 'warning' | 'danger' | 'critical' => {
-  if (mitesPerDay < 1) return 'good';
-  if (mitesPerDay < 3) return 'warning';
+  if (mitesPerDay < 3) return 'good';
+  if (mitesPerDay < 5) return 'warning';
   if (mitesPerDay < 10) return 'danger';
   return 'critical';
 };
@@ -284,7 +284,7 @@ const Dashboard = () => {
                 {apiaryFilter === 'none'
                   ? t('dashboard.noApiary')
                   : apiaries?.find((a) => a.id === apiaryFilter)?.name || t('dashboard.apiary')}
-              </h2>
+              </h2>         
               {groupData.ungrouped.length > 0 && (
                 <button className="secondary" onClick={() => setShowChartsForApiary(apiaryFilter)}>
                   📊 {t('dashboard.showAllCharts')}
