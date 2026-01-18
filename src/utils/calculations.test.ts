@@ -155,16 +155,22 @@ describe('calculations', () => {
       expect(getMitesPerDayColor(15)).toBe('#ef4444');
     });
 
-    it('should return yellow color when mites per day is between 5 and 10', () => {
-      expect(getMitesPerDayColor(5)).toBe('#f59e0b');
-      expect(getMitesPerDayColor(7.5)).toBe('#f59e0b');
-      expect(getMitesPerDayColor(9.9)).toBe('#f59e0b');
+    it('should return orange color when mites per day is between 5 and 10', () => {
+      expect(getMitesPerDayColor(5)).toBe('#f97316');
+      expect(getMitesPerDayColor(7.5)).toBe('#f97316');
+      expect(getMitesPerDayColor(9.9)).toBe('#f97316');
     });
 
-    it('should return green color when mites per day < 5', () => {
+    it('should return yellow color when mites per day is between 3 and 5', () => {
+      expect(getMitesPerDayColor(3)).toBe('#f59e0b');
+      expect(getMitesPerDayColor(3.5)).toBe('#f59e0b');
+      expect(getMitesPerDayColor(4.9)).toBe('#f59e0b');
+    });
+
+    it('should return green color when mites per day < 3', () => {
       expect(getMitesPerDayColor(0)).toBe('#10b981');
-      expect(getMitesPerDayColor(3)).toBe('#10b981');
-      expect(getMitesPerDayColor(4.9)).toBe('#10b981');
+      expect(getMitesPerDayColor(1)).toBe('#10b981');
+      expect(getMitesPerDayColor(2.9)).toBe('#10b981');
     });
   });
 });
