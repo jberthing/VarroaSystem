@@ -23,6 +23,7 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   PointElement,
   LineElement,
   Title,
@@ -39,6 +40,7 @@ import './Dashboard.css';
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  LogarithmicScale,
   PointElement,
   LineElement,
   Title,
@@ -569,11 +571,12 @@ const Dashboard = () => {
     const [chartData, setChartData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'daily' | 'moving10' | 'weekly' | 'monthly'>('daily');
+    const [scaleType, setScaleType] = useState<'linear' | 'logarithmic'>('linear');
     const [chartInstance, setChartInstance] = useState<any>(null);
 
     useEffect(() => {
       loadAllData();
-    }, [hives, viewMode]);
+    }, [hives, viewMode, scaleType]);
 
     const loadAllData = async () => {
       const colors = [
@@ -652,7 +655,7 @@ const Dashboard = () => {
           label: hive.name,
           data: aggregatedObs.map((obs: any) => ({
             x: new Date(obs.date),
-            y: obs.mitesPerDay,
+            y: scaleType === 'logarithmic' && obs.mitesPerDay === 0 ? null : obs.mitesPerDay,
           })),
           borderColor: color.border,
           backgroundColor: color.bg,
@@ -785,7 +788,9 @@ const Dashboard = () => {
           },
         },
         y: {
-          beginAtZero: true,
+          type: scaleType,
+          beginAtZero: scaleType === 'linear',
+          ...(scaleType === 'logarithmic' ? { min: 0.1, max: 60 } : {}),
           title: {
             display: true,
             text: `${t('dashboard.mitesPerDay')}`,
@@ -820,24 +825,46 @@ const Dashboard = () => {
             gap: '8px',
             alignItems: 'center',
             fontSize: '14px',
+            flexWrap: 'nowrap',
+            minWidth: 0,
           }}
         >
-          <label style={{ fontWeight: 500, fontSize: '13px' }}>{t('dashboard.view')}:</label>
-          <select
-            value={viewMode}
-            onChange={(e) => setViewMode(e.target.value as any)}
-            style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              border: '1px solid #d1d5db',
-              fontSize: '13px',
-            }}
-          >
-            <option value="daily">{t('dashboard.daily')}</option>
-            <option value="moving10">{t('dashboard.moving10')}</option>
-            <option value="weekly">{t('dashboard.weekly')}</option>
-            <option value="monthly">{t('dashboard.monthly')}</option>
-          </select>
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
+            <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>{t('dashboard.view')}:</label>
+            <select
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value as any)}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid #d1d5db',
+                fontSize: '13px',
+              }}
+            >
+              <option value="daily">{t('dashboard.daily')}</option>
+              <option value="moving10">{t('dashboard.moving10')}</option>
+              <option value="weekly">{t('dashboard.weekly')}</option>
+              <option value="monthly">{t('dashboard.monthly')}</option>
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
+            <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>
+              {t('hiveDetail.scale')}:
+            </label>
+            <select
+              value={scaleType}
+              onChange={(e) => setScaleType(e.target.value as any)}
+              style={{
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid #d1d5db',
+                fontSize: '13px',
+              }}
+            >
+              <option value="linear">{t('hiveDetail.linear')}</option>
+              <option value="logarithmic">{t('hiveDetail.logarithmic')}</option>
+            </select>
+          </div>
           <button
             onClick={resetZoom}
             className="secondary"
@@ -856,6 +883,21 @@ const Dashboard = () => {
             💡 {t('dashboard.zoomHelp')}
           </span>
         </div>
+        {scaleType === 'logarithmic' && (
+          <div
+            style={{
+              marginBottom: '15px',
+              padding: '10px 12px',
+              backgroundColor: '#fef3c7',
+              border: '1px solid #fbbf24',
+              borderRadius: '4px',
+              fontSize: '13px',
+              color: '#92400e',
+            }}
+          >
+            ⚠️ {t('hiveDetail.zerovaluesRemoved')}
+          </div>
+        )}
         <Line
           ref={(ref: any) => {
             if (ref) {
