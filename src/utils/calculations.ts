@@ -38,9 +38,10 @@ export const getTrendColor = (trend: 'up' | 'down' | 'flat' | 'none'): string =>
 };
 
 export const getMitesPerDayColor = (mitesPerDay: number): string => {
-  if (mitesPerDay >= 10) return '#ef4444'; // red
-  if (mitesPerDay >= 5) return '#f59e0b'; // yellow
-  return '#10b981'; // green
+  if (mitesPerDay < 3) return '#10b981'; // green
+  if (mitesPerDay < 5) return '#f59e0b'; // yellow
+  if (mitesPerDay < 10) return '#f97316'; // orange
+  return '#ef4444'; // red
 };
 
 export interface YearlyAverageResult {
