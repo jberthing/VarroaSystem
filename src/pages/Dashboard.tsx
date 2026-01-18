@@ -296,7 +296,7 @@ const Dashboard = () => {
             {groupData.ungrouped.map(({ hive, latest, trend, yearlyAverage }) => (
               <Link to={`/hives/${hive.id}`} key={hive.id} className="hive-card-link">
                 <div
-                  className={`hive-card ${latest ? getStatusLevel(latest.mitesPerDay) : 'no-data'}`}
+                  className={`hive-card ${latest ? getStatusLevel(yearlyAverage.averageMitesPerDay) : 'no-data'}`}
                 >
                   <div className="hive-status-bar" />
                   <div className="hive-card-content">
@@ -353,18 +353,26 @@ const Dashboard = () => {
                                     color: getMitesPerDayColor(yearlyAverage.averageMitesPerDay),
                                   }}
                                 >
-                                  {yearlyAverage.averageMitesPerDay.toFixed(1)}
+                                  <center>{yearlyAverage.averageMitesPerDay.toFixed(1)}</center>
                                 </span>
                                 <span className="hive-yearly-unit">
-                                  {t('dashboard.avgMitesPerDay')}
+                                  <center>{t('dashboard.avgMitesPerDay')}</center>
                                 </span>
                               </div>
                               <div className="hive-yearly-stat">
                                 <span className="hive-yearly-value">
-                                  {yearlyAverage.totalMiteCount}
+                                  <center>{yearlyAverage.totalMiteCount}</center>
                                 </span>
                                 <span className="hive-yearly-unit">
-                                  {t('dashboard.mitesTotal')}
+                                  <center>{t('dashboard.mitesTotal')}</center>
+                                </span>
+                              </div>
+                              <div className="hive-yearly-stat">
+                                <span className="hive-yearly-value">
+                                  <center>{yearlyAverage.sampledDays}</center>
+                                </span>
+                                <span className="hive-yearly-unit">
+                                  <center>{t('dashboard.days')}</center>
                                 </span>
                               </div>
                             </div>
@@ -396,7 +404,7 @@ const Dashboard = () => {
                   {groupHives.map(({ hive, latest, trend, yearlyAverage }) => (
                     <Link to={`/hives/${hive.id}`} key={hive.id} className="hive-card-link">
                       <div
-                        className={`hive-card ${latest ? getStatusLevel(latest.mitesPerDay) : 'no-data'}`}
+                        className={`hive-card ${latest ? getStatusLevel(yearlyAverage.averageMitesPerDay) : 'no-data'}`}
                       >
                         <div className="hive-status-bar" />
                         <div className="hive-card-content">
@@ -455,18 +463,26 @@ const Dashboard = () => {
                                           ),
                                         }}
                                       >
-                                        {yearlyAverage.averageMitesPerDay.toFixed(1)}
+                                        <center>{yearlyAverage.averageMitesPerDay.toFixed(1)}</center>
                                       </span>
                                       <span className="hive-yearly-unit">
-                                        {t('dashboard.avgMitesPerDay')}
+                                        <center>{t('dashboard.avgMitesPerDay')}</center>
                                       </span>
                                     </div>
                                     <div className="hive-yearly-stat">
                                       <span className="hive-yearly-value">
-                                        {yearlyAverage.totalMiteCount}
+                                        <center>{yearlyAverage.totalMiteCount}</center>
                                       </span>
                                       <span className="hive-yearly-unit">
-                                        {t('dashboard.mitesTotal')}
+                                        <center>{t('dashboard.mitesTotal')}</center>
+                                      </span>
+                                    </div>
+                                    <div className="hive-yearly-stat">
+                                      <span className="hive-yearly-value">
+                                        <center>{yearlyAverage.sampledDays}</center>
+                                      </span>
+                                      <span className="hive-yearly-unit">
+                                        <center>{t('dashboard.days')}</center>
                                       </span>
                                     </div>
                                   </div>

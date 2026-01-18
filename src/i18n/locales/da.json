@@ -33,7 +33,7 @@
     "avgMitesPerDay": "gns. mider/dag",
     "mitesTotal": "mider ialt",
     "lowSampleWarning": "Kun {{days}} dages prøvetagning i år",
-    "days": "monitoreringsdage",
+    "days": "monitorerings dage",
     "observations": "Observationer",
     "totalMites": "Total mider",
     "chartsFor": "Grafer for",
