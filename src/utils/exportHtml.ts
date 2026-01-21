@@ -74,6 +74,7 @@ export const generateStandaloneHTMLApp = async (
         <nav class="nav">
           <button id="nav-apiaries" class="nav-button active">Apiaries</button>
           <button id="nav-details" class="nav-button">Details</button>
+          <a href="https://github.com/jberthing/VarroaSystem" target="_blank" rel="noopener noreferrer" class="github-link" title="View on GitHub">🐙 GitHub</a>
         </nav>
       </div>
     </header>
@@ -182,25 +183,15 @@ export const generateStandaloneHTMLApp = async (
             <div class="hive-grid">
         \`;
 
-        // Sort hives by mites/day from the latest observation by date (descending)
+        // Sort hives by average mites/day (descending)
         const sortedHives = data.hives.slice().sort((a, b) => {
-          const aObs = data.observations.find(([id]) => id === a.id)?.[1] || [];
-          const bObs = data.observations.find(([id]) => id === b.id)?.[1] || [];
+          const aYearly = data.yearlyAverages.find(([id]) => id === a.id)?.[1];
+          const bYearly = data.yearlyAverages.find(([id]) => id === b.id)?.[1];
 
-          const aLatest = aObs.reduce((newest, obs) => {
-            if (!newest) return obs;
-            return new Date(obs.date).getTime() > new Date(newest.date).getTime() ? obs : newest;
-          }, null);
+          const aAvgMites = aYearly?.averageMitesPerDay ?? -1;
+          const bAvgMites = bYearly?.averageMitesPerDay ?? -1;
 
-          const bLatest = bObs.reduce((newest, obs) => {
-            if (!newest) return obs;
-            return new Date(obs.date).getTime() > new Date(newest.date).getTime() ? obs : newest;
-          }, null);
-
-          const aMites = aLatest?.mitesPerDay ?? -1;
-          const bMites = bLatest?.mitesPerDay ?? -1;
-
-          return bMites - aMites; // Descending (highest first)
+          return bAvgMites - aAvgMites; // Descending (highest first)
         });
 
         sortedHives.forEach((hive, hiveIdx) => {
@@ -243,8 +234,8 @@ export const generateStandaloneHTMLApp = async (
                   <span class="metric-value">\${totalMites} mites</span>
                 </div>
                 <div class="metric-row">
-                  <span class="metric-label">Observations:</span>
-                  <span class="metric-value">\${currentYearObs.length}</span>
+                  <span class="metric-label">Monitoring days:</span>
+                  <span class="metric-value">\${yearly?.sampledDays}</span>
                 </div>
               </div>
             </div>
@@ -356,7 +347,6 @@ export const generateStandaloneHTMLApp = async (
                   <th>Mites</th>
                   <th>Tray Days</th>
                   <th>Mites/Day</th>
-                  <th>Notes</th>
                 </tr>
               </thead>
               <tbody>
@@ -371,7 +361,6 @@ export const generateStandaloneHTMLApp = async (
             <td>\${obs.miteCount}</td>
             <td>\${obs.trayDays}</td>
             <td><strong>\${obs.mitesPerDay.toFixed(2)}</strong></td>
-            <td>\${obs.notes || '—'}</td>
           </tr>
         \`;
       });
@@ -695,6 +684,24 @@ const getStandaloneCSS = (): string => {
     .nav-button.active {
       color: var(--color-gold);
       border-bottom-color: var(--color-gold);
+    }
+
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .github-link:hover {
+      color: var(--color-text-primary);
+      background-color: #f3f4f6;
     }
 
     .main {
@@ -1140,6 +1147,14 @@ const getCSS = (): string => {
       font-size: 2.5rem;
       margin-bottom: 0.5rem;
       color: var(--color-text-primary);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .header-meta {
@@ -1664,8 +1679,8 @@ const generateHiveHTML = (
             <div class="yearly-stat-value">${yearlyAverage.totalMiteCount}</div>
           </div>
           <div class="yearly-stat">
-            <div class="yearly-stat-label">Observations</div>
-            <div class="yearly-stat-value">${yearlyAverage.totalObservations}</div>
+            <div class="yearly-stat-label">Monitoring days</div>
+            <div class="yearly-stat-value">${yearlyAverage.sampledDays}</div>
           </div>
           <div class="yearly-stat">
             <div class="yearly-stat-label">Sampled Days</div>
@@ -1745,7 +1760,10 @@ export const generateHTMLExport = async (data: ExportData, language: string): Pr
     <body>
       <div class="container">
         <div class="header">
-          <h1>🐝 Varroa Monitor</h1>
+          <div class="header-top">
+            <h1>🐝 Varroa Monitor</h1>
+            <a href="https://github.com/jberthing/VarroaSystem" target="_blank" rel="noopener noreferrer" class="github-link" title="View on GitHub">🐙 GitHub</a>
+          </div>
           <h2>${data.apiary.name}</h2>
           <div class="header-meta">
             <div class="meta-item">
