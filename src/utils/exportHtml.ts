@@ -443,11 +443,21 @@ export const generateStandaloneHTMLApp = async (
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(0, 0, 0, 0.1)' },
-              ticks: { color: '#374151' }
+              ticks: { color: '#374151' },
+              title: {
+                display: true,
+                text: 'Mites per Day',
+                color: '#374151'
+              }
             },
             x: {
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              ticks: { color: '#374151' }
+              ticks: { color: '#374151' },
+              title: {
+                display: true,
+                text: 'Date',
+                color: '#374151'
+              }
             }
           }
         }
@@ -568,11 +578,21 @@ export const generateStandaloneHTMLApp = async (
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(0, 0, 0, 0.1)' },
-              ticks: { color: '#374151' }
+              ticks: { color: '#374151' },
+              title: {
+                display: true,
+                text: 'Mites per Day',
+                color: '#374151'
+              }
             },
             x: {
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              ticks: { color: '#374151' }
+              ticks: { color: '#374151' },
+              title: {
+                display: true,
+                text: 'Date',
+                color: '#374151'
+              }
             }
           }
         }
