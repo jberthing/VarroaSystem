@@ -132,11 +132,31 @@ const Dashboard = () => {
       })
     );
 
-    // Sort by highest mites per day first
+    // Sort by highest yearly average mites/day; if latest mites/day exceeds the yearly average,
+    // sort by latest instead (i.e., sort by the higher of the two).
+    const getSortMitesPerDay = (item: (typeof data)[number]) => {
+      const yearly = item.yearlyAverage?.averageMitesPerDay;
+      const latest = item.latest?.mitesPerDay;
+
+      const safeYearly = typeof yearly === 'number' && Number.isFinite(yearly) ? yearly : 0;
+      const safeLatest = typeof latest === 'number' && Number.isFinite(latest) ? latest : 0;
+
+      return Math.max(safeYearly, safeLatest);
+    };
+
     data.sort((a, b) => {
-      if (!a.latest) return 1;
-      if (!b.latest) return -1;
-      return b.latest.mitesPerDay - a.latest.mitesPerDay;
+      const aValue = getSortMitesPerDay(a);
+      const bValue = getSortMitesPerDay(b);
+      if (bValue !== aValue) return bValue - aValue;
+
+      // Tiebreakers for deterministic sorting
+      const aDate = a.latest?.date ?? '';
+      const bDate = b.latest?.date ?? '';
+      if (bDate !== aDate) return bDate.localeCompare(aDate);
+
+      const aName = a.hive?.name ?? '';
+      const bName = b.hive?.name ?? '';
+      return aName.localeCompare(bName);
     });
 
     setHiveData(data);
