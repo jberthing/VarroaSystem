@@ -804,7 +804,7 @@ const Dashboard = () => {
           },
           title: {
             display: true,
-            text: 'Dato',
+            text: `${t('dashboard.date')}`,
           },
         },
         y: {

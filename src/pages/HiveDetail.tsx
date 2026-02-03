@@ -336,7 +336,7 @@ const HiveDetail = () => {
         },
         title: {
           display: true,
-          text: 'Dato',
+          text: `${t('hiveDetail.date')}`,
         },
       },
       y: {
