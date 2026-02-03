@@ -26,6 +26,7 @@
     "allApiaries": "Alle Bienenstände",
     "noApiary": "Kein Bienenstand",
     "showAllCharts": "Alle Diagramme anzeigen",
+    "date": "Datum",
     "mitesPerDay": "Milben pro Tag",
     "noObservations": "Noch keine Beobachtungen",
     "yearlyAverage": "Jahresdurchschnitt",
@@ -219,8 +220,11 @@
     "resetZoom": "Zurücksetzen",
     "download": "Herunterladen",
     "zoomHelp": "Scrollen: Zoom • Ziehen: Schwenken",
+    "scale": "Maßstab",
+    "linear": "Linear",
+    "logarithmic": "Logarithmisch",
+    "zerovaluesRemoved": "Hinweis: Werte mit 0 Milben werden auf der logarithmischen Skala nicht angezeigt",
     "mitesPerDay": "Milben/Tag",
-    "mitesPerDay2": "Milben pro Tag",
     "observations": "Beobachtungen",
     "date": "Datum",
     "mites": "Milben",
@@ -243,7 +247,6 @@
     "lowSampleWarning": "Nur {{days}} Überwachungstage in diesem Jahr",
     "daysUnit": "Überwachungstage",
     "observationsCount": "Beobachtungen",
-    "totalMites": "Gesamtzahl Milben",
     "totalMites": "Gesamtzahl Milben"
   },
   "quickObservation": {

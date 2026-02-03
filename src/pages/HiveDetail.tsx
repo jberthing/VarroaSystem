@@ -48,6 +48,7 @@ ChartJS.register(
 );
 
 type ViewMode = 'daily' | 'moving10' | 'weekly' | 'monthly';
+type ScaleType = 'linear' | 'logarithmic';
 
 const HiveDetail = () => {
   const { t } = useTranslation();
@@ -60,6 +61,7 @@ const HiveDetail = () => {
   const [editingTreatment, setEditingTreatment] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
+  const [scaleType, setScaleType] = useState<ScaleType>('linear');
   const [chartInstance, setChartInstance] = useState<any>(null);
 
   // Live query for observations and treatments
@@ -209,14 +211,16 @@ const HiveDetail = () => {
   const aggregatedObservations = aggregateData([...observations].reverse(), viewMode);
 
   // Prepare chart data with time-series
+  const chartDataPoints = aggregatedObservations.map((obs) => ({
+    x: new Date(obs.date),
+    y: scaleType === 'logarithmic' && obs.mitesPerDay === 0 ? null : obs.mitesPerDay,
+  }));
+
   const chartData = {
     datasets: [
       {
         label: viewMode === 'moving10' ? 'Mider pr. dag (10-dages gns.)' : 'Mider pr. dag',
-        data: aggregatedObservations.map((obs) => ({
-          x: new Date(obs.date),
-          y: obs.mitesPerDay,
-        })),
+        data: chartDataPoints,
         borderColor: viewMode === 'moving10' ? '#8b5cf6' : '#fbbf24',
         backgroundColor:
           viewMode === 'moving10' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(251, 191, 36, 0.1)',
@@ -332,10 +336,12 @@ const HiveDetail = () => {
         },
         title: {
           display: true,
-          text: 'Dato',
+          text: `${t('hiveDetail.date')}`,
         },
       },
       y: {
+        type: scaleType,
+        ...(scaleType === 'logarithmic' ? { min: 0.1, max: 60 } : {}),
         title: {
           display: true,
           text: `${t('hiveDetail.mitesPerDay')}`,
@@ -409,26 +415,48 @@ const HiveDetail = () => {
               gap: '8px',
               alignItems: 'center',
               fontSize: '14px',
+              flexWrap: 'nowrap',
+              minWidth: 0,
             }}
           >
-            <label style={{ fontWeight: 500, fontSize: '13px' }}>
-              {t('hiveDetail.viewLabel')}:
-            </label>
-            <select
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as ViewMode)}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: '1px solid #d1d5db',
-                fontSize: '13px',
-              }}
-            >
-              <option value="daily">{t('hiveDetail.daily')}</option>
-              <option value="moving10">{t('hiveDetail.moving10')}</option>
-              <option value="weekly">{t('hiveDetail.weekly')}</option>
-              <option value="monthly">{t('hiveDetail.monthly')}</option>
-            </select>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
+              <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>
+                {t('hiveDetail.viewLabel')}:
+              </label>
+              <select
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value as ViewMode)}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #d1d5db',
+                  fontSize: '13px',
+                }}
+              >
+                <option value="daily">{t('hiveDetail.daily')}</option>
+                <option value="moving10">{t('hiveDetail.moving10')}</option>
+                <option value="weekly">{t('hiveDetail.weekly')}</option>
+                <option value="monthly">{t('hiveDetail.monthly')}</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
+              <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>
+                {t('hiveDetail.scale')}:
+              </label>
+              <select
+                value={scaleType}
+                onChange={(e) => setScaleType(e.target.value as ScaleType)}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #d1d5db',
+                  fontSize: '13px',
+                }}
+              >
+                <option value="linear">{t('hiveDetail.linear')}</option>
+                <option value="logarithmic">{t('hiveDetail.logarithmic')}</option>
+              </select>
+            </div>
             <button
               onClick={resetZoom}
               className="secondary"
@@ -455,6 +483,21 @@ const HiveDetail = () => {
               💡 {t('hiveDetail.zoomHelp')}
             </span>
           </div>
+          {scaleType === 'logarithmic' && (
+            <div
+              style={{
+                marginBottom: '15px',
+                padding: '10px 12px',
+                backgroundColor: '#fef3c7',
+                border: '1px solid #fbbf24',
+                borderRadius: '4px',
+                fontSize: '13px',
+                color: '#92400e',
+              }}
+            >
+              ⚠️ {t('hiveDetail.zerovaluesRemoved')}
+            </div>
+          )}
           <div className="chart-container">
             <Line
               ref={(ref: any) => ref && setChartInstance(ref)}
