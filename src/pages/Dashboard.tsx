@@ -19,6 +19,7 @@ import {
   calculateYearlyAverage,
 } from '../utils/calculations';
 import QuickObservationForm from '../components/QuickObservationForm';
+import Hammer from 'hammerjs';
 import {
   Chart as ChartJS,
   CategoryScale,
