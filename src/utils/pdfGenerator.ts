@@ -18,6 +18,8 @@ interface ReportData {
   includeTreatments: boolean;
   includeMonthlySummaries: boolean;
   locale?: string;
+  years?: number[];
+  yearData?: Map<number, { observations: Map<string, Observation[]>; treatments: Map<string, Treatment[]> }>;
   labels?: {
     monthlyOverview?: string;
     apiaryOverview?: string;
@@ -32,13 +34,17 @@ interface ReportData {
     tableNotes?: string;
     tableMetric?: string;
     tableValue?: string;
+    contents?: string;
+    yearLabel?: string;
   };
 }
+
+type ReportLabels = Required<NonNullable<ReportData['labels']>>;
 
 /**
  * Get default English labels for PDF
  */
-function getDefaultLabels(): Required<ReportData['labels']> {
+function getDefaultLabels(): ReportLabels {
   return {
     monthlyOverview: 'Monthly Overview',
     apiaryOverview: 'Apiary Overview',
@@ -53,6 +59,8 @@ function getDefaultLabels(): Required<ReportData['labels']> {
     tableNotes: 'Notes',
     tableMetric: 'Metric',
     tableValue: 'Value',
+    contents: 'Contents',
+    yearLabel: 'Year',
   };
 }
 
@@ -391,9 +399,13 @@ export const generatePdfReport = async (reportData: ReportData): Promise<void> =
   });
 
   const locale = reportData.locale || navigator.language || 'en-US';
+  const years = reportData.years && reportData.years.length > 0 ? [...reportData.years].sort((a, b) => a - b) : [reportData.year];
 
   // Get labels with defaults
-  const labels: Required<ReportData['labels']> = { ...getDefaultLabels(), ...reportData.labels } as Required<ReportData['labels']>;
+  const resolvedLabels: ReportLabels = {
+    ...getDefaultLabels(),
+    ...(reportData.labels ?? {}),
+  } as ReportLabels;
 
   doc.setProperties({
     title: 'Varroa Monitor Report',
@@ -405,6 +417,7 @@ export const generatePdfReport = async (reportData: ReportData): Promise<void> =
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   let pageNumber = 1;
+  const tocEntries: { title: string; page: number; level: number }[] = [];
 
   // ===== Cover page =====
   let y = 40;
@@ -417,7 +430,10 @@ export const generatePdfReport = async (reportData: ReportData): Promise<void> =
   doc.setFontSize(14);
   (doc.setFont as any)(undefined, 'normal');
   doc.setTextColor(100, 100, 100);
-  (doc.text as any)(`Year ${reportData.year}`, pageWidth / 2, y, { align: 'center' });
+  const yearLabel = years.length === 1
+    ? `${resolvedLabels.yearLabel} ${years[0]}`
+    : `${resolvedLabels.yearLabel}s ${years[0]}–${years[years.length - 1]}`;
+  (doc.text as any)(yearLabel, pageWidth / 2, y, { align: 'center' });
   y += 20;
 
   doc.setFontSize(12);
@@ -438,196 +454,233 @@ export const generatePdfReport = async (reportData: ReportData): Promise<void> =
   doc.setTextColor(0, 0, 0);
   addPageFooter(doc, pageNumber, pageHeight);
 
-  // ===== Summary page =====
+  // ===== Contents page =====
   doc.addPage();
   pageNumber += 1;
-  addPageHeader(doc, 'Summary', pageNumber, pageHeight);
-  y = 30;
+  const tocPageNumber = pageNumber;
+  addPageHeader(doc, resolvedLabels.contents, pageNumber, pageHeight);
 
-  // Calculate summary statistics
-  let totalObservations = 0;
-  let avgMitesPerDay = 0;
-  let totalMites = 0;
-  let totalMonitoringDays = 0;
+  for (const year of years) {
+    const yearData = reportData.yearData?.get(year) || {
+      observations: reportData.observations,
+      treatments: reportData.treatments,
+    };
 
-  reportData.observations.forEach((obs) => {
-    totalObservations += obs.length;
-    obs.forEach((o) => {
-      totalMites += o.miteCount;
-      totalMonitoringDays += o.trayDays;
-    });
-  });
-
-  if (totalMonitoringDays > 0) {
-    avgMitesPerDay = parseFloat((totalMites / totalMonitoringDays).toFixed(2));
-  }
-
-  y = drawSectionHeading(doc, 'Summary', y);
-  y = drawSummaryTable(
-    doc,
-    {
-      'Apiaries': apiaryCount,
-      'Total Hives': hiveCount,
-      'Total Observations': totalObservations,
-      'Total Monitoring Days': totalMonitoringDays,
-      'Average Mites/Day': avgMitesPerDay,
-      'Total Mites': totalMites,
-    },
-    y + 10,
-    labels!
-  );
-
-  addPageFooter(doc, pageNumber, pageHeight);
-
-  // ===== Apiary chapters =====
-  for (const [, apiaryData] of reportData.apiaries) {
+    // ===== Summary page (per year) =====
     doc.addPage();
     pageNumber += 1;
-    addPageHeader(doc, apiaryData.apiary.name, pageNumber, pageHeight);
+    addPageHeader(doc, `Summary ${year}`, pageNumber, pageHeight);
+    tocEntries.push({ title: `${resolvedLabels.yearLabel} ${year}`, page: pageNumber, level: 0 });
+
     y = 30;
 
-    y = drawSectionHeading(doc, apiaryData.apiary.name, y);
+    // Calculate summary statistics
+    let totalObservations = 0;
+    let avgMitesPerDay = 0;
+    let totalMites = 0;
+    let totalMonitoringDays = 0;
 
-    if (apiaryData.apiary.location) {
-      doc.setFontSize(10);
-      (doc.setFont as any)(undefined, 'normal');
-      doc.setTextColor(100, 100, 100);
-      (doc.text as any)(`Location: ${apiaryData.apiary.location}`, 15, (y += 8));
-      doc.setTextColor(0, 0, 0);
-      y += 5;
+    yearData.observations.forEach((obs) => {
+      totalObservations += obs.length;
+      obs.forEach((o) => {
+        totalMites += o.miteCount;
+        totalMonitoringDays += o.trayDays;
+      });
+    });
+
+    if (totalMonitoringDays > 0) {
+      avgMitesPerDay = parseFloat((totalMites / totalMonitoringDays).toFixed(2));
     }
 
-    // Add apiary image if available
-    if (apiaryData.apiary.image) {
-      y = checkAndAddNewPage(doc, y, IMAGE_BOX_MM + 20, pageNumber, pageHeight);
-      y += 5;
-      try {
-        const coverImage = await createCoverSquareImage(apiaryData.apiary.image);
-        (doc.addImage as any)(coverImage, 'PNG', 15, y, IMAGE_BOX_MM, IMAGE_BOX_MM);
-        y += IMAGE_BOX_MM + 5;
-      } catch (err) {
-        console.error('Error adding apiary image:', err);
+    y = drawSectionHeading(doc, `Summary ${year}`, y);
+    y = drawSummaryTable(
+      doc,
+      {
+        'Apiaries': apiaryCount,
+        'Total Hives': hiveCount,
+        'Total Observations': totalObservations,
+        'Total Monitoring Days': totalMonitoringDays,
+        'Average Mites/Day': avgMitesPerDay,
+        'Total Mites': totalMites,
+      },
+      y + 10,
+      resolvedLabels
+    );
+
+    addPageFooter(doc, pageNumber, pageHeight);
+
+    // ===== Apiary chapters =====
+    for (const [, apiaryData] of reportData.apiaries) {
+      doc.addPage();
+      pageNumber += 1;
+      addPageHeader(doc, apiaryData.apiary.name, pageNumber, pageHeight);
+      tocEntries.push({ title: apiaryData.apiary.name, page: pageNumber, level: 1 });
+
+      y = 30;
+
+      y = drawSectionHeading(doc, apiaryData.apiary.name, y);
+
+      if (apiaryData.apiary.location) {
+        doc.setFontSize(10);
+        (doc.setFont as any)(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        (doc.text as any)(`Location: ${apiaryData.apiary.location}`, 15, (y += 8));
+        doc.setTextColor(0, 0, 0);
+        y += 5;
       }
-    }
 
-    // Apiary overview
-    const apiaryObservations: Observation[] = [];
-    const apiaryTreatments: Treatment[] = [];
-
-    for (const hive of apiaryData.hives.values()) {
-      if (reportData.observations.has(hive.id)) {
-        apiaryObservations.push(...reportData.observations.get(hive.id)!);
-      }
-      if (reportData.treatments.has(hive.id)) {
-        apiaryTreatments.push(...reportData.treatments.get(hive.id)!);
-      }
-    }
-
-    if (reportData.includeMonthlySummaries && apiaryObservations.length > 0) {
-      y = checkAndAddNewPage(doc, y, 60, pageNumber, pageHeight);
-      y += 5;
-      y = drawSubsectionHeading(doc, labels!.monthlyOverview, y);
-      y = drawMonthlySummaryTable(doc, apiaryObservations, apiaryTreatments, y + 5, labels!);
-      y += 10;
-    }
-
-    // Add apiary-level combined chart if requested
-    if (reportData.includeCharts && apiaryObservations.length > 0) {
-      y = checkAndAddNewPage(doc, y, 100, pageNumber, pageHeight);
-      y += 5;
-      y = drawSubsectionHeading(doc, labels!.apiaryOverview, y);
-      y += 5;
-      try {
-        // Collect observations by hive for this apiary
-        const apiaryHiveObservations: Map<string, Observation[]> = new Map();
-        for (const hive of apiaryData.hives.values()) {
-          const hiveObs = reportData.observations.get(hive.id) || [];
-          apiaryHiveObservations.set(hive.id, hiveObs);
-        }
-
-        const chartImage = await createApiaryChartImage(
-          apiaryData.hives,
-          apiaryHiveObservations,
-          reportData.year,
-          locale,
-          600,
-          300
-        );
-        (doc.addImage as any)(chartImage, 'PNG', 30, y, 150, 75);
-        y += 80;
-      } catch (err) {
-        console.error('Error adding apiary chart:', err);
-      }
-    }
-
-    // Hive subchapters
-    for (const hive of apiaryData.hives.values()) {
-      y = checkAndAddNewPage(doc, y, 40, pageNumber, pageHeight);
-
-      y = drawSubsectionHeading(doc, `Hive: ${hive.name}`, y);
-
-      const hiveObservations = reportData.observations.get(hive.id) || [];
-      const hiveTreatments = reportData.treatments.get(hive.id) || [];
-      const latestObs = hiveObservations[hiveObservations.length - 1];
-
-      y = drawHiveInfoBox(doc, hive, latestObs, y + 5);
-
-      // Add hive image if available
-      if (hive.image) {
+      // Add apiary image if available
+      if (apiaryData.apiary.image) {
         y = checkAndAddNewPage(doc, y, IMAGE_BOX_MM + 20, pageNumber, pageHeight);
         y += 5;
         try {
-          const coverImage = await createCoverSquareImage(hive.image);
+          const coverImage = await createCoverSquareImage(apiaryData.apiary.image);
           (doc.addImage as any)(coverImage, 'PNG', 15, y, IMAGE_BOX_MM, IMAGE_BOX_MM);
           y += IMAGE_BOX_MM + 5;
         } catch (err) {
-          console.error('Error adding hive image:', err);
+          console.error('Error adding apiary image:', err);
         }
       }
 
-      // Add hive chart if available and requested
-      if (reportData.includeCharts && hiveObservations.length > 0) {
-        y = checkAndAddNewPage(doc, y, 100, pageNumber, pageHeight);
-        y += 5;
-        y = drawSubsectionHeading(doc, labels!.trendChart, y);
-        y += 5;
-        try {
-          const chartImage = await createChartImage(
-            hiveObservations,
-            `${hive.name} - Mite Trend for ${reportData.year}`,
-            locale,
-            reportData.year,
-            600,
-            300
-          );
-          (doc.addImage as any)(chartImage, 'PNG', 30, y, 150, 75);
-          y += 80;
-        } catch (err) {
-          console.error('Error adding hive chart:', err);
+      // Apiary overview
+      const apiaryObservations: Observation[] = [];
+      const apiaryTreatments: Treatment[] = [];
+
+      for (const hive of apiaryData.hives.values()) {
+        if (yearData.observations.has(hive.id)) {
+          apiaryObservations.push(...yearData.observations.get(hive.id)!);
+        }
+        if (yearData.treatments.has(hive.id)) {
+          apiaryTreatments.push(...yearData.treatments.get(hive.id)!);
         }
       }
 
-      if (reportData.includeMonthlySummaries && hiveObservations.length > 0) {
+      if (reportData.includeMonthlySummaries && apiaryObservations.length > 0) {
+        y = checkAndAddNewPage(doc, y, 60, pageNumber, pageHeight);
         y += 5;
-        y = drawMonthlySummaryTable(doc, hiveObservations, hiveTreatments, y, labels!);
+        y = drawSubsectionHeading(doc, resolvedLabels.monthlyOverview, y);
+        y = drawMonthlySummaryTable(doc, apiaryObservations, apiaryTreatments, y + 5, resolvedLabels);
         y += 10;
       }
 
-      if (reportData.includeTreatments && hiveTreatments.length > 0) {
-        y = checkAndAddNewPage(doc, y, 30, pageNumber, pageHeight);
+      // Add apiary-level combined chart if requested
+      if (reportData.includeCharts && apiaryObservations.length > 0) {
+        y = checkAndAddNewPage(doc, y, 110, pageNumber, pageHeight);
         y += 5;
-        y = drawSubsectionHeading(doc, labels!.tableTreatments, y);
-        y = drawTreatmentTable(doc, hiveTreatments, y + 5, labels!);
+        y = drawSubsectionHeading(doc, resolvedLabels.apiaryOverview, y);
+        y += 5;
+        try {
+          // Collect observations by hive for this apiary
+          const apiaryHiveObservations: Map<string, Observation[]> = new Map();
+          for (const hive of apiaryData.hives.values()) {
+            const hiveObs = yearData.observations.get(hive.id) || [];
+            apiaryHiveObservations.set(hive.id, hiveObs);
+          }
+
+          const chartImage = await createApiaryChartImage(
+            apiaryData.hives,
+            apiaryHiveObservations,
+            year,
+            locale,
+            900,
+            450
+          );
+          (doc.addImage as any)(chartImage, 'PNG', 15, y, 180, 90);
+          y += 95;
+        } catch (err) {
+          console.error('Error adding apiary chart:', err);
+        }
       }
 
-      y += 10;
-    }
+      // Hive subchapters
+      for (const hive of apiaryData.hives.values()) {
+        y = checkAndAddNewPage(doc, y, 40, pageNumber, pageHeight);
 
-    addPageFooter(doc, pageNumber, pageHeight);
+        y = drawSubsectionHeading(doc, `Hive: ${hive.name}`, y);
+        tocEntries.push({ title: `Hive: ${hive.name}`, page: pageNumber, level: 2 });
+
+        const hiveObservations = yearData.observations.get(hive.id) || [];
+        const hiveTreatments = yearData.treatments.get(hive.id) || [];
+        const latestObs = hiveObservations[hiveObservations.length - 1];
+
+        y = drawHiveInfoBox(doc, hive, latestObs, y + 5);
+
+        // Add hive image if available
+        if (hive.image) {
+          y = checkAndAddNewPage(doc, y, IMAGE_BOX_MM + 20, pageNumber, pageHeight);
+          y += 5;
+          try {
+            const coverImage = await createCoverSquareImage(hive.image);
+            (doc.addImage as any)(coverImage, 'PNG', 15, y, IMAGE_BOX_MM, IMAGE_BOX_MM);
+            y += IMAGE_BOX_MM + 5;
+          } catch (err) {
+            console.error('Error adding hive image:', err);
+          }
+        }
+
+        // Add hive chart if available and requested
+        if (reportData.includeCharts && hiveObservations.length > 0) {
+          y = checkAndAddNewPage(doc, y, 110, pageNumber, pageHeight);
+          y += 5;
+        y = drawSubsectionHeading(doc, resolvedLabels.trendChart, y);
+          y += 5;
+          try {
+            const chartImage = await createChartImage(
+              hiveObservations,
+              `${hive.name} - Mite Trend for ${year}`,
+              locale,
+              year,
+              900,
+              450
+            );
+            (doc.addImage as any)(chartImage, 'PNG', 15, y, 180, 90);
+            y += 95;
+          } catch (err) {
+            console.error('Error adding hive chart:', err);
+          }
+        }
+
+        if (reportData.includeMonthlySummaries && hiveObservations.length > 0) {
+          y += 5;
+          y = drawMonthlySummaryTable(doc, hiveObservations, hiveTreatments, y, resolvedLabels);
+          y += 10;
+        }
+
+        if (reportData.includeTreatments && hiveTreatments.length > 0) {
+          y = checkAndAddNewPage(doc, y, 30, pageNumber, pageHeight);
+          y += 5;
+        y = drawSubsectionHeading(doc, resolvedLabels.tableTreatments, y);
+        y = drawTreatmentTable(doc, hiveTreatments, y + 5, resolvedLabels);
+        }
+
+        y += 10;
+      }
+
+      addPageFooter(doc, pageNumber, pageHeight);
+    }
   }
 
+  // Fill Contents page
+  doc.setPage(tocPageNumber);
+  y = 30;
+  doc.setFontSize(12);
+  (doc.setFont as any)(undefined, 'bold');
+  (doc.text as any)(resolvedLabels.contents, 15, y);
+  y += 8;
+
+  (doc.setFont as any)(undefined, 'normal');
+  doc.setFontSize(10);
+  tocEntries.forEach((entry) => {
+    const indent = entry.level === 0 ? 0 : entry.level === 1 ? 6 : 12;
+    (doc.text as any)(entry.title, 15 + indent, y);
+    (doc.text as any)(String(entry.page), pageWidth - 15, y, { align: 'right' });
+    y += 6;
+  });
+
   // Generate download
-  const filename = `varroa-report-${reportData.year}-${new Date().toISOString().split('T')[0]}.pdf`;
+  const filename = years.length === 1
+    ? `varroa-report-${years[0]}-${new Date().toISOString().split('T')[0]}.pdf`
+    : `varroa-report-${years[0]}-${years[years.length - 1]}-${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);
 };
 

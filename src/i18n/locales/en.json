@@ -214,6 +214,7 @@
     "selectAtLeastOneHive": "Please select at least one hive",
     "selectAtLeastOneYear": "Please select at least one year",
     "noYearsAvailable": "No data found for the selected hives.",
+    "contents": "Contents",
     "report": "Report",
     "monthlyOverview": "Monthly Overview",
     "apiaryOverview": "Apiary Overview",

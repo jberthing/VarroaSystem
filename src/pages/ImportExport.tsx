@@ -211,23 +211,24 @@ const ImportExport = () => {
         }
       }
 
+      // Build report data structure
+      const apiariesMap = new Map();
+      for (const apiary of selectedApiaries) {
+        const hivesForApiary = selectedHives.filter((h) => h.apiaryId === apiary.id);
+        if (hivesForApiary.length > 0) {
+          apiariesMap.set(apiary.id, {
+            apiary,
+            hives: new Map(hivesForApiary.map((h) => [h.id, h])),
+          });
+        }
+      }
+
+      const yearData = new Map<number, { observations: Map<string, Observation[]>; treatments: Map<string, Treatment[]> }>();
+
       for (const year of years) {
-        // Build report data structure (per-year)
-        const apiariesMap = new Map();
         const observationsMap = new Map();
         const treatmentsMap = new Map();
 
-        for (const apiary of selectedApiaries) {
-          const hivesForApiary = selectedHives.filter((h) => h.apiaryId === apiary.id);
-          if (hivesForApiary.length > 0) {
-            apiariesMap.set(apiary.id, {
-              apiary,
-              hives: new Map(hivesForApiary.map((h) => [h.id, h])),
-            });
-          }
-        }
-
-        // Fetch observations and treatments for selected hives
         for (const hive of selectedHives) {
           const observations = await getObservationsForHiveByYear(hive.id, year);
           const treatments = needsTreatments ? (treatmentsAllByHive.get(hive.id) || []) : [];
@@ -243,33 +244,39 @@ const ImportExport = () => {
           }
         }
 
-        // Generate PDF (one per year)
-        await generatePdfReport({
-          apiaries: apiariesMap,
-          observations: observationsMap,
-          treatments: treatmentsMap,
-          year,
-          includeCharts: options.includeCharts,
-          includeTreatments: options.includeTreatments,
-          includeMonthlySummaries: options.includeMonthlySummaries,
-          locale: i18n.language,
-          labels: {
-            monthlyOverview: t('pdfExport.monthlyOverview'),
-            apiaryOverview: t('pdfExport.apiaryOverview'),
-            trendChart: t('pdfExport.trendChart'),
-            tableMonth: t('pdfExport.tableMonth'),
-            tableDays: t('pdfExport.tableDays'),
-            tableObservations: t('pdfExport.tableObservations'),
-            tableAvgMites: t('pdfExport.tableAvgMites'),
-            tableTreatments: t('pdfExport.tableTreatments'),
-            tableDate: t('pdfExport.tableDate'),
-            tableTreatment: t('pdfExport.tableTreatment'),
-            tableNotes: t('pdfExport.tableNotes'),
-            tableMetric: t('pdfExport.tableMetric'),
-            tableValue: t('pdfExport.tableValue'),
-          },
-        });
+        yearData.set(year, { observations: observationsMap, treatments: treatmentsMap });
       }
+
+      // Generate one PDF with all selected years
+      await generatePdfReport({
+        apiaries: apiariesMap,
+        observations: new Map(),
+        treatments: new Map(),
+        year: years[0],
+        years,
+        yearData,
+        includeCharts: options.includeCharts,
+        includeTreatments: options.includeTreatments,
+        includeMonthlySummaries: options.includeMonthlySummaries,
+        locale: i18n.language,
+        labels: {
+          monthlyOverview: t('pdfExport.monthlyOverview'),
+          apiaryOverview: t('pdfExport.apiaryOverview'),
+          trendChart: t('pdfExport.trendChart'),
+          contents: t('pdfExport.contents'),
+          yearLabel: t('pdfExport.year'),
+          tableMonth: t('pdfExport.tableMonth'),
+          tableDays: t('pdfExport.tableDays'),
+          tableObservations: t('pdfExport.tableObservations'),
+          tableAvgMites: t('pdfExport.tableAvgMites'),
+          tableTreatments: t('pdfExport.tableTreatments'),
+          tableDate: t('pdfExport.tableDate'),
+          tableTreatment: t('pdfExport.tableTreatment'),
+          tableNotes: t('pdfExport.tableNotes'),
+          tableMetric: t('pdfExport.tableMetric'),
+          tableValue: t('pdfExport.tableValue'),
+        },
+      });
 
       setIsPdfExportModalOpen(false);
     } catch (err) {
