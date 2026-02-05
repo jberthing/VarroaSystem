@@ -31,7 +31,6 @@ import {
 import { Hive, Treatment, Observation } from '../db/database';
 import { getMitesPerDayColor, calculateYearlyAverage } from '../utils/calculations';
 import QuickObservationForm from '../components/QuickObservationForm';
-import Hammer from 'hammerjs';
 import './HiveDetail.css';
 
 ChartJS.register(

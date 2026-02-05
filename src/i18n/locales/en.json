@@ -85,6 +85,8 @@
     "confirmSeedDemo": "This will replace all your data with demo data. Are you sure?",
     "seedDemoSuccess": "Demo data has been loaded",
     "seedDemoError": "Error loading demo data",
+    "exportPDF": "Export PDF Report",
+    "pdfExportError": "PDF export error",
     "exportHtmlModal": {
       "title": "Export to Interactive HTML",
       "description": "Export your apiary data as a fully interactive web application with charts and navigation",
@@ -200,10 +202,42 @@
     "importSuccess": "Imported {{count}} observations",
     "importError": "Import error"
   },
+  "pdfExport": {
+    "title": "Export PDF Report",
+    "year": "Year",
+    "selectApiariesAndHives": "Select Apiaries and Hives",
+    "whatToInclude": "What to Include",
+    "includeCharts": "Include Charts",
+    "includeTreatments": "Include Treatments",
+    "includeMonthlySummaries": "Include Monthly Summaries",
+    "info": "Selected hives will be organized by apiary in the PDF report. Each apiary will be a chapter with hives as subchapters.",
+    "selectAtLeastOneHive": "Please select at least one hive",
+    "selectAtLeastOneYear": "Please select at least one year",
+    "noYearsAvailable": "No data found for the selected hives.",
+    "report": "Report",
+    "monthlyOverview": "Monthly Overview",
+    "apiaryOverview": "Apiary Overview",
+    "trendChart": "Trend Chart",
+    "tableMonth": "Month",
+    "tableDays": "Days",
+    "tableObservations": "Obs.",
+    "tableAvgMites": "Avg Mites/Day",
+    "tableTreatments": "Treatments",
+    "tableDate": "Date",
+    "tableTreatment": "Treatment",
+    "tableNotes": "Notes",
+    "tableMetric": "Metric",
+    "tableValue": "Value"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "selectAll": "Select All",
+    "clearAll": "Clear All",
+    "cancel": "Cancel",
+    "export": "Export",
+    "exporting": "Exporting..."
   },
   "hiveDetail": {
     "backToHives": "Back to hives",

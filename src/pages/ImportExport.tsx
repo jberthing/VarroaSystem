@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { exportAllData, importAllData, clearAllData, seedDemoData } from '../db/repository';
+import {
+  exportAllData,
+  importAllData,
+  clearAllData,
+  seedDemoData,
+  getAllApiaries,
+  getAllHives,
+  getObservationsForHiveByYear,
+  getTreatmentsForHive,
+} from '../db/repository';
 import { downloadJSON, readFileAsText } from '../utils/fileUtils';
 import { Observation, Treatment } from '../db/database';
 import ExportHtmlModal from '../components/ExportHtmlModal';
+import PdfExportModal from '../components/PdfExportModal';
+import { generatePdfReport } from '../utils/pdfGenerator';
 import './ImportExport.css';
 
 const ImportExport = () => {
@@ -12,6 +23,8 @@ const ImportExport = () => {
   const [importSuccess, setImportSuccess] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isExportHtmlModalOpen, setIsExportHtmlModalOpen] = useState(false);
+  const [isPdfExportModalOpen, setIsPdfExportModalOpen] = useState(false);
+  const [isPdfExporting, setIsPdfExporting] = useState(false);
 
   const handleExportJSON = async () => {
     try {
@@ -168,6 +181,108 @@ const ImportExport = () => {
     }
   };
 
+  const handleExportPdf = async (options: {
+    selectedApiaryIds: string[];
+    selectedHiveIds: string[];
+    years: number[];
+    includeCharts: boolean;
+    includeTreatments: boolean;
+    includeMonthlySummaries: boolean;
+  }) => {
+    setIsPdfExporting(true);
+    try {
+      // Fetch all required data
+      const allApiaries = await getAllApiaries();
+      const allHives = await getAllHives();
+
+      // Filter selected data
+      const selectedApiaries = allApiaries.filter((a) =>
+        options.selectedApiaryIds.includes(a.id)
+      );
+      const selectedHives = allHives.filter((h) => options.selectedHiveIds.includes(h.id));
+
+      const years = [...options.years].sort((a, b) => a - b);
+
+      const needsTreatments = options.includeTreatments || options.includeMonthlySummaries;
+      const treatmentsAllByHive = new Map<string, Treatment[]>();
+      if (needsTreatments) {
+        for (const hive of selectedHives) {
+          treatmentsAllByHive.set(hive.id, await getTreatmentsForHive(hive.id));
+        }
+      }
+
+      for (const year of years) {
+        // Build report data structure (per-year)
+        const apiariesMap = new Map();
+        const observationsMap = new Map();
+        const treatmentsMap = new Map();
+
+        for (const apiary of selectedApiaries) {
+          const hivesForApiary = selectedHives.filter((h) => h.apiaryId === apiary.id);
+          if (hivesForApiary.length > 0) {
+            apiariesMap.set(apiary.id, {
+              apiary,
+              hives: new Map(hivesForApiary.map((h) => [h.id, h])),
+            });
+          }
+        }
+
+        // Fetch observations and treatments for selected hives
+        for (const hive of selectedHives) {
+          const observations = await getObservationsForHiveByYear(hive.id, year);
+          const treatments = needsTreatments ? (treatmentsAllByHive.get(hive.id) || []) : [];
+          const filteredTreatments = needsTreatments
+            ? treatments.filter((t) => t.date >= `${year}-01-01` && t.date <= `${year}-12-31`)
+            : [];
+
+          if (observations.length > 0) {
+            observationsMap.set(hive.id, observations);
+          }
+          if (filteredTreatments.length > 0) {
+            treatmentsMap.set(hive.id, filteredTreatments);
+          }
+        }
+
+        // Generate PDF (one per year)
+        await generatePdfReport({
+          apiaries: apiariesMap,
+          observations: observationsMap,
+          treatments: treatmentsMap,
+          year,
+          includeCharts: options.includeCharts,
+          includeTreatments: options.includeTreatments,
+          includeMonthlySummaries: options.includeMonthlySummaries,
+          locale: i18n.language,
+          labels: {
+            monthlyOverview: t('pdfExport.monthlyOverview'),
+            apiaryOverview: t('pdfExport.apiaryOverview'),
+            trendChart: t('pdfExport.trendChart'),
+            tableMonth: t('pdfExport.tableMonth'),
+            tableDays: t('pdfExport.tableDays'),
+            tableObservations: t('pdfExport.tableObservations'),
+            tableAvgMites: t('pdfExport.tableAvgMites'),
+            tableTreatments: t('pdfExport.tableTreatments'),
+            tableDate: t('pdfExport.tableDate'),
+            tableTreatment: t('pdfExport.tableTreatment'),
+            tableNotes: t('pdfExport.tableNotes'),
+            tableMetric: t('pdfExport.tableMetric'),
+            tableValue: t('pdfExport.tableValue'),
+          },
+        });
+      }
+
+      setIsPdfExportModalOpen(false);
+    } catch (err) {
+      alert(
+        t('importExport.pdfExportError') +
+          ': ' +
+          (err instanceof Error ? err.message : t('importExport.unknownError'))
+      );
+    } finally {
+      setIsPdfExporting(false);
+    }
+  };
+
   return (
     <div className="container">
       <h1>{t('importExport.title')}</h1>
@@ -183,6 +298,9 @@ const ImportExport = () => {
             </button>
             <button onClick={() => setIsExportHtmlModalOpen(true)} className="secondary">
               📊 {t('importExport.exportHTML')}
+            </button>
+            <button onClick={() => setIsPdfExportModalOpen(true)} className="secondary">
+              📄 {t('importExport.exportPDF', { defaultValue: 'Export PDF Report' })}
             </button>
           </div>
         </div>
@@ -240,6 +358,13 @@ const ImportExport = () => {
         isOpen={isExportHtmlModalOpen}
         onClose={() => setIsExportHtmlModalOpen(false)}
         language={i18n.language}
+      />
+
+      <PdfExportModal
+        isOpen={isPdfExportModalOpen}
+        onClose={() => setIsPdfExportModalOpen(false)}
+        onExport={handleExportPdf}
+        isLoading={isPdfExporting}
       />
     </div>
   );

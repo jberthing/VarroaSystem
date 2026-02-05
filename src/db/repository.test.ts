@@ -397,4 +397,42 @@ describe('repository', () => {
       expect(result.every((h) => h.isActive)).toBe(true);
     });
   });
+
+  describe('getAvailableYearsForHives', () => {
+    it('should return empty array when no hiveIds are provided', async () => {
+      const result = await repository.getAvailableYearsForHives([]);
+
+      expect(result).toEqual([]);
+      expect(db.observations.where).not.toHaveBeenCalled();
+      expect(db.treatments.where).not.toHaveBeenCalled();
+    });
+
+    it('should return unique years from observations and treatments (sorted desc)', async () => {
+      const hiveIds = ['hive-1', 'hive-2'];
+
+      const obsToArray = vi.fn().mockResolvedValue([
+        { hiveId: 'hive-1', date: '2024-01-05' },
+        { hiveId: 'hive-1', date: '2025-02-01' },
+        { hiveId: 'hive-2', date: '2025-03-10' },
+      ]);
+      const obsAnyOf = vi.fn().mockReturnValue({ toArray: obsToArray });
+      vi.mocked(db.observations.where).mockReturnValue({ anyOf: obsAnyOf } as any);
+
+      const trtToArray = vi.fn().mockResolvedValue([
+        { hiveId: 'hive-1', date: '2023-09-01' },
+        { hiveId: 'hive-2', date: '2025-01-01' },
+      ]);
+      const trtAnyOf = vi.fn().mockReturnValue({ toArray: trtToArray });
+      vi.mocked(db.treatments.where).mockReturnValue({ anyOf: trtAnyOf } as any);
+
+      const result = await repository.getAvailableYearsForHives(hiveIds);
+
+      expect(db.observations.where).toHaveBeenCalledWith('hiveId');
+      expect(obsAnyOf).toHaveBeenCalledWith(hiveIds);
+      expect(db.treatments.where).toHaveBeenCalledWith('hiveId');
+      expect(trtAnyOf).toHaveBeenCalledWith(hiveIds);
+
+      expect(result).toEqual([2025, 2024, 2023]);
+    });
+  });
 });

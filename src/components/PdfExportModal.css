@@ -1,0 +1,195 @@
+.pdf-export-modal {
+  max-width: 900px;
+}
+
+.pdf-export-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.25rem;
+}
+
+.pdf-export-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem;
+  background: #ffffff;
+}
+
+.pdf-export-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
+}
+
+.pdf-export-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pdf-export-row label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.pdf-export-year input[type='number'] {
+  width: 120px;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.pdf-export-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.btn.btn-small {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.pdf-export-selection {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem;
+  max-height: 48vh;
+  overflow: auto;
+  background: #f9fafb;
+}
+
+.pdf-export-selection .apiary-group {
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pdf-export-selection .apiary-group:last-child {
+  border-bottom: none;
+}
+
+.pdf-export-selection .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  color: #374151;
+  user-select: none;
+}
+
+.pdf-export-selection input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f59e0b;
+}
+
+.pdf-export-selection .hive-list {
+  margin: 0.4rem 0 0.2rem 1.6rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.pdf-export-muted {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.pdf-export-options {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.pdf-export-options .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  color: #374151;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.pdf-export-option {
+  width: 100%;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pdf-export-option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdf-export-option input[type='checkbox'] {
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0;
+}
+
+.pdf-export-years {
+  margin-top: 0.75rem;
+}
+
+.pdf-export-years-list {
+  margin-top: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.5rem;
+  background: #f9fafb;
+  max-height: 180px;
+  overflow: auto;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.pdf-export-counts {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.pdf-export-count {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem;
+  background: #f3f4f6;
+  border-radius: 10px;
+  min-width: 140px;
+}
+
+.pdf-export-count .label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pdf-export-count .value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+@media (max-width: 800px) {
+  .pdf-export-modal {
+    max-width: 95%;
+  }
+
+  .pdf-export-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-export-selection {
+    max-height: 42vh;
+  }
+}

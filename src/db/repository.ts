@@ -177,6 +177,29 @@ export const getAllObservations = async (): Promise<Observation[]> => {
   return await db.observations.toArray();
 };
 
+export const getAvailableYearsForHives = async (hiveIds: string[]): Promise<number[]> => {
+  if (hiveIds.length === 0) return [];
+
+  const [observations, treatments] = await Promise.all([
+    db.observations.where('hiveId').anyOf(hiveIds).toArray(),
+    db.treatments.where('hiveId').anyOf(hiveIds).toArray(),
+  ]);
+
+  const years = new Set<number>();
+
+  observations.forEach((obs) => {
+    const year = Number.parseInt(obs.date.slice(0, 4), 10);
+    if (Number.isFinite(year)) years.add(year);
+  });
+
+  treatments.forEach((treatment) => {
+    const year = Number.parseInt(treatment.date.slice(0, 4), 10);
+    if (Number.isFinite(year)) years.add(year);
+  });
+
+  return Array.from(years).sort((a, b) => b - a);
+};
+
 export const getObservationByHiveAndDate = async (
   hiveId: string,
   date: string
