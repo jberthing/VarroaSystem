@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { db, Apiary, Hive, Observation, Treatment } from './database';
+import { db, Apiary, Hive, Observation, Treatment, Queen } from './database';
 
 // Apiary operations
 export const createApiary = async (
@@ -88,6 +88,8 @@ export const deleteHive = async (id: string): Promise<void> => {
   await db.hives.delete(id);
   // Also delete associated observations
   await db.observations.where('hiveId').equals(id).delete();
+  // Also delete associated queens
+  await db.queens.where('hiveId').equals(id).delete();
 };
 
 // Observation operations
@@ -224,13 +226,94 @@ export const getAllTreatments = async (): Promise<Treatment[]> => {
   return await db.treatments.toArray();
 };
 
+// Queen operations
+export const createQueen = async (
+  hiveId: string,
+  data: {
+    name?: string;
+    birthYear?: number;
+    origin?: string;
+    motherId?: string;
+    rating?: number;
+    notes?: string;
+    isActive?: boolean;
+  }
+): Promise<Queen> => {
+  if (data.rating !== undefined && (data.rating < 1 || data.rating > 5)) {
+    throw new Error('Rating skal være mellem 1 og 5');
+  }
+
+  const isActive = data.isActive ?? true;
+  if (isActive) {
+    await db.queens.where('hiveId').equals(hiveId).and((q) => q.isActive).modify({
+      isActive: false,
+    });
+  }
+
+  const queen: Queen = {
+    id: uuidv4(),
+    hiveId,
+    name: data.name?.trim() || undefined,
+    birthYear: data.birthYear,
+    origin: data.origin?.trim() || undefined,
+    motherId: data.motherId || undefined,
+    rating: data.rating,
+    notes: data.notes?.trim() || undefined,
+    isActive,
+    createdAt: Date.now(),
+  };
+
+  await db.queens.add(queen);
+  return queen;
+};
+
+export const updateQueen = async (id: string, updates: Partial<Queen>): Promise<void> => {
+  if (updates.rating !== undefined && (updates.rating < 1 || updates.rating > 5)) {
+    throw new Error('Rating skal være mellem 1 og 5');
+  }
+
+  let targetHiveId = updates.hiveId;
+  if (!targetHiveId) {
+    const current = await db.queens.get(id);
+    targetHiveId = current?.hiveId;
+  }
+
+  if (updates.isActive && targetHiveId) {
+    await db.queens
+      .where('hiveId')
+      .equals(targetHiveId)
+      .and((q) => q.isActive && q.id !== id)
+      .modify({ isActive: false });
+  }
+
+  await db.queens.update(id, updates);
+};
+
+export const deleteQueen = async (id: string): Promise<void> => {
+  await db.queens.delete(id);
+};
+
+export const getQueensForHive = async (hiveId: string): Promise<Queen[]> => {
+  return await db.queens.where('hiveId').equals(hiveId).reverse().sortBy('createdAt');
+};
+
+export const getActiveQueenForHive = async (hiveId: string): Promise<Queen | undefined> => {
+  const queens = await db.queens.where('hiveId').equals(hiveId).and((q) => q.isActive).toArray();
+  return queens[0];
+};
+
+export const getAllQueens = async (): Promise<Queen[]> => {
+  return await db.queens.toArray();
+};
+
 // Export/Import
 export const exportAllData = async () => {
   const apiaries = await db.apiaries.toArray();
   const hives = await db.hives.toArray();
   const observations = await db.observations.toArray();
   const treatments = await db.treatments.toArray();
-  return { apiaries, hives, observations, treatments };
+  const queens = await db.queens.toArray();
+  return { apiaries, hives, observations, treatments, queens };
 };
 
 export const importAllData = async (data: {
@@ -238,12 +321,21 @@ export const importAllData = async (data: {
   hives: Hive[];
   observations: Observation[];
   treatments?: Treatment[];
+  queens?: Queen[];
 }): Promise<void> => {
-  await db.transaction('rw', db.apiaries, db.hives, db.observations, db.treatments, async () => {
+  await db.transaction(
+    'rw',
+    db.apiaries,
+    db.hives,
+    db.observations,
+    db.treatments,
+    db.queens,
+    async () => {
     await db.apiaries.clear();
     await db.hives.clear();
     await db.observations.clear();
     await db.treatments.clear();
+    await db.queens.clear();
     if (data.apiaries) {
       await db.apiaries.bulkAdd(data.apiaries);
     }
@@ -252,15 +344,26 @@ export const importAllData = async (data: {
     if (data.treatments) {
       await db.treatments.bulkAdd(data.treatments);
     }
+    if (data.queens) {
+      await db.queens.bulkAdd(data.queens);
+    }
   });
 };
 
 export const clearAllData = async (): Promise<void> => {
-  await db.transaction('rw', db.apiaries, db.hives, db.observations, db.treatments, async () => {
+  await db.transaction(
+    'rw',
+    db.apiaries,
+    db.hives,
+    db.observations,
+    db.treatments,
+    db.queens,
+    async () => {
     await db.apiaries.clear();
     await db.hives.clear();
     await db.observations.clear();
     await db.treatments.clear();
+    await db.queens.clear();
   });
 };
 
@@ -274,6 +377,10 @@ export const seedDemoData = async (): Promise<void> => {
   const hive1 = await createHive('Stade A', apiary1.id);
   const hive2 = await createHive('Stade B', apiary1.id);
   const hive3 = await createHive('Stade C', apiary2.id);
+
+  await createQueen(hive1.id, { name: 'Dronning A', birthYear: new Date().getFullYear() - 1 });
+  await createQueen(hive2.id, { name: 'Dronning B', birthYear: new Date().getFullYear() - 2 });
+  await createQueen(hive3.id, { name: 'Dronning C', birthYear: new Date().getFullYear() - 1 });
 
   // Create observations over the past 30 days
   const today = new Date();

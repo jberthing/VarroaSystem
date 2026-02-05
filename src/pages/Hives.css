@@ -115,6 +115,37 @@
   font-size: 0.875rem;
 }
 
+.hive-queen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.hive-queen-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  display: inline-block;
+}
+
+.hive-queen-label {
+  font-weight: 600;
+}
+
+.hive-queen-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.hive-queen-mother {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
 .hive-actions {
   display: flex;
   gap: 0.5rem;

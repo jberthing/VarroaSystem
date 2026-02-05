@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getAllHives, getAllApiaries, createHive, updateHive } from '../db/repository';
+import { getAllHives, getAllApiaries, createHive, updateHive, getAllQueens } from '../db/repository';
+import { Queen } from '../db/database';
 import { compressImage, getBase64Size } from '../utils/imageUtils';
+import { getQueenColorKeyForYear, getQueenColorHex } from '../utils/queenUtils';
 import './Hives.css';
 
 const Hives = () => {
@@ -13,6 +15,7 @@ const Hives = () => {
 
   const hives = useLiveQuery(() => getAllHives(false), []);
   const apiaries = useLiveQuery(() => getAllApiaries(true), []);
+  const queens = useLiveQuery(() => getAllQueens(), []);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -118,7 +121,7 @@ const Hives = () => {
     setError('');
   };
 
-  if (!hives || !apiaries) {
+  if (!hives || !apiaries || !queens) {
     return (
       <div className="container">
         <p>Indlæser...</p>
@@ -134,6 +137,41 @@ const Hives = () => {
 
   const activeHives = filteredHives.filter((h) => h.isActive);
   const archivedHives = filteredHives.filter((h) => !h.isActive);
+
+  const activeQueenByHive = new Map<string, Queen>();
+  queens.forEach((queen) => {
+    if (queen.isActive && !activeQueenByHive.has(queen.hiveId)) {
+      activeQueenByHive.set(queen.hiveId, queen);
+    }
+  });
+
+  const getMotherName = (queen: Queen) => {
+    if (!queen.motherId) return '';
+    const mother = queens.find((q) => q.id === queen.motherId);
+    if (!mother) return t('hives.queenMotherUnknown');
+    return mother.name || t('hiveDetail.queenUnnamed');
+  };
+
+  const renderQueenLine = (hiveId: string) => {
+    const queen = activeQueenByHive.get(hiveId);
+    if (!queen) return null;
+    const motherName = getMotherName(queen);
+    const colorKey = getQueenColorKeyForYear(queen.birthYear);
+    const colorHex = getQueenColorHex(colorKey);
+
+    return (
+      <div className="hive-queen">
+        <span className="hive-queen-dot" style={{ backgroundColor: colorHex }} title={t(`queenColors.${colorKey}`)} />
+        <span className="hive-queen-label">{t('hives.queenLabel')}:</span>
+        <span className="hive-queen-name">{queen.name || t('hiveDetail.queenUnnamed')}</span>
+        {motherName && (
+          <span className="hive-queen-mother">
+            {t('hives.queenMotherLabel')}: {motherName}
+          </span>
+        )}
+      </div>
+    );
+  };
 
   // Group hives by apiary
   const groupedHives: Record<string, any[]> = {};
@@ -274,6 +312,7 @@ const Hives = () => {
                         <div>
                           <h3>{hive.name}</h3>
                           {hive.location && <p className="hive-location">{hive.location}</p>}
+                          {renderQueenLine(hive.id)}
                         </div>
                       </Link>
                       <div className="hive-actions">
@@ -308,6 +347,7 @@ const Hives = () => {
                       <div>
                         <h3>{hive.name}</h3>
                         {hive.location && <p className="hive-location">{hive.location}</p>}
+                        {renderQueenLine(hive.id)}
                       </div>
                     </Link>
                     <div className="hive-actions">
@@ -336,6 +376,7 @@ const Hives = () => {
                     <div className="hive-info">
                       <h3>{hive.name}</h3>
                       {hive.location && <p className="hive-location">{hive.location}</p>}
+                      {renderQueenLine(hive.id)}
                     </div>
                     <div className="hive-actions">
                       <button

@@ -27,9 +27,17 @@ import {
   deleteTreatment,
   updateObservation,
   updateTreatment,
+  getQueensForHive,
+  getAllQueens,
+  getAllHives,
+  getAllApiaries,
+  createQueen,
+  updateQueen,
+  deleteQueen,
 } from '../db/repository';
-import { Hive, Treatment, Observation } from '../db/database';
+import { Hive, Treatment, Observation, Queen } from '../db/database';
 import { getMitesPerDayColor, calculateYearlyAverage } from '../utils/calculations';
+import { getQueenColorKeyForYear, getQueenColorHex } from '../utils/queenUtils';
 import QuickObservationForm from '../components/QuickObservationForm';
 import './HiveDetail.css';
 
@@ -60,6 +68,19 @@ const HiveDetail = () => {
   const [editingObservation, setEditingObservation] = useState<string | null>(null);
   const [editingTreatment, setEditingTreatment] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [showQueenForm, setShowQueenForm] = useState(false);
+  const [editingQueenId, setEditingQueenId] = useState<string | null>(null);
+  const [queenForm, setQueenForm] = useState({
+    name: '',
+    birthYear: '',
+    origin: '',
+    motherId: '',
+    rating: '',
+    notes: '',
+    isActive: true,
+    hiveId: '',
+  });
+  const [queenError, setQueenError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
   const [scaleType, setScaleType] = useState<ScaleType>('linear');
   const [chartInstance, setChartInstance] = useState<any>(null);
@@ -75,8 +96,19 @@ const HiveDetail = () => {
     [id]
   );
 
+  const queens = useLiveQuery(() => (id ? getQueensForHive(id) : Promise.resolve([])), [id]);
+  const allQueens = useLiveQuery(() => getAllQueens(), []);
+  const allHives = useLiveQuery(() => getAllHives(false), []);
+  const apiaries = useLiveQuery(() => getAllApiaries(false), []);
+
   useEffect(() => {
     loadHive();
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      setQueenForm((prev) => ({ ...prev, hiveId: id }));
+    }
   }, [id]);
 
   const loadHive = async () => {
@@ -153,6 +185,101 @@ const HiveDetail = () => {
     } catch (err) {
       alert('Fejl ved opdatering: ' + (err instanceof Error ? err.message : 'Ukendt fejl'));
     }
+  };
+
+  const resetQueenForm = () => {
+    setQueenForm({
+      name: '',
+      birthYear: '',
+      origin: '',
+      motherId: '',
+      rating: '',
+      notes: '',
+      isActive: true,
+      hiveId: id || '',
+    });
+    setQueenError('');
+  };
+
+  const handleQueenSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+
+    try {
+      setQueenError('');
+      const birthYear = queenForm.birthYear ? Number(queenForm.birthYear) : undefined;
+      const rating = queenForm.rating ? Number(queenForm.rating) : undefined;
+
+      if (editingQueenId) {
+        await updateQueen(editingQueenId, {
+          name: queenForm.name || undefined,
+          birthYear,
+          origin: queenForm.origin || undefined,
+          motherId: queenForm.motherId || undefined,
+          rating,
+          notes: queenForm.notes || undefined,
+          isActive: queenForm.isActive,
+          hiveId: queenForm.hiveId || id,
+        });
+      } else {
+        await createQueen(id, {
+          name: queenForm.name || undefined,
+          birthYear,
+          origin: queenForm.origin || undefined,
+          motherId: queenForm.motherId || undefined,
+          rating,
+          notes: queenForm.notes || undefined,
+          isActive: queenForm.isActive,
+        });
+      }
+
+      setEditingQueenId(null);
+      setShowQueenForm(false);
+      resetQueenForm();
+    } catch (err) {
+      setQueenError(err instanceof Error ? err.message : 'Ukendt fejl');
+    }
+  };
+
+  const handleEditQueen = (queen: Queen) => {
+    setEditingQueenId(queen.id);
+    setShowQueenForm(true);
+    setQueenForm({
+      name: queen.name || '',
+      birthYear: queen.birthYear ? String(queen.birthYear) : '',
+      origin: queen.origin || '',
+      motherId: queen.motherId || '',
+      rating: queen.rating ? String(queen.rating) : '',
+      notes: queen.notes || '',
+      isActive: queen.isActive,
+      hiveId: queen.hiveId,
+    });
+    setQueenError('');
+  };
+
+  const handleDeleteQueen = async (queenId: string) => {
+    if (confirm(t('hiveDetail.confirmDeleteQueen'))) {
+      await deleteQueen(queenId);
+    }
+  };
+
+  const handleCancelQueenEdit = () => {
+    setEditingQueenId(null);
+    setShowQueenForm(false);
+    resetQueenForm();
+  };
+
+  const getQueenDisplayName = (queen: Queen) => {
+    return queen.name || t('hiveDetail.queenUnnamed');
+  };
+
+  const getHiveLabel = (hiveId: string) => {
+    const hiveItem = allHives?.find((h) => h.id === hiveId);
+    if (!hiveItem) return t('hiveDetail.queenUnknownHive');
+    const apiaryName = hiveItem.apiaryId
+      ? apiaries?.find((a) => a.id === hiveItem.apiaryId)?.name
+      : undefined;
+    return apiaryName ? `${hiveItem.name} (${apiaryName})` : hiveItem.name;
   };
 
   if (!hive || !observations || !treatments) {
@@ -356,6 +483,11 @@ const HiveDetail = () => {
     }
   };
 
+  const queenColorKey = getQueenColorKeyForYear(
+    queenForm.birthYear ? Number(queenForm.birthYear) : undefined
+  );
+  const queenColorHex = getQueenColorHex(queenColorKey);
+
   return (
     <div className="container">
       <div className="detail-header">
@@ -552,6 +684,212 @@ const HiveDetail = () => {
                 );
               })}
             </div>
+          </div>
+
+          <div className="observations-section queen-section">
+            <div className="section-header">
+              <h2>{t('hiveDetail.queens')}</h2>
+              <button onClick={() => setShowQueenForm(!showQueenForm)}>
+                {showQueenForm ? t('hiveDetail.cancel') : `+ ${t('hiveDetail.newQueen')}`}
+              </button>
+            </div>
+
+            {showQueenForm && (
+              <form onSubmit={handleQueenSubmit} className="queen-form">
+                {queenError && <div className="error-message">{queenError}</div>}
+
+                <div className="queen-form-grid">
+                  <div className="form-group">
+                    <label>{t('hiveDetail.queenName')}</label>
+                    <input
+                      type="text"
+                      value={queenForm.name}
+                      onChange={(e) => setQueenForm({ ...queenForm, name: e.target.value })}
+                      placeholder={t('hiveDetail.queenNamePlaceholder')}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('hiveDetail.queenBirthYear')}</label>
+                    <div className="queen-year-input">
+                      <input
+                        type="number"
+                        value={queenForm.birthYear}
+                        onChange={(e) => setQueenForm({ ...queenForm, birthYear: e.target.value })}
+                        placeholder="2025"
+                        min="1900"
+                        max="2100"
+                      />
+                      <span
+                        className="queen-color-dot"
+                        style={{ backgroundColor: queenColorHex }}
+                        title={t(`queenColors.${queenColorKey}`)}
+                      />
+                      <span className="queen-color-label">
+                        {t(`queenColors.${queenColorKey}`)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('hiveDetail.queenOrigin')}</label>
+                    <input
+                      type="text"
+                      value={queenForm.origin}
+                      onChange={(e) => setQueenForm({ ...queenForm, origin: e.target.value })}
+                      placeholder={t('hiveDetail.queenOriginPlaceholder')}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('hiveDetail.queenMother')}</label>
+                    <select
+                      value={queenForm.motherId}
+                      onChange={(e) => setQueenForm({ ...queenForm, motherId: e.target.value })}
+                    >
+                      <option value="">{t('hiveDetail.queenNoMother')}</option>
+                      {allQueens
+                        ?.filter((q) => q.id !== editingQueenId)
+                        .map((queen) => (
+                          <option key={queen.id} value={queen.id}>
+                            {getQueenDisplayName(queen)} • {getHiveLabel(queen.hiveId)}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('hiveDetail.queenRating')}</label>
+                    <select
+                      value={queenForm.rating}
+                      onChange={(e) => setQueenForm({ ...queenForm, rating: e.target.value })}
+                    >
+                      <option value="">{t('hiveDetail.queenNoRating')}</option>
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <option key={rating} value={rating}>
+                          {rating}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('hiveDetail.notes')}</label>
+                    <input
+                      type="text"
+                      value={queenForm.notes}
+                      onChange={(e) => setQueenForm({ ...queenForm, notes: e.target.value })}
+                      placeholder={t('hiveDetail.notesPlaceholder')}
+                    />
+                  </div>
+
+                  <div className="form-group queen-active-toggle">
+                    <label>{t('hiveDetail.queenActive')}</label>
+                    <input
+                      type="checkbox"
+                      checked={queenForm.isActive}
+                      onChange={(e) => setQueenForm({ ...queenForm, isActive: e.target.checked })}
+                    />
+                  </div>
+
+                  {editingQueenId && (
+                    <div className="form-group">
+                      <label>{t('hiveDetail.queenHive')}</label>
+                      <select
+                        value={queenForm.hiveId}
+                        onChange={(e) => setQueenForm({ ...queenForm, hiveId: e.target.value })}
+                      >
+                        {allHives?.map((h) => (
+                          <option key={h.id} value={h.id}>
+                            {getHiveLabel(h.id)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit">
+                    {editingQueenId ? t('hiveDetail.save') : t('hiveDetail.addQueen')}
+                  </button>
+                  <button type="button" className="secondary" onClick={handleCancelQueenEdit}>
+                    {t('hiveDetail.cancel')}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {queens && queens.length === 0 && !showQueenForm ? (
+              <div className="empty-state small">
+                <p>{t('hiveDetail.noQueens')}</p>
+                <button onClick={() => setShowQueenForm(true)}>
+                  {t('hiveDetail.addFirstQueen')}
+                </button>
+              </div>
+            ) : (
+              <div className="observations-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t('hiveDetail.queenName')}</th>
+                      <th>{t('hiveDetail.queenBirthYear')}</th>
+                      <th>{t('hiveDetail.queenColor')}</th>
+                      <th>{t('hiveDetail.queenOrigin')}</th>
+                      <th>{t('hiveDetail.queenMother')}</th>
+                      <th>{t('hiveDetail.queenRating')}</th>
+                      <th>{t('hiveDetail.notes')}</th>
+                      <th>{t('hiveDetail.queenActive')}</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {queens?.map((queen) => {
+                      const colorKey = getQueenColorKeyForYear(queen.birthYear);
+                      const colorHex = getQueenColorHex(colorKey);
+                      const mother = allQueens?.find((q) => q.id === queen.motherId);
+
+                      return (
+                        <tr key={queen.id}>
+                          <td>{getQueenDisplayName(queen)}</td>
+                          <td>{queen.birthYear || '-'}</td>
+                          <td>
+                            <span
+                              className="queen-color-dot"
+                              style={{ backgroundColor: colorHex }}
+                              title={t(`queenColors.${colorKey}`)}
+                            />
+                            <span className="queen-color-label">
+                              {t(`queenColors.${colorKey}`)}
+                            </span>
+                          </td>
+                          <td>{queen.origin || '-'}</td>
+                          <td>{mother ? getQueenDisplayName(mother) : '-'}</td>
+                          <td>{queen.rating ? queen.rating : '-'}</td>
+                          <td className="notes-cell">{queen.notes || '-'}</td>
+                          <td>{queen.isActive ? t('hiveDetail.queenActiveYes') : '-'}</td>
+                          <td>
+                            <button
+                              onClick={() => handleEditQueen(queen)}
+                              className="secondary small"
+                              style={{ marginRight: '4px' }}
+                            >
+                              {t('hiveDetail.edit')}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteQueen(queen.id)}
+                              className="danger small"
+                            >
+                              {t('hiveDetail.delete')}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           <div className="observations-section">

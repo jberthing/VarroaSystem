@@ -39,11 +39,25 @@ export interface Treatment {
   createdAt: number;
 }
 
+export interface Queen {
+  id: string;
+  hiveId: string;
+  name?: string;
+  birthYear?: number;
+  origin?: string;
+  motherId?: string;
+  rating?: number; // 1-5
+  notes?: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
 export class VarroaDB extends Dexie {
   apiaries!: Table<Apiary>;
   hives!: Table<Hive>;
   observations!: Table<Observation>;
   treatments!: Table<Treatment>;
+  queens!: Table<Queen>;
 
   constructor() {
     super('VarroaDB');
@@ -63,6 +77,14 @@ export class VarroaDB extends Dexie {
       hives: 'id, apiaryId, name, isActive, createdAt',
       observations: 'id, hiveId, date, createdAt, mitesPerDay',
       treatments: 'id, hiveId, date, createdAt',
+    });
+    // Version 4: Add queens table
+    this.version(4).stores({
+      apiaries: 'id, name, isActive, createdAt',
+      hives: 'id, apiaryId, name, isActive, createdAt',
+      observations: 'id, hiveId, date, createdAt, mitesPerDay',
+      treatments: 'id, hiveId, date, createdAt',
+      queens: 'id, hiveId, isActive, birthYear, createdAt, motherId',
     });
   }
 }

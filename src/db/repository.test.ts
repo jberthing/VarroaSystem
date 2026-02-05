@@ -44,6 +44,16 @@ vi.mock('./database', () => ({
       clear: vi.fn(),
       bulkAdd: vi.fn(),
     },
+    queens: {
+      add: vi.fn(),
+      update: vi.fn(),
+      get: vi.fn(),
+      toArray: vi.fn(),
+      where: vi.fn(),
+      delete: vi.fn(),
+      clear: vi.fn(),
+      bulkAdd: vi.fn(),
+    },
     transaction: vi.fn(),
   },
 }));
