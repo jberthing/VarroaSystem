@@ -62,6 +62,12 @@ export const generateStandaloneHTMLApp = async (
   <title>Varroa Monitor - Apiary Export</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.1.0"></script>
+  <script>
+    // Register the zoom plugin with Chart.js
+    Chart.register(window.ChartZoom);
+  </script>
   <style>
     ${getStandaloneCSS()}
   </style>
@@ -117,6 +123,10 @@ export const generateStandaloneHTMLApp = async (
           <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
+          <div style="margin-bottom: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button onclick="resetComparisonZoom()" class="secondary" style="padding: 4px 10px; fontSize: '13px'; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🔍 Reset Zoom</button>
+            <span style="font-size: 12px; color: #6b7280;">💡 Scroll to zoom, drag to pan</span>
+          </div>
           <div style="position: relative; height: 400px;">
             <canvas id="comparisonChart"></canvas>
           </div>
@@ -333,6 +343,10 @@ export const generateStandaloneHTMLApp = async (
           <h2>\${hive.name}</h2>
           <div class="details-section">
             <h3>Trend Chart</h3>
+            <div style="margin-bottom: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button onclick="resetTrendZoom()" class="secondary" style="padding: 4px 10px; fontSize: '13px'; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🔍 Reset Zoom</button>
+              <span style="font-size: 12px; color: #6b7280;">💡 Scroll to zoom, drag to pan</span>
+            </div>
             <div style="position: relative; height: 350px;">
               <canvas id="trendChart"></canvas>
             </div>
@@ -412,11 +426,10 @@ export const generateStandaloneHTMLApp = async (
       const chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: sorted.map(o => formatDate(o.date)),
           datasets: [
             {
               label: 'Mites per Day',
-              data: sorted.map(o => o.mitesPerDay),
+              data: sorted.map(o => ({ x: o.date, y: o.mitesPerDay })),
               borderColor: '#fbbf24',
               backgroundColor: 'rgba(251, 191, 36, 0.1)',
               borderWidth: 2,
@@ -437,6 +450,28 @@ export const generateStandaloneHTMLApp = async (
               mode: 'nearest',
               axis: 'x',
               intersect: false
+            },
+            zoom: {
+              zoom: {
+                wheel: {
+                  enabled: true,
+                  speed: 0.1
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x'
+              },
+              pan: {
+                enabled: true,
+                mode: 'x'
+              },
+              limits: {
+                x: {
+                  min: 'original',
+                  max: 'original'
+                }
+              }
             }
           },
           scales: {
@@ -451,6 +486,12 @@ export const generateStandaloneHTMLApp = async (
               }
             },
             x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+                displayFormats: { day: 'MMM d' },
+                tooltipFormat: 'PP'
+              },
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
               ticks: { color: '#374151' },
               title: {
@@ -500,6 +541,26 @@ export const generateStandaloneHTMLApp = async (
       destroyCharts();
     }
 
+    function resetTrendZoom() {
+      if (chartInstances.length > 0) {
+        chartInstances.forEach(chart => {
+          if (chart && chart.resetZoom) {
+            chart.resetZoom();
+          }
+        });
+      }
+    }
+
+    function resetComparisonZoom() {
+      if (chartInstances.length > 0) {
+        chartInstances.forEach(chart => {
+          if (chart && chart.resetZoom) {
+            chart.resetZoom();
+          }
+        });
+      }
+    }
+
     function showComparisonGraph(apiaryIndex) {
       currentApiaryIndex = apiaryIndex;
       openModal();
@@ -526,7 +587,7 @@ export const generateStandaloneHTMLApp = async (
         const hiveObs = data.observations.find(([id]) => id === hive.id)?.[1] || [];
         hiveObs.forEach(o => allDates.add(o.date));
       });
-      const labels = Array.from(allDates).sort().map(d => formatDate(d));
+      const sortedDates = Array.from(allDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
       // Prepare datasets for all hives - align data with dates
       const datasets = data.hives.map((hive, idx) => {
@@ -539,7 +600,7 @@ export const generateStandaloneHTMLApp = async (
         });
 
         // Map data aligned with all dates
-        const chartData = Array.from(allDates).sort().map(date => obsMap[date] ?? null);
+        const chartData = sortedDates.map(date => ({ x: date, y: obsMap[date] ?? null }));
 
         return {
           label: hive.name,
@@ -556,7 +617,6 @@ export const generateStandaloneHTMLApp = async (
       const chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: labels,
           datasets: datasets
         },
         options: {
@@ -572,6 +632,28 @@ export const generateStandaloneHTMLApp = async (
               mode: 'nearest',
               axis: 'x',
               intersect: false
+            },
+            zoom: {
+              zoom: {
+                wheel: {
+                  enabled: true,
+                  speed: 0.1
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x'
+              },
+              pan: {
+                enabled: true,
+                mode: 'x'
+              },
+              limits: {
+                x: {
+                  min: 'original',
+                  max: 'original'
+                }
+              }
             }
           },
           scales: {
@@ -586,6 +668,12 @@ export const generateStandaloneHTMLApp = async (
               }
             },
             x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+                displayFormats: { day: 'MMM d' },
+                tooltipFormat: 'PP'
+              },
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
               ticks: { color: '#374151' },
               title: {
@@ -647,6 +735,10 @@ const getStandaloneCSS = (): string => {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    canvas {
+      touch-action: none;
     }
 
     body {
