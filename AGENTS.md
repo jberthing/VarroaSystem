@@ -5,6 +5,7 @@ VarroaSystem is a Vite + React + TypeScript PWA for local varroa mite tracking w
 ## Universal Rules
 - Do not edit generated artifacts: `dist/`, `coverage/`, `node_modules/`.
 - Keep changes scoped to the request; avoid broad refactors unless asked.
+- Challenge bad decisions directly: if a request is likely wrong or risky, say so clearly, explain briefly, and propose a better option.
 - If behavior changes, update or add tests.
 - If user-facing text changes, update all locale files in `src/i18n/locales/`.
 - Before finishing, run:
