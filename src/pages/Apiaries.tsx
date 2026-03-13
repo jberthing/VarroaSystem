@@ -83,11 +83,20 @@ const Apiaries = () => {
 
   return (
     <div className="container">
-      <div className="apiaries-header">
-        <h1>{t('apiaries.title')}</h1>
-        <button onClick={() => setShowForm(!showForm)}>
-          {showForm ? t('apiaries.cancel') : `+ ${t('apiaries.newApiary')}`}
-        </button>
+      <div className="page-intro">
+        <div>
+          <h1>{t('apiaries.title')}</h1>
+          <p className="page-lead">
+            {t('apiaries.subtitle', {
+              defaultValue: 'Group colonies, compare locations, and keep track of seasonal notes.',
+            })}
+          </p>
+        </div>
+        <div className="page-intro-actions">
+          <button onClick={() => setShowForm(!showForm)}>
+            {showForm ? t('apiaries.cancel') : `+ ${t('apiaries.newApiary')}`}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -132,7 +141,7 @@ const Apiaries = () => {
       )}
 
       {activeApiaries.length === 0 && !showForm ? (
-        <div className="empty-state">
+        <div className="empty-state empty-state-card">
           <p>{t('apiaries.noApiaries')}</p>
           <button onClick={() => setShowForm(true)}>{t('apiaries.createFirst')}</button>
         </div>

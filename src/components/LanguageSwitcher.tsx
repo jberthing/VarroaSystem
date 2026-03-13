@@ -22,6 +22,7 @@ const LanguageSwitcher = () => {
       {languages.map((lang) => (
         <button
           key={lang.code}
+          type="button"
           onClick={() => changeLanguage(lang.code)}
           className={`language-button ${currentLanguage === lang.code ? 'active' : ''}`}
           title={lang.label}

@@ -15,6 +15,12 @@
 - Confirm readability and responsiveness on mobile widths.
 - Keep tooltip/axis labels and threshold semantics consistent.
 
+## UI Consistency
+- Use the shared `page-intro` hero layout (title + optional `page-lead`) for new or updated route headers.
+- Prefer the global chip filters, `.surface`/`.card` spacing, and status tags from `src/index.css` when building controls or summaries.
+- Convert dense tables on mobile to the `.data-table.stacked-table` pattern and ensure `data-label` attributes are set.
+- Keep calls-to-action and info cards aligned with the shared tokens instead of inline styles or emojis.
+
 ## i18n Changes
 - Keep keys aligned across `src/i18n/locales/da.json`, `en.json`, `de.json`.
 - Avoid hardcoded user-facing strings in components.

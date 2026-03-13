@@ -2,7 +2,9 @@
   "app": {
     "title": "Varroa Monitor",
     "version": "Version",
-    "developedBy": "Udviklet af Jesper Berthing"
+    "developedBy": "Udviklet af Jesper Berthing",
+    "tagline": "Din feltmakker",
+    "offlineReady": "Virker offline og i marken"
   },
   "nav": {
     "overview": "Oversigt",
@@ -10,10 +12,13 @@
     "hives": "Bistader",
     "varrodetector": "VarroDetector",
     "importExport": "Import/Eksport",
-    "exportHtml": "Eksporter HTML"
+    "exportHtml": "Eksporter HTML",
+    "primary": "Primær navigation"
   },
   "dashboard": {
     "title": "Oversigt",
+    "heroEyebrow": "Feltstatus",
+    "subtitle": "Prioritér bigårde, registrér hurtige målinger og sammenlign tryk uden at forlade marken.",
     "welcome": "Velkommen til Varroa Monitor!",
     "noHives": "Du har ingen bistader endnu.",
     "createFirstApiary": "Opret din første bigård",
@@ -22,6 +27,7 @@
     "7days": "7 dage",
     "30days": "30 dage",
     "allData": "Alle data",
+    "timeRange": "Tidsinterval",
     "apiary": "Bigård",
     "allApiaries": "Alle bigårde",
     "noApiary": "Uden bigård",
@@ -51,6 +57,7 @@
   },
   "importExport": {
     "title": "Import & Eksport",
+    "subtitle": "Hold dine lokale data sikre med hurtige eksportfiler, HTML-opsummeringer og import på andre enheder.",
     "exportData": "Eksportér data",
     "exportDescription": "Download en sikkerhedskopi af alle dine bistader og registreringer.",
     "exportJSON": "Eksportér JSON (backup)",
@@ -109,6 +116,7 @@
   },
   "apiaries": {
     "title": "Bigårde",
+    "subtitle": "Saml familier, sammenlign placeringer og få styr på årets noter.",
     "newApiary": "Ny bigård",
     "cancel": "Annullér",
     "editApiary": "Redigerér bigård",
@@ -131,6 +139,7 @@
   },
   "hives": {
     "title": "Bistader",
+    "subtitle": "Få overblik over alle familier, skift fokus hurtigt og gem billeder eller positioner undervejs.",
     "breadcrumbApiaries": "Bigårde",
     "newHive": "Nyt bistade",
     "cancel": "Annullér",
@@ -203,7 +212,9 @@
   "common": {
     "loading": "Indlæser...",
     "error": "Fejl",
-    "success": "Succes"
+    "success": "Succes",
+    "openMenu": "Åbn menu",
+    "closeMenu": "Luk menu"
   },
   "hiveDetail": {
     "backToHives": "Tilbage til bistader",

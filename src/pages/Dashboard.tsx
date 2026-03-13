@@ -217,7 +217,7 @@ const Dashboard = () => {
   if (hives.length === 0) {
     return (
       <div className="container">
-        <div className="empty-dashboard">
+        <div className="empty-dashboard empty-state-card">
           <h2>{t('dashboard.welcome')}</h2>
           <p>{t('dashboard.noHives')}</p>
           <Link to="/apiaries">
@@ -231,12 +231,21 @@ const Dashboard = () => {
   const groupData = groupedHiveData();
 
   return (
-    <div className="container">
-      <div className="dashboard-header">
-        <h1>{t('dashboard.title')}</h1>
-        <button onClick={() => setShowQuickForm(!showQuickForm)}>
-          {showQuickForm ? t('dashboard.hideForm') : `⚡ ${t('dashboard.newObservation')}`}
-        </button>
+    <div className="container dashboard-page">
+      <div className="page-intro">
+        <div>
+          <h1>{t('dashboard.title')}</h1>
+          <p className="page-lead">
+            {t('dashboard.subtitle', {
+              defaultValue: 'Prioritize apiaries, capture quick mite checks, and compare pressure trends without leaving the field.',
+            })}
+          </p>
+        </div>
+        <div className="page-intro-actions">
+          <button className="pill" type="button" onClick={() => setShowQuickForm(!showQuickForm)}>
+            {showQuickForm ? t('dashboard.hideForm') : `⚡ ${t('dashboard.newObservation')}`}
+          </button>
+        </div>
       </div>
 
       {showQuickForm && (
@@ -248,52 +257,53 @@ const Dashboard = () => {
         />
       )}
 
-      <div className="filter-row">
-        <div className="filter-buttons">
-          <button
-            className={timeFilter === '7' ? 'secondary' : 'secondary'}
-            onClick={() => setTimeFilter('7')}
-            style={{
-              backgroundColor: timeFilter === '7' ? '#fbbf24' : undefined,
-            }}
-          >
-            {t('dashboard.7days')}
-          </button>
-          <button
-            className={timeFilter === '30' ? 'secondary' : 'secondary'}
-            onClick={() => setTimeFilter('30')}
-            style={{
-              backgroundColor: timeFilter === '30' ? '#fbbf24' : undefined,
-            }}
-          >
-            {t('dashboard.30days')}
-          </button>
-          <button
-            className={timeFilter === 'all' ? 'secondary' : 'secondary'}
-            onClick={() => setTimeFilter('all')}
-            style={{
-              backgroundColor: timeFilter === 'all' ? '#fbbf24' : undefined,
-            }}
-          >
-            {t('dashboard.allData')}
-          </button>
+      <div className="dashboard-toolbar surface">
+        <div className="toolbar-group">
+          <p className="toolbar-label">{t('dashboard.timeRange')}</p>
+          <div className="chip-group" role="group" aria-label={t('dashboard.timeRange')}>
+            <button
+              type="button"
+              className={`chip ${timeFilter === '7' ? 'is-active' : ''}`}
+              onClick={() => setTimeFilter('7')}
+            >
+              {t('dashboard.7days')}
+            </button>
+            <button
+              type="button"
+              className={`chip ${timeFilter === '30' ? 'is-active' : ''}`}
+              onClick={() => setTimeFilter('30')}
+            >
+              {t('dashboard.30days')}
+            </button>
+            <button
+              type="button"
+              className={`chip ${timeFilter === 'all' ? 'is-active' : ''}`}
+              onClick={() => setTimeFilter('all')}
+            >
+              {t('dashboard.allData')}
+            </button>
+          </div>
         </div>
 
-        <div className="apiary-filter">
-          <label htmlFor="apiaryFilter">{t('dashboard.apiary')}:</label>
-          <select
-            id="apiaryFilter"
-            value={apiaryFilter}
-            onChange={(e) => setApiaryFilter(e.target.value)}
-          >
-            <option value="all">{t('dashboard.allApiaries')}</option>
-            {apiaries.map((apiary) => (
-              <option key={apiary.id} value={apiary.id}>
-                {apiary.name}
-              </option>
-            ))}
-            {hives.some((h) => !h.apiaryId) && <option value="none">Uden bigård</option>}
-          </select>
+        <div className="toolbar-group">
+          <label htmlFor="apiaryFilter" className="toolbar-label">
+            {t('dashboard.apiary')}
+          </label>
+          <div className="select-wrapper">
+            <select
+              id="apiaryFilter"
+              value={apiaryFilter}
+              onChange={(e) => setApiaryFilter(e.target.value)}
+            >
+              <option value="all">{t('dashboard.allApiaries')}</option>
+              {apiaries.map((apiary) => (
+                <option key={apiary.id} value={apiary.id}>
+                  {apiary.name}
+                </option>
+              ))}
+              {hives.some((h) => !h.apiaryId) && <option value="none">Uden bigård</option>}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -837,86 +847,33 @@ const Dashboard = () => {
 
     return (
       <div className="combined-chart-container">
-        <div
-          className="chart-controls"
-          style={{
-            marginBottom: '10px',
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-            fontSize: '14px',
-            flexWrap: 'nowrap',
-            minWidth: 0,
-          }}
-        >
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
-            <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>{t('dashboard.view')}:</label>
-            <select
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as any)}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: '1px solid #d1d5db',
-                fontSize: '13px',
-              }}
-            >
+        <div className="chart-toolbar">
+          <label className="chart-toolbar__group">
+            <span>{t('dashboard.view')}:</span>
+            <select value={viewMode} onChange={(e) => setViewMode(e.target.value as any)}>
               <option value="daily">{t('dashboard.daily')}</option>
               <option value="moving10">{t('dashboard.moving10')}</option>
               <option value="weekly">{t('dashboard.weekly')}</option>
               <option value="monthly">{t('dashboard.monthly')}</option>
             </select>
-          </div>
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
-            <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>
-              {t('hiveDetail.scale')}:
-            </label>
-            <select
-              value={scaleType}
-              onChange={(e) => setScaleType(e.target.value as any)}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: '1px solid #d1d5db',
-                fontSize: '13px',
-              }}
-            >
+          </label>
+          <label className="chart-toolbar__group">
+            <span>{t('hiveDetail.scale')}:</span>
+            <select value={scaleType} onChange={(e) => setScaleType(e.target.value as any)}>
               <option value="linear">{t('hiveDetail.linear')}</option>
               <option value="logarithmic">{t('hiveDetail.logarithmic')}</option>
             </select>
-          </div>
-          <button
-            onClick={resetZoom}
-            className="secondary"
-            style={{ padding: '4px 10px', fontSize: '13px' }}
-          >
+          </label>
+          <button onClick={resetZoom} className="ghost small">
             🔍 {t('dashboard.resetZoom')}
           </button>
-          <button
-            onClick={handleDownload}
-            className="secondary"
-            style={{ padding: '4px 10px', fontSize: '13px' }}
-          >
+          <button onClick={handleDownload} className="ghost small">
             📥 {t('dashboard.download')}
           </button>
-          <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: 'auto' }}>
-            💡 {t('dashboard.zoomHelp')}
-          </span>
+          <span className="chart-toolbar__hint">💡 {t('dashboard.zoomHelp')}</span>
         </div>
         {scaleType === 'logarithmic' && (
-          <div
-            style={{
-              marginBottom: '15px',
-              padding: '10px 12px',
-              backgroundColor: '#fef3c7',
-              border: '1px solid #fbbf24',
-              borderRadius: '4px',
-              fontSize: '13px',
-              color: '#92400e',
-            }}
-          >
-            ⚠️ {t('hiveDetail.zerovaluesRemoved')}
-          </div>
+          <div className="alert warning log-scale-alert">⚠️ {t('hiveDetail.zerovaluesRemoved')}</div>
         )}
         <Line
           ref={(ref: any) => {

@@ -170,7 +170,16 @@ const ImportExport = () => {
 
   return (
     <div className="container">
-      <h1>{t('importExport.title')}</h1>
+      <div className="page-intro">
+        <div>
+          <h1>{t('importExport.title')}</h1>
+          <p className="page-lead">
+            {t('importExport.subtitle', {
+              defaultValue: 'Keep local data safe with one-tap exports, HTML summaries, and cross-device imports.',
+            })}
+          </p>
+        </div>
+      </div>
 
       <div className="import-export-section">
         <div className="section-card">

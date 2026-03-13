@@ -154,18 +154,25 @@ const Hives = () => {
 
   return (
     <div className="container">
-      <div className="hives-header">
+      <div className="page-intro">
         <div>
           <h1>{t('hives.title')}</h1>
+          <p className="page-lead">
+            {t('hives.subtitle', {
+              defaultValue: 'See every colony, switch focus quickly, and capture photos or locations on the go.',
+            })}
+          </p>
           {selectedApiary && (
             <p className="breadcrumb">
               <Link to="/apiaries">{t('hives.breadcrumbApiaries')}</Link> → {selectedApiary.name}
             </p>
           )}
         </div>
-        <button onClick={() => setShowForm(!showForm)}>
-          {showForm ? t('hives.cancel') : `+ ${t('hives.newHive')}`}
-        </button>
+        <div className="page-intro-actions">
+          <button onClick={() => setShowForm(!showForm)}>
+            {showForm ? t('hives.cancel') : `+ ${t('hives.newHive')}`}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -245,7 +252,7 @@ const Hives = () => {
       )}
 
       {activeHives.length === 0 && !showForm ? (
-        <div className="empty-state">
+        <div className="empty-state empty-state-card">
           <p>{t('hives.noHives')}</p>
           <button onClick={() => setShowForm(true)}>{t('hives.createFirst')}</button>
         </div>
