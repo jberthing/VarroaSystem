@@ -200,13 +200,15 @@ const VarroDetectorImport = () => {
 
   return (
     <div className="container">
-      <div className="header-section">
-        <h1>🔬 {t('varrodetector.title')}</h1>
-        <p className="subtitle">{t('varrodetector.subtitle')}</p>
+      <div className="page-intro">
+        <div>
+          <h1>{t('varrodetector.title')}</h1>
+          <p className="page-lead">{t('varrodetector.subtitle')}</p>
+        </div>
       </div>
 
       <div className="info-card">
-        <h3>📋 {t('varrodetector.aboutTitle')}</h3>
+        <h3>{t('varrodetector.aboutTitle')}</h3>
         <ul>
           <li dangerouslySetInnerHTML={{ __html: t('varrodetector.aboutItem1') }} />
           <li>{t('varrodetector.aboutItem2')}</li>
@@ -304,7 +306,7 @@ const VarroDetectorImport = () => {
                   <div className="step-number">5</div>
                   <div className="step-content">
                     <h3>{t('varrodetector.step5Title')}</h3>
-                    <div className="mapping-table-wrapper">
+                    <div className="mapping-table-wrapper data-table stacked-table">
                       <table className="mapping-table">
                         <thead>
                           <tr>

@@ -2,7 +2,9 @@
   "app": {
     "title": "Varroa Monitor",
     "version": "Version",
-    "developedBy": "Developed by Jesper Berthing"
+    "developedBy": "Developed by Jesper Berthing",
+    "tagline": "Local field companion",
+    "offlineReady": "Works offline & in the field"
   },
   "nav": {
     "overview": "Overview",
@@ -10,10 +12,13 @@
     "hives": "Hives",
     "varrodetector": "VarroDetector",
     "importExport": "Import/Export",
-    "exportHtml": "Export HTML"
+    "exportHtml": "Export HTML",
+    "primary": "Primary navigation"
   },
   "dashboard": {
     "title": "Overview",
+    "heroEyebrow": "Field pulse",
+    "subtitle": "Prioritize apiaries, capture quick mite checks, and compare pressure trends without leaving the field.",
     "welcome": "Welcome to Varroa Monitor!",
     "noHives": "You don't have any hives yet.",
     "createFirstApiary": "Create your first apiary",
@@ -22,6 +27,7 @@
     "7days": "7 days",
     "30days": "30 days",
     "allData": "All data",
+    "timeRange": "Time range",
     "apiary": "Apiary",
     "allApiaries": "All apiaries",
     "noApiary": "No apiary",
@@ -51,6 +57,7 @@
   },
   "importExport": {
     "title": "Import & Export",
+    "subtitle": "Keep your local data safe with quick exports, HTML summaries, and cross-device imports.",
     "exportData": "Export data",
     "exportDescription": "Download a backup of all your hives and observations.",
     "exportJSON": "Export JSON (backup)",
@@ -109,6 +116,7 @@
   },
   "apiaries": {
     "title": "Apiaries",
+    "subtitle": "Group colonies, compare locations, and keep track of seasonal notes.",
     "newApiary": "New apiary",
     "cancel": "Cancel",
     "editApiary": "Edit apiary",
@@ -131,6 +139,7 @@
   },
   "hives": {
     "title": "Hives",
+    "subtitle": "See every colony, switch focus quickly, and capture photos or locations on the go.",
     "breadcrumbApiaries": "Apiaries",
     "newHive": "New hive",
     "cancel": "Cancel",
@@ -203,7 +212,9 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "hiveDetail": {
     "backToHives": "Back to hives",

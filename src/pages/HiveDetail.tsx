@@ -52,6 +52,7 @@ type ScaleType = 'linear' | 'logarithmic';
 
 const HiveDetail = () => {
   const { t } = useTranslation();
+  const actionsLabel = t('common.actions', { defaultValue: 'Actions' });
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [hive, setHive] = useState<Hive | null>(null);
@@ -407,61 +408,24 @@ const HiveDetail = () => {
         </div>
       ) : (
         <>
-          <div
-            className="chart-controls"
-            style={{
-              marginBottom: '10px',
-              display: 'flex',
-              gap: '8px',
-              alignItems: 'center',
-              fontSize: '14px',
-              flexWrap: 'nowrap',
-              minWidth: 0,
-            }}
-          >
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
-              <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>
-                {t('hiveDetail.viewLabel')}:
-              </label>
-              <select
-                value={viewMode}
-                onChange={(e) => setViewMode(e.target.value as ViewMode)}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  border: '1px solid #d1d5db',
-                  fontSize: '13px',
-                }}
-              >
+          <div className="chart-toolbar">
+            <label className="chart-toolbar__group">
+              <span>{t('hiveDetail.viewLabel')}:</span>
+              <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)}>
                 <option value="daily">{t('hiveDetail.daily')}</option>
                 <option value="moving10">{t('hiveDetail.moving10')}</option>
                 <option value="weekly">{t('hiveDetail.weekly')}</option>
                 <option value="monthly">{t('hiveDetail.monthly')}</option>
               </select>
-            </div>
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', minWidth: 0 }}>
-              <label style={{ fontWeight: 500, fontSize: '13px', whiteSpace: 'nowrap' }}>
-                {t('hiveDetail.scale')}:
-              </label>
-              <select
-                value={scaleType}
-                onChange={(e) => setScaleType(e.target.value as ScaleType)}
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  border: '1px solid #d1d5db',
-                  fontSize: '13px',
-                }}
-              >
+            </label>
+            <label className="chart-toolbar__group">
+              <span>{t('hiveDetail.scale')}:</span>
+              <select value={scaleType} onChange={(e) => setScaleType(e.target.value as ScaleType)}>
                 <option value="linear">{t('hiveDetail.linear')}</option>
                 <option value="logarithmic">{t('hiveDetail.logarithmic')}</option>
               </select>
-            </div>
-            <button
-              onClick={resetZoom}
-              className="secondary"
-              style={{ padding: '4px 10px', fontSize: '13px' }}
-            >
+            </label>
+            <button onClick={resetZoom} className="ghost small">
               🔍 {t('hiveDetail.resetZoom')}
             </button>
             <button
@@ -474,29 +438,14 @@ const HiveDetail = () => {
                   link.click();
                 }
               }}
-              className="secondary"
-              style={{ padding: '4px 10px', fontSize: '13px' }}
+              className="ghost small"
             >
               📥 {t('hiveDetail.download')}
             </button>
-            <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: 'auto' }}>
-              💡 {t('hiveDetail.zoomHelp')}
-            </span>
+            <span className="chart-toolbar__hint">💡 {t('hiveDetail.zoomHelp')}</span>
           </div>
           {scaleType === 'logarithmic' && (
-            <div
-              style={{
-                marginBottom: '15px',
-                padding: '10px 12px',
-                backgroundColor: '#fef3c7',
-                border: '1px solid #fbbf24',
-                borderRadius: '4px',
-                fontSize: '13px',
-                color: '#92400e',
-              }}
-            >
-              ⚠️ {t('hiveDetail.zerovaluesRemoved')}
-            </div>
+            <div className="alert warning log-scale-alert">⚠️ {t('hiveDetail.zerovaluesRemoved')}</div>
           )}
           <div className="chart-container">
             <Line
@@ -556,7 +505,7 @@ const HiveDetail = () => {
 
           <div className="observations-section">
             <h2>{t('hiveDetail.observations')}</h2>
-            <div className="observations-table">
+            <div className="observations-table data-table stacked-table">
               <table>
                 <thead>
                   <tr>
@@ -573,14 +522,14 @@ const HiveDetail = () => {
                     <tr key={obs.id}>
                       {editingObservation === obs.id ? (
                         <>
-                          <td>
+                          <td data-label={t('hiveDetail.date')}>
                             <input
                               type="date"
                               value={editForm.date}
                               onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                             />
                           </td>
-                          <td>
+                          <td data-label={t('hiveDetail.mites')}>
                             <input
                               type="number"
                               value={editForm.miteCount}
@@ -591,7 +540,7 @@ const HiveDetail = () => {
                               style={{ width: '80px' }}
                             />
                           </td>
-                          <td>
+                          <td data-label={t('hiveDetail.days')}>
                             <input
                               type="number"
                               value={editForm.trayDays}
@@ -602,12 +551,12 @@ const HiveDetail = () => {
                               style={{ width: '60px' }}
                             />
                           </td>
-                          <td>
+                          <td data-label={t('hiveDetail.mitesPerDay')}>
                             {(
                               (Number(editForm.miteCount) || 0) / (Number(editForm.trayDays) || 1)
                             ).toFixed(1)}
                           </td>
-                          <td>
+                          <td data-label={t('hiveDetail.notes')}>
                             <input
                               type="text"
                               value={editForm.notes}
@@ -616,7 +565,7 @@ const HiveDetail = () => {
                               style={{ width: '100%' }}
                             />
                           </td>
-                          <td>
+                          <td data-label={actionsLabel}>
                             <button
                               onClick={() => handleSaveObservation(obs.id)}
                               className="small"
@@ -631,10 +580,10 @@ const HiveDetail = () => {
                         </>
                       ) : (
                         <>
-                          <td>{obs.date}</td>
-                          <td>{obs.miteCount}</td>
-                          <td>{obs.trayDays}</td>
-                          <td>
+                          <td data-label={t('hiveDetail.date')}>{obs.date}</td>
+                          <td data-label={t('hiveDetail.mites')}>{obs.miteCount}</td>
+                          <td data-label={t('hiveDetail.days')}>{obs.trayDays}</td>
+                          <td data-label={t('hiveDetail.mitesPerDay')}>
                             <span
                               className="mites-value"
                               style={{ color: getMitesPerDayColor(obs.mitesPerDay) }}
@@ -642,8 +591,10 @@ const HiveDetail = () => {
                               {obs.mitesPerDay.toFixed(1)}
                             </span>
                           </td>
-                          <td className="notes-cell">{obs.notes || '-'}</td>
-                          <td>
+                          <td data-label={t('hiveDetail.notes')} className="notes-cell">
+                            {obs.notes || '-'}
+                          </td>
+                          <td data-label={actionsLabel}>
                             <button
                               onClick={() => handleEditObservation(obs)}
                               className="secondary small"
@@ -670,7 +621,7 @@ const HiveDetail = () => {
           {treatments.length > 0 && (
             <div className="observations-section">
               <h2>{t('hiveDetail.treatments')}</h2>
-              <div className="observations-table">
+              <div className="observations-table data-table stacked-table treatments-table">
                 <table>
                   <thead>
                     <tr>
@@ -685,14 +636,14 @@ const HiveDetail = () => {
                       <tr key={treatment.id}>
                         {editingTreatment === treatment.id ? (
                           <>
-                            <td>
+                            <td data-label={t('hiveDetail.date')}>
                               <input
                                 type="date"
                                 value={editForm.date}
                                 onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                               />
                             </td>
-                            <td>
+                            <td data-label={t('hiveDetail.product')}>
                               <select
                                 value={editForm.treatmentType}
                                 onChange={(e) =>
@@ -711,7 +662,7 @@ const HiveDetail = () => {
                                 <option value="Andet">{t('treatments.other')}</option>
                               </select>
                             </td>
-                            <td>
+                            <td data-label={t('hiveDetail.notes')}>
                               <input
                                 type="text"
                                 value={editForm.notes}
@@ -722,7 +673,7 @@ const HiveDetail = () => {
                                 style={{ width: '100%' }}
                               />
                             </td>
-                            <td>
+                            <td data-label={actionsLabel}>
                               <button
                                 onClick={() => handleSaveTreatment(treatment.id)}
                                 className="small"
@@ -737,12 +688,14 @@ const HiveDetail = () => {
                           </>
                         ) : (
                           <>
-                            <td>{treatment.date}</td>
-                            <td>
+                            <td data-label={t('hiveDetail.date')}>{treatment.date}</td>
+                            <td data-label={t('hiveDetail.product')}>
                               <strong>{treatment.treatmentType}</strong>
                             </td>
-                            <td className="notes-cell">{treatment.notes || '-'}</td>
-                            <td>
+                            <td data-label={t('hiveDetail.notes')} className="notes-cell">
+                              {treatment.notes || '-'}
+                            </td>
+                            <td data-label={actionsLabel}>
                               <button
                                 onClick={() => handleEditTreatment(treatment)}
                                 className="secondary small"

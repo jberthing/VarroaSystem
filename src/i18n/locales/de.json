@@ -2,7 +2,9 @@
   "app": {
     "title": "Varroa Monitor",
     "version": "Version",
-    "developedBy": "Entwickelt von Jesper Berthing"
+    "developedBy": "Entwickelt von Jesper Berthing",
+    "tagline": "Ihr Begleiter im Feld",
+    "offlineReady": "Funktioniert offline und draußen"
   },
   "nav": {
     "overview": "Übersicht",
@@ -10,10 +12,13 @@
     "hives": "Bienenstöcke",
     "varrodetector": "VarroDetector",
     "importExport": "Import/Export",
-    "exportHtml": "HTML exportieren"
+    "exportHtml": "HTML exportieren",
+    "primary": "Hauptnavigation"
   },
   "dashboard": {
     "title": "Übersicht",
+    "heroEyebrow": "Feldstatus",
+    "subtitle": "Priorisieren Sie Bienenstände, erfassen Sie schnelle Milbenzählungen und vergleichen Sie Belastungen direkt im Feld.",
     "welcome": "Willkommen bei Varroa Monitor!",
     "noHives": "Sie haben noch keine Bienenstöcke.",
     "createFirstApiary": "Erstellen Sie Ihren ersten Bienenstand",
@@ -22,6 +27,7 @@
     "7days": "7 Tage",
     "30days": "30 Tage",
     "allData": "Alle Daten",
+    "timeRange": "Zeitraum",
     "apiary": "Bienenstand",
     "allApiaries": "Alle Bienenstände",
     "noApiary": "Kein Bienenstand",
@@ -51,6 +57,7 @@
   },
   "importExport": {
     "title": "Import & Export",
+    "subtitle": "Sichern Sie Ihre lokalen Daten mit schnellen Exporten, HTML-Zusammenfassungen und plattformübergreifenden Imports.",
     "exportData": "Daten exportieren",
     "exportDescription": "Laden Sie eine Sicherungskopie aller Ihrer Bienenstöcke und Beobachtungen herunter.",
     "exportJSON": "JSON exportieren (Backup)",
@@ -109,6 +116,7 @@
   },
   "apiaries": {
     "title": "Bienenstände",
+    "subtitle": "Kolonien bündeln, Standorte vergleichen und saisonale Notizen im Blick behalten.",
     "newApiary": "Neuer Bienenstand",
     "cancel": "Abbrechen",
     "editApiary": "Bienenstand bearbeiten",
@@ -131,6 +139,7 @@
   },
   "hives": {
     "title": "Bienenstöcke",
+    "subtitle": "Behalten Sie jeden Stock im Blick, wechseln Sie schnell den Fokus und erfassen Sie Fotos oder Standorte unterwegs.",
     "breadcrumbApiaries": "Bienenstände",
     "newHive": "Neuer Bienenstock",
     "cancel": "Abbrechen",
@@ -203,7 +212,9 @@
   "common": {
     "loading": "Laden...",
     "error": "Fehler",
-    "success": "Erfolg"
+    "success": "Erfolg",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen"
   },
   "hiveDetail": {
     "backToHives": "Zurück zu Bienenstöcken",
