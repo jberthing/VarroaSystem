@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import PersistentStorageNotice from './PersistentStorageNotice';
 import './Layout.css';
 import packageJson from '../../package.json';
 
@@ -73,6 +74,8 @@ const Layout = () => {
           </div>
         </div>
       </header>
+
+      <PersistentStorageNotice />
 
       <main className="main">
         <Outlet />

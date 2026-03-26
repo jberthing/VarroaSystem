@@ -216,6 +216,15 @@
     "openMenu": "Åbn menu",
     "closeMenu": "Luk menu"
   },
+  "storage": {
+    "warningTitle": "Beskyt dine data",
+    "warningDescription": "Browseren kan slette lokale data, når der er lav diskplads, eller når websitedata ryddes. Giv vedvarende lageradgang, så Varroa Monitor bliver på enheden.",
+    "deniedDescription": "Tilladelsen blev afvist. Tjek browserens indstillinger (fx Indstillinger > Cookies og websidedata > Webstedstilladelser > Holdbar lagring) eller lav jævnlige backups via Import/Eksport.",
+    "unsupportedDescription": "Denne browser kan ikke låse lageret. Eksportér regelmæssige backups fra Import/Eksport.",
+    "requestButton": "Behold data på enheden",
+    "requesting": "Anmoder...",
+    "dismiss": "Skjul advarsel"
+  },
   "hiveDetail": {
     "backToHives": "Tilbage til bistader",
     "imageClickToView": "Klik for at se i fuld størrelse",
