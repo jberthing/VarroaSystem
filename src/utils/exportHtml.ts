@@ -441,6 +441,14 @@ export const generateStandaloneHTMLApp = async (
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              top: 8,
+              right: 12,
+              bottom: 28,
+              left: 12,
+            },
+          },
           plugins: {
             legend: {
               display: true,
@@ -478,7 +486,10 @@ export const generateStandaloneHTMLApp = async (
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(0, 0, 0, 0.1)' },
-              ticks: { color: '#374151' },
+              ticks: {
+                color: '#374151',
+                padding: 6,
+              },
               title: {
                 display: true,
                 text: 'Mites per Day',
@@ -493,7 +504,12 @@ export const generateStandaloneHTMLApp = async (
                 tooltipFormat: 'PP'
               },
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              ticks: { color: '#374151' },
+              ticks: {
+                color: '#374151',
+                padding: 12,
+                autoSkipPadding: 24,
+                maxRotation: 0
+              },
               title: {
                 display: true,
                 text: 'Date',
@@ -622,6 +638,14 @@ export const generateStandaloneHTMLApp = async (
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              top: 8,
+              right: 12,
+              bottom: 28,
+              left: 12,
+            },
+          },
           plugins: {
             legend: {
               display: true,
@@ -660,7 +684,10 @@ export const generateStandaloneHTMLApp = async (
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(0, 0, 0, 0.1)' },
-              ticks: { color: '#374151' },
+              ticks: {
+                color: '#374151',
+                padding: 6,
+              },
               title: {
                 display: true,
                 text: 'Mites per Day',
@@ -675,7 +702,12 @@ export const generateStandaloneHTMLApp = async (
                 tooltipFormat: 'PP'
               },
               grid: { color: 'rgba(0, 0, 0, 0.05)' },
-              ticks: { color: '#374151' },
+              ticks: {
+                color: '#374151',
+                padding: 12,
+                autoSkipPadding: 24,
+                maxRotation: 0
+              },
               title: {
                 display: true,
                 text: 'Date',
