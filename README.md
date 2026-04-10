@@ -143,6 +143,7 @@ npm run deploy
 - Alle data gemmes **lokalt** i din browser (IndexedDB)
 - Ingen data sendes til en server
 - Husk at lave backup regelmæssigt via "Import/Eksport" siden
+- Fra version 1.7.0 beder appen understøttede browsere (Edge/Chrome) om **vedvarende lageradgang** – godkend prompten (Edge > Indstillinger > Cookies og webstedsdata > Webstedsdata > Holdbar lagring), så Windows/Edge ikke rydder dine data ved lav diskplads
 
 ## 🧪 Test med demo-data
 

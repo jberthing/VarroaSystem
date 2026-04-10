@@ -216,6 +216,15 @@
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen"
   },
+  "storage": {
+    "warningTitle": "Schützen Sie Ihre Daten",
+    "warningDescription": "Der Browser kann lokale Daten löschen, wenn wenig Speicherplatz vorhanden ist oder Websitedaten bereinigt werden. Gewähren Sie dauerhaften Speicher, damit Varroa Monitor geschützt bleibt.",
+    "deniedDescription": "Speicherzugriff wurde verweigert. Prüfen Sie die Browsereinstellungen (z. B. Einstellungen > Cookies und Websiteberechtigungen > Website-Daten > Dauerhafter Speicher) oder exportieren Sie regelmäßig Backups.",
+    "unsupportedDescription": "Dieser Browser kann keinen dauerhaften Speicher anfordern. Bitte exportieren Sie häufig Backups über Import/Export.",
+    "requestButton": "Daten auf diesem Gerät behalten",
+    "requesting": "Anfrage läuft...",
+    "dismiss": "Hinweis ausblenden"
+  },
   "hiveDetail": {
     "backToHives": "Zurück zu Bienenstöcken",
     "imageClickToView": "Klicken Sie, um in voller Größe anzuzeigen",

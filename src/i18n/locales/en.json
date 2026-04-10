@@ -216,6 +216,15 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
+  "storage": {
+    "warningTitle": "Keep your data safe",
+    "warningDescription": "Your browser may delete local data when disk space is low or when site data is cleared. Grant persistent storage so Varroa Monitor stays protected.",
+    "deniedDescription": "Storage permission was denied. Check your browser settings (for example: Settings > Cookies and site permissions > Site data > Durable storage) or export backups regularly.",
+    "unsupportedDescription": "This browser cannot lock storage. Please export backups frequently from Import/Export.",
+    "requestButton": "Keep data on this device",
+    "requesting": "Requesting...",
+    "dismiss": "Dismiss notification"
+  },
   "hiveDetail": {
     "backToHives": "Back to hives",
     "imageClickToView": "Click to view full size",
