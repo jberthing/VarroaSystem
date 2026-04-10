@@ -269,6 +269,22 @@
 .combined-chart-container {
   height: 550px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-3);
+}
+
+.combined-chart-area {
+  flex: 1;
+  min-height: 320px;
+  padding: 0 var(--space-2);
+  padding-bottom: var(--space-4);
+  display: flex;
+  width: 100%;
+}
+
+.combined-chart-area canvas {
+  height: 100% !important;
 }
 
 .loading {

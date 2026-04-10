@@ -741,6 +741,14 @@ const Dashboard = () => {
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 8,
+          right: 16,
+          bottom: 28,
+          left: 16,
+        },
+      },
       plugins: {
         legend: {
           position: 'top' as const,
@@ -816,6 +824,11 @@ const Dashboard = () => {
             display: true,
             text: `${t('dashboard.date')}`,
           },
+          ticks: {
+            maxRotation: 0,
+            autoSkipPadding: 24,
+            padding: 12,
+          },
         },
         y: {
           type: scaleType,
@@ -824,6 +837,9 @@ const Dashboard = () => {
           title: {
             display: true,
             text: `${t('dashboard.mitesPerDay')}`,
+          },
+          ticks: {
+            padding: 6,
           },
         },
       },
@@ -875,18 +891,21 @@ const Dashboard = () => {
         {scaleType === 'logarithmic' && (
           <div className="alert warning log-scale-alert">⚠️ {t('hiveDetail.zerovaluesRemoved')}</div>
         )}
-        <Line
-          ref={(ref: any) => {
-            if (ref) {
-              setChartInstance(ref);
-              if (chartRef) {
-                chartRef.current = ref;
+        <div className="combined-chart-area">
+          <Line
+            ref={(ref: any) => {
+              if (ref) {
+                setChartInstance(ref);
+                if (chartRef) {
+                  chartRef.current = ref;
+                }
               }
-            }
-          }}
-          data={chartData}
-          options={chartOptions}
-        />
+            }}
+            data={chartData}
+            options={chartOptions}
+            style={{ height: '100%' }}
+          />
+        </div>
       </div>
     );
   }
