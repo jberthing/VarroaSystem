@@ -409,10 +409,38 @@ export const generateStandaloneHTMLApp = async (
       content.innerHTML = html;
 
       // Render chart
-      setTimeout(() => renderChart(hiveObs), 100);
+      setTimeout(() => renderChart(hiveObs, treatments), 100);
     }
 
-    function renderChart(observations) {
+    // Treatment type → human-readable label (keyed by language)
+    const TREATMENT_LABELS = {
+      en: {
+        'Oxalsyre': 'Oxalic acid', 'Myresyre': 'Formic acid', 'Thymol': 'Thymol',
+        'Apiguard': 'Apiguard', 'ApiLife Var': 'ApiLife Var',
+        'Dronelarve udskæring': 'Drone brood removal', 'Dronning indespærring': 'Queen confinement',
+        'Total yngel fratagelse': 'Total brood removal', 'Fangstkassette': 'Trap comb', 'Andet': 'Other'
+      },
+      da: {
+        'Oxalsyre': 'Oxalsyre', 'Myresyre': 'Myresyre', 'Thymol': 'Thymol',
+        'Apiguard': 'Apiguard', 'ApiLife Var': 'ApiLife Var',
+        'Dronelarve udskæring': 'Dronelarve udskæring', 'Dronning indespærring': 'Dronning indespærring',
+        'Total yngel fratagelse': 'Total yngel fratagelse', 'Fangstkassette': 'Fangstkassette', 'Andet': 'Andet'
+      },
+      de: {
+        'Oxalsyre': 'Oxalsäure', 'Myresyre': 'Ameisensäure', 'Thymol': 'Thymol',
+        'Apiguard': 'Apiguard', 'ApiLife Var': 'ApiLife Var',
+        'Dronelarve udskæring': 'Drohnenbrut schneiden', 'Dronning indespærring': 'Königin einsperren',
+        'Total yngel fratagelse': 'Gesamte Brutentnahme', 'Fangstkassette': 'Fangwabe', 'Andet': 'Sonstiges'
+      }
+    };
+    const BIOTECHNICAL_TYPES = ['Dronelarve udskæring','Dronning indespærring','Total yngel fratagelse','Fangstkassette'];
+
+    function getTreatmentLabel(type) {
+      const labels = TREATMENT_LABELS[LANGUAGE] || TREATMENT_LABELS['en'];
+      return labels[type] || type;
+    }
+
+    function renderChart(observations, treatments) {
       destroyCharts();
 
       const canvas = document.getElementById('trendChart');
@@ -421,6 +449,56 @@ export const generateStandaloneHTMLApp = async (
       const sorted = observations.slice().sort((a, b) => 
         new Date(a.date).getTime() - new Date(b.date).getTime()
       );
+
+      // Build treatment scatter datasets grouped by date
+      const chemicalByDate = new Map();
+      const bioByDate = new Map();
+      (treatments || []).forEach(t => {
+        const isBio = BIOTECHNICAL_TYPES.includes(t.treatmentType);
+        const label = getTreatmentLabel(t.treatmentType);
+        const map = isBio ? bioByDate : chemicalByDate;
+        if (!map.has(t.date)) map.set(t.date, { x: t.date, labels: [] });
+        map.get(t.date).labels.push(label);
+      });
+
+      const chemicalPoints = [...chemicalByDate.values()].map(v => ({ x: v.x, y: 1 }));
+      const chemicalMeta  = [...chemicalByDate.values()].map(v => v.labels);
+      const bioPoints     = [...bioByDate.values()].map(v => ({ x: v.x, y: 1 }));
+      const bioMeta       = [...bioByDate.values()].map(v => v.labels);
+
+      const treatmentDatasets = [];
+      if (chemicalPoints.length > 0) {
+        treatmentDatasets.push({
+          type: 'scatter',
+          label: LANGUAGE === 'da' ? 'Kemiske behandlinger' : LANGUAGE === 'de' ? 'Chemische Behandlungen' : 'Chemical treatments',
+          data: chemicalPoints,
+          yAxisID: 'yTreatment',
+          pointStyle: 'triangle',
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 12,
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.9)',
+          order: -1,
+          _treatmentMeta: chemicalMeta
+        });
+      }
+      if (bioPoints.length > 0) {
+        treatmentDatasets.push({
+          type: 'scatter',
+          label: LANGUAGE === 'da' ? 'Biotekniske behandlinger' : LANGUAGE === 'de' ? 'Biotechnische Behandlungen' : 'Biotechnical treatments',
+          data: bioPoints,
+          yAxisID: 'yTreatment',
+          pointStyle: 'rectRot',
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 12,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.9)',
+          order: -1,
+          _treatmentMeta: bioMeta
+        });
+      }
 
       const ctx = canvas.getContext('2d');
       const chart = new Chart(ctx, {
@@ -435,7 +513,8 @@ export const generateStandaloneHTMLApp = async (
               borderWidth: 2,
               tension: 0.4,
               fill: true
-            }
+            },
+            ...treatmentDatasets
           ]
         },
         options: {
@@ -451,13 +530,22 @@ export const generateStandaloneHTMLApp = async (
           },
           plugins: {
             legend: {
-              display: true,
+              display: treatmentDatasets.length > 0,
               labels: { color: '#374151' }
             },
             tooltip: {
               mode: 'nearest',
               axis: 'x',
-              intersect: false
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.yAxisID === 'yTreatment') {
+                    const labels = context.dataset._treatmentMeta?.[context.dataIndex] ?? [];
+                    return labels;
+                  }
+                  return 'Mites/day: ' + (context.parsed.y != null ? context.parsed.y.toFixed(2) : '—');
+                }
+              }
             },
             zoom: {
               zoom: {
@@ -495,6 +583,13 @@ export const generateStandaloneHTMLApp = async (
                 text: 'Mites per Day',
                 color: '#374151'
               }
+            },
+            yTreatment: {
+              display: false,
+              min: 0,
+              max: 2,
+              position: 'right',
+              grid: { display: false }
             },
             x: {
               type: 'time',
@@ -606,7 +701,7 @@ export const generateStandaloneHTMLApp = async (
       const sortedDates = Array.from(allDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
       // Prepare datasets for all hives - align data with dates
-      const datasets = data.hives.map((hive, idx) => {
+      const lineDatasets = data.hives.map((hive, idx) => {
         const hiveObs = data.observations.find(([id]) => id === hive.id)?.[1] || [];
         
         // Create a map of date -> mitesPerDay for quick lookup
@@ -628,6 +723,61 @@ export const generateStandaloneHTMLApp = async (
           fill: true
         };
       });
+
+      // Collect all treatments across all hives, grouped by date
+      const compChemByDate = new Map();
+      const compBioByDate = new Map();
+      data.hives.forEach(hive => {
+        const hiveTreatments = data.treatments.find(([id]) => id === hive.id)?.[1] || [];
+        hiveTreatments.forEach(t => {
+          const isBio = BIOTECHNICAL_TYPES.includes(t.treatmentType);
+          const label = hive.name + ': ' + getTreatmentLabel(t.treatmentType);
+          const map = isBio ? compBioByDate : compChemByDate;
+          if (!map.has(t.date)) map.set(t.date, { x: t.date, labels: [] });
+          map.get(t.date).labels.push(label);
+        });
+      });
+
+      const compChemPoints = [...compChemByDate.values()].map(v => ({ x: v.x, y: 1 }));
+      const compChemMeta  = [...compChemByDate.values()].map(v => v.labels);
+      const compBioPoints = [...compBioByDate.values()].map(v => ({ x: v.x, y: 1 }));
+      const compBioMeta   = [...compBioByDate.values()].map(v => v.labels);
+
+      const treatmentDatasets = [];
+      if (compChemPoints.length > 0) {
+        treatmentDatasets.push({
+          type: 'scatter',
+          label: LANGUAGE === 'da' ? 'Kemiske behandlinger' : LANGUAGE === 'de' ? 'Chemische Behandlungen' : 'Chemical treatments',
+          data: compChemPoints,
+          yAxisID: 'yTreatment',
+          pointStyle: 'triangle',
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 12,
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.9)',
+          order: -1,
+          _treatmentMeta: compChemMeta
+        });
+      }
+      if (compBioPoints.length > 0) {
+        treatmentDatasets.push({
+          type: 'scatter',
+          label: LANGUAGE === 'da' ? 'Biotekniske behandlinger' : LANGUAGE === 'de' ? 'Biotechnische Behandlungen' : 'Biotechnical treatments',
+          data: compBioPoints,
+          yAxisID: 'yTreatment',
+          pointStyle: 'rectRot',
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 12,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.9)',
+          order: -1,
+          _treatmentMeta: compBioMeta
+        });
+      }
+
+      const datasets = [...lineDatasets, ...treatmentDatasets];
 
       const ctx = canvas.getContext('2d');
       const chart = new Chart(ctx, {
@@ -655,7 +805,16 @@ export const generateStandaloneHTMLApp = async (
             tooltip: {
               mode: 'nearest',
               axis: 'x',
-              intersect: false
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.yAxisID === 'yTreatment') {
+                    const labels = context.dataset._treatmentMeta?.[context.dataIndex] ?? [];
+                    return labels;
+                  }
+                  return context.dataset.label + ': ' + (context.parsed.y != null ? context.parsed.y.toFixed(2) : '—');
+                }
+              }
             },
             zoom: {
               zoom: {
@@ -693,6 +852,13 @@ export const generateStandaloneHTMLApp = async (
                 text: 'Mites per Day',
                 color: '#374151'
               }
+            },
+            yTreatment: {
+              display: false,
+              min: 0,
+              max: 2,
+              position: 'right',
+              grid: { display: false }
             },
             x: {
               type: 'time',
