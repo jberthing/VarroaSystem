@@ -292,12 +292,18 @@
     "errorGeneric": "Beim Speichern der Beobachtung ist ein Fehler aufgetreten"
   },
   "treatments": {
+    "chemicalGroup": "Chemische Behandlungen",
+    "biotechnicalGroup": "Biotechnische Behandlungen",
     "oxalicAcid": "Oxalsäure",
     "formicAcid": "Ameisensäure",
     "thymol": "Thymol",
     "apiguard": "Apiguard",
     "apiLifeVar": "ApiLife Var",
     "droneBroodRemoval": "Drohnenbrut-Entfernung",
-    "other": "Andere"
+    "queenConfinement": "Königinneneinsperren",
+    "totalBroodRemoval": "Vollständige Brutentnahme",
+    "trapComb": "Fangwabe",
+    "other": "Andere",
+    "endDateLabel": "Enddatum (optional)"
   }
 }

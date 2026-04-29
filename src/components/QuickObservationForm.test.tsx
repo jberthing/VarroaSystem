@@ -225,6 +225,73 @@ describe('QuickObservationForm Integration Tests', () => {
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
+  it('should show biotechnical treatment options in the dropdown', async () => {
+    const user = userEvent.setup();
+
+    render(<QuickObservationForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
+    });
+
+    // Switch to treatment mode
+    const treatmentRadio = screen.getByLabelText('quickObservation.treatment');
+    await user.click(treatmentRadio);
+
+    // Verify biotechnical options exist
+    expect(screen.getByRole('option', { name: 'treatments.queenConfinement' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'treatments.totalBroodRemoval' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'treatments.trapComb' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'treatments.droneBroodRemoval' })).toBeInTheDocument();
+  });
+
+  it('should show endDate field when a biotechnical treatment is selected', async () => {
+    const user = userEvent.setup();
+
+    render(<QuickObservationForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
+    });
+
+    // Switch to treatment mode
+    const treatmentRadio = screen.getByLabelText('quickObservation.treatment');
+    await user.click(treatmentRadio);
+
+    // endDate field should not be visible for default (chemical) treatment
+    expect(screen.queryByLabelText('treatments.endDateLabel')).not.toBeInTheDocument();
+
+    // Select a biotechnical treatment
+    const treatmentSelect = screen.getByLabelText('quickObservation.productLabel');
+    await user.selectOptions(treatmentSelect, 'Dronning indespærring');
+
+    // endDate field should now be visible
+    expect(screen.getByLabelText('treatments.endDateLabel')).toBeInTheDocument();
+  });
+
+  it('should hide endDate field when switching back to chemical treatment', async () => {
+    const user = userEvent.setup();
+
+    render(<QuickObservationForm />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/bigård 1 - stade a/i)).toBeInTheDocument();
+    });
+
+    const treatmentRadio = screen.getByLabelText('quickObservation.treatment');
+    await user.click(treatmentRadio);
+
+    const treatmentSelect = screen.getByLabelText('quickObservation.productLabel');
+
+    // Select biotechnical -> endDate appears
+    await user.selectOptions(treatmentSelect, 'Fangstkassette');
+    expect(screen.getByLabelText('treatments.endDateLabel')).toBeInTheDocument();
+
+    // Switch back to chemical -> endDate disappears
+    await user.selectOptions(treatmentSelect, 'Oxalsyre');
+    expect(screen.queryByLabelText('treatments.endDateLabel')).not.toBeInTheDocument();
+  });
+
   it('should use defaultHiveId when provided', async () => {
     render(<QuickObservationForm defaultHiveId="hive2" />);
 

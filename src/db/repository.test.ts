@@ -329,7 +329,28 @@ describe('repository', () => {
         treatmentType: 'Oxalsyre',
         notes: 'Test behandling',
       });
+      expect(result.endDate).toBeUndefined();
       expect(result.createdAt).toBeDefined();
+    });
+
+    it('should create biotechnical treatment with endDate', async () => {
+      vi.mocked(db.treatments.add).mockResolvedValue(undefined);
+
+      const result = await repository.createTreatment(
+        'hive-123',
+        '2026-01-07',
+        'Dronning indespærring',
+        undefined,
+        '2026-01-28'
+      );
+
+      expect(result).toMatchObject({
+        hiveId: 'hive-123',
+        date: '2026-01-07',
+        endDate: '2026-01-28',
+        treatmentType: 'Dronning indespærring',
+      });
+      expect(result.notes).toBeUndefined();
     });
 
     it('should create treatment without notes', async () => {

@@ -193,12 +193,14 @@ export const createTreatment = async (
   hiveId: string,
   date: string,
   treatmentType: string,
-  notes?: string
+  notes?: string,
+  endDate?: string
 ): Promise<Treatment> => {
   const treatment: Treatment = {
     id: uuidv4(),
     hiveId,
     date,
+    endDate,
     treatmentType,
     notes,
     createdAt: Date.now(),

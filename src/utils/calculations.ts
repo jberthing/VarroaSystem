@@ -1,5 +1,66 @@
 import { Observation } from '../db/database';
 
+export const BIOTECHNICAL_TREATMENT_TYPES: readonly string[] = [
+  'Dronelarve udskæring',
+  'Dronning indespærring',
+  'Total yngel fratagelse',
+  'Fangstkassette',
+];
+
+export const isBiotechnicalTreatment = (type: string): boolean =>
+  BIOTECHNICAL_TREATMENT_TYPES.includes(type);
+
+// Maps stored DB value → i18n key for display translation
+export const TREATMENT_TYPE_I18N_KEYS: Record<string, string> = {
+  'Oxalsyre': 'treatments.oxalicAcid',
+  'Myresyre': 'treatments.formicAcid',
+  'Thymol': 'treatments.thymol',
+  'Apiguard': 'treatments.apiguard',
+  'ApiLife Var': 'treatments.apiLifeVar',
+  'Dronelarve udskæring': 'treatments.droneBroodRemoval',
+  'Dronning indespærring': 'treatments.queenConfinement',
+  'Total yngel fratagelse': 'treatments.totalBroodRemoval',
+  'Fangstkassette': 'treatments.trapComb',
+  'Andet': 'treatments.other',
+};
+
+export const getTreatmentI18nKey = (type: string): string =>
+  TREATMENT_TYPE_I18N_KEYS[type] ?? 'treatments.other';
+
+// Treatment annotation colors
+export const CHEMICAL_LINE_COLOR = '#ef4444';
+export const CHEMICAL_LABEL_BG = 'rgba(239, 68, 68, 0.9)';
+export const BIOTECHNICAL_LINE_COLOR = '#22c55e';
+export const BIOTECHNICAL_LABEL_BG = 'rgba(34, 197, 94, 0.9)';
+export const BIOTECHNICAL_BOX_BG = 'rgba(34, 197, 94, 0.15)';
+
+const STAGGER_POSITIONS = ['start', 'center', 'end'] as const;
+
+/**
+ * Groups annotations by their xMin date and staggers label positions within
+ * each date group (start → center → end → start …) so overlapping annotations
+ * are readable both in the interactive chart and in the downloaded PNG.
+ */
+export function applyAnnotationStagger(
+  annotations: Record<string, any>
+): Record<string, any> {
+  const byDate: Record<string, string[]> = {};
+  for (const [key, ann] of Object.entries(annotations)) {
+    const d: Date = ann.xMin instanceof Date ? ann.xMin : new Date(ann.xMin);
+    const dateStr = d.toISOString().split('T')[0];
+    if (!byDate[dateStr]) byDate[dateStr] = [];
+    byDate[dateStr].push(key);
+  }
+  for (const keys of Object.values(byDate)) {
+    keys.forEach((key, i) => {
+      if (annotations[key].label) {
+        annotations[key].label.position = STAGGER_POSITIONS[i % STAGGER_POSITIONS.length];
+      }
+    });
+  }
+  return annotations;
+}
+
 export const calculateTrend = (
   latest: Observation | undefined,
   previous: Observation | undefined
