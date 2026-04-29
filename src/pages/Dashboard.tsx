@@ -19,7 +19,10 @@ import {
   calculateYearlyAverage,
   isBiotechnicalTreatment,
   getTreatmentI18nKey,
-  applyAnnotationStagger,
+  CHEMICAL_LINE_COLOR,
+  CHEMICAL_LABEL_BG,
+  BIOTECHNICAL_LINE_COLOR,
+  BIOTECHNICAL_LABEL_BG,
 } from '../utils/calculations';
 import QuickObservationForm from '../components/QuickObservationForm';
 import {
@@ -700,38 +703,64 @@ const Dashboard = () => {
         };
       });
 
-      // Create treatment annotations with time-series
-      const treatmentAnnotations = hivesData.reduce(
-        (acc: any, { treatments, color }, hiveIndex) => {
-          treatments.forEach((treatment: any, treatIndex: number) => {
-            const isBio = isBiotechnicalTreatment(treatment.treatmentType);
-            acc[`treatment_${hiveIndex}_${treatIndex}`] = {
-              type: 'line',
-              xMin: new Date(treatment.date),
-              xMax: new Date(treatment.date),
-              borderColor: color.border,
-              borderWidth: 2,
-              borderDash: isBio ? [6, 4] : [],
-              label: {
-                content: t(getTreatmentI18nKey(treatment.treatmentType)),
-                display: true,
-                position: 'start',
-                backgroundColor: color.border,
-                color: 'white',
-                font: { size: 9 },
-                padding: 3,
-              },
-            };
-          });
-          return acc;
-        },
-        {}
-      );
-      applyAnnotationStagger(treatmentAnnotations);
+      // Create treatment scatter datasets – aggregate by date so same-date treatments
+      // from multiple hives all appear in a single tooltip entry.
+      const chemicalByDate = new Map<string, { x: Date; entries: Array<{ hiveName: string; treatmentType: string }> }>();
+      const bioByDate = new Map<string, { x: Date; entries: Array<{ hiveName: string; treatmentType: string }> }>();
+
+      hivesData.forEach(({ hive, treatments }) => {
+        treatments.forEach((treatment: any) => {
+          const isBio = isBiotechnicalTreatment(treatment.treatmentType);
+          const map = isBio ? bioByDate : chemicalByDate;
+          if (!map.has(treatment.date)) {
+            map.set(treatment.date, { x: new Date(treatment.date), entries: [] });
+          }
+          map.get(treatment.date)!.entries.push({ hiveName: hive.name, treatmentType: treatment.treatmentType });
+        });
+      });
+
+      const chemicalPoints = [...chemicalByDate.values()].map((v) => ({ x: v.x, y: 1 }));
+      const chemicalMeta = [...chemicalByDate.values()].map((v) => v.entries);
+      const bioPoints = [...bioByDate.values()].map((v) => ({ x: v.x, y: 1 }));
+      const bioMeta = [...bioByDate.values()].map((v) => v.entries);
+
+      const treatmentDatasets: any[] = [];
+      if (chemicalPoints.length > 0) {
+        treatmentDatasets.push({
+          type: 'scatter',
+          label: t('treatments.chemicalGroup'),
+          data: chemicalPoints,
+          yAxisID: 'yTreatment',
+          pointStyle: 'triangle',
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 12,
+          borderColor: CHEMICAL_LINE_COLOR,
+          backgroundColor: CHEMICAL_LABEL_BG,
+          order: -1,
+          _treatmentMeta: chemicalMeta,
+        });
+      }
+      if (bioPoints.length > 0) {
+        treatmentDatasets.push({
+          type: 'scatter',
+          label: t('treatments.biotechnicalGroup'),
+          data: bioPoints,
+          yAxisID: 'yTreatment',
+          pointStyle: 'rectRot',
+          pointRadius: 9,
+          pointHoverRadius: 11,
+          hitRadius: 12,
+          borderColor: BIOTECHNICAL_LINE_COLOR,
+          backgroundColor: BIOTECHNICAL_LABEL_BG,
+          order: -1,
+          _treatmentMeta: bioMeta,
+        });
+      }
 
       setChartData({
-        datasets,
-        annotations: treatmentAnnotations,
+        datasets: [...datasets, ...treatmentDatasets],
+        annotations: {},
       });
       setLoading(false);
     };
@@ -779,7 +808,12 @@ const Dashboard = () => {
               });
             },
             label: function (context: any) {
-              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} ${t('dashboard.mitesPerDay')}`;
+              if ((context.dataset as any).yAxisID === 'yTreatment') {
+                const entries: Array<{ hiveName: string; treatmentType: string }> =
+                  (context.dataset as any)._treatmentMeta?.[context.dataIndex] ?? [];
+                return entries.map((e) => `${e.hiveName}: ${t(getTreatmentI18nKey(e.treatmentType))}`);
+              }
+              return `${context.dataset.label}: ${context.parsed.y?.toFixed(2)} ${t('dashboard.mitesPerDay')}`;
             },
           },
         },
@@ -847,6 +881,13 @@ const Dashboard = () => {
           ticks: {
             padding: 6,
           },
+        },
+        yTreatment: {
+          display: false,
+          min: 0,
+          max: 2,
+          position: 'right' as const,
+          grid: { display: false },
         },
       },
     };

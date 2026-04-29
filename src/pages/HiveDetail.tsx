@@ -38,8 +38,6 @@ import {
   CHEMICAL_LABEL_BG,
   BIOTECHNICAL_LINE_COLOR,
   BIOTECHNICAL_LABEL_BG,
-  BIOTECHNICAL_BOX_BG,
-  applyAnnotationStagger,
 } from '../utils/calculations';
 import QuickObservationForm from '../components/QuickObservationForm';
 import './HiveDetail.css';
@@ -230,6 +228,60 @@ const HiveDetail = () => {
     y: scaleType === 'logarithmic' && obs.mitesPerDay === 0 ? null : obs.mitesPerDay,
   }));
 
+  // Build treatment scatter datasets – aggregate by date so same-date treatments
+  // appear as one point with all labels in the tooltip.
+  const chemicalByDate = new Map<string, { x: Date; labels: string[] }>();
+  const bioByDate = new Map<string, { x: Date; labels: string[] }>();
+
+  treatments.forEach((treatment: Treatment) => {
+    const isBio = isBiotechnicalTreatment(treatment.treatmentType);
+    const label = t(getTreatmentI18nKey(treatment.treatmentType));
+    const map = isBio ? bioByDate : chemicalByDate;
+    if (!map.has(treatment.date)) {
+      map.set(treatment.date, { x: new Date(treatment.date), labels: [] });
+    }
+    map.get(treatment.date)!.labels.push(label);
+  });
+
+  const chemicalPoints = [...chemicalByDate.values()].map((v) => ({ x: v.x, y: 1 }));
+  const chemicalMeta = [...chemicalByDate.values()].map((v) => v.labels);
+  const bioPoints = [...bioByDate.values()].map((v) => ({ x: v.x, y: 1 }));
+  const bioMeta = [...bioByDate.values()].map((v) => v.labels);
+
+  const treatmentDatasets: any[] = [];
+  if (chemicalPoints.length > 0) {
+    treatmentDatasets.push({
+      type: 'scatter',
+      label: t('treatments.chemicalGroup'),
+      data: chemicalPoints,
+      yAxisID: 'yTreatment',
+      pointStyle: 'triangle',
+      pointRadius: 9,
+      pointHoverRadius: 11,
+      hitRadius: 12,
+      borderColor: CHEMICAL_LINE_COLOR,
+      backgroundColor: CHEMICAL_LABEL_BG,
+      order: -1,
+      _treatmentMeta: chemicalMeta,
+    });
+  }
+  if (bioPoints.length > 0) {
+    treatmentDatasets.push({
+      type: 'scatter',
+      label: t('treatments.biotechnicalGroup'),
+      data: bioPoints,
+      yAxisID: 'yTreatment',
+      pointStyle: 'rectRot',
+      pointRadius: 9,
+      pointHoverRadius: 11,
+      hitRadius: 12,
+      borderColor: BIOTECHNICAL_LINE_COLOR,
+      backgroundColor: BIOTECHNICAL_LABEL_BG,
+      order: -1,
+      _treatmentMeta: bioMeta,
+    });
+  }
+
   const chartData = {
     datasets: [
       {
@@ -243,61 +295,17 @@ const HiveDetail = () => {
         pointHoverRadius: 6,
         fill: true,
       },
+      ...treatmentDatasets,
     ],
   };
-
-  // Create treatment annotations for time-series
-  const treatmentAnnotations: any = {};
-  treatments.forEach((treatment: Treatment, index: number) => {
-    const isBio = isBiotechnicalTreatment(treatment.treatmentType);
-    if (isBio && treatment.endDate) {
-      treatmentAnnotations[`treatment${index}`] = {
-        type: 'box',
-        xMin: new Date(treatment.date),
-        xMax: new Date(treatment.endDate),
-        backgroundColor: BIOTECHNICAL_BOX_BG,
-        borderColor: BIOTECHNICAL_LINE_COLOR,
-        borderWidth: 1,
-        label: {
-          display: true,
-          content: t(getTreatmentI18nKey(treatment.treatmentType)),
-          position: { x: 'start', y: 'start' } as const,
-          backgroundColor: BIOTECHNICAL_LABEL_BG,
-          color: 'white',
-          font: { size: 10, weight: 'bold' as const },
-          padding: 4,
-        },
-      };
-    } else {
-      const lineColor = isBio ? BIOTECHNICAL_LINE_COLOR : CHEMICAL_LINE_COLOR;
-      const labelBg = isBio ? BIOTECHNICAL_LABEL_BG : CHEMICAL_LABEL_BG;
-      treatmentAnnotations[`treatment${index}`] = {
-        type: 'line',
-        xMin: new Date(treatment.date),
-        xMax: new Date(treatment.date),
-        borderColor: lineColor,
-        borderWidth: 2,
-        borderDash: [6, 4],
-        label: {
-          display: true,
-          content: t(getTreatmentI18nKey(treatment.treatmentType)),
-          position: 'start',
-          backgroundColor: labelBg,
-          color: 'white',
-          font: { size: 10, weight: 'bold' },
-          padding: 4,
-        },
-      };
-    }
-  });
-  applyAnnotationStagger(treatmentAnnotations);
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false,
+        display: treatmentDatasets.length > 0,
+        position: 'top' as const,
       },
       title: {
         display: true,
@@ -308,9 +316,9 @@ const HiveDetail = () => {
         },
       },
       tooltip: {
-        mode: 'index' as const,
-        intersect: false,
+        mode: 'nearest' as const,
         axis: 'x' as const,
+        intersect: false,
         callbacks: {
           title: function (context: any) {
             const date = new Date(context[0].parsed.x);
@@ -322,7 +330,12 @@ const HiveDetail = () => {
             });
           },
           label: function (context: any) {
-            return `${t('hiveDetail.mitesPerDay')}: ${context.parsed.y.toFixed(2)}`;
+            if ((context.dataset as any).yAxisID === 'yTreatment') {
+              const labels: string[] =
+                (context.dataset as any)._treatmentMeta?.[context.dataIndex] ?? [];
+              return labels;
+            }
+            return `${t('hiveDetail.mitesPerDay2')}: ${context.parsed.y?.toFixed(2)}`;
           },
         },
       },
@@ -349,7 +362,7 @@ const HiveDetail = () => {
         },
       },
       annotation: {
-        annotations: treatmentAnnotations,
+        annotations: {},
       },
     },
     scales: {
@@ -381,6 +394,13 @@ const HiveDetail = () => {
           display: true,
           text: `${t('hiveDetail.mitesPerDay')}`,
         },
+      },
+      yTreatment: {
+        display: false,
+        min: 0,
+        max: 2,
+        position: 'right' as const,
+        grid: { display: false },
       },
     },
   };

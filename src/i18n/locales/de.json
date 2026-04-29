@@ -133,9 +133,26 @@
     "seeHives": "Bienenstöcke ansehen",
     "edit": "Bearbeiten",
     "archive": "Archivieren",
-    "archivedTitle": "Archivierte Bienenstände",
     "restore": "Wiederherstellen",
+    "register": "Für Bienenstand registrieren",
     "error": "Ein Fehler ist aufgetreten"
+  },
+  "apiaryBulk": {
+    "title": "Registrieren für {{name}}",
+    "subtitle": "Behandlung oder Milbenzählung für alle Stöcke in diesem Bienenstand auf einmal registrieren.",
+    "selectHives": "Bienenstöcke auswählen",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Alle abwählen",
+    "miteCountPerHive": "Milbenanzahl pro Bienenstock",
+    "emptySkips": "Leer = überspringen",
+    "submitTreatment": "Behandlung für {{count}} Stock/Stöcke speichern",
+    "submitObservation": "Milbenzählung für {{count}} Stock/Stöcke speichern",
+    "successTreatment": "Behandlung für {{count}} Stock/Stöcke gespeichert",
+    "successObservation": "Milbenzählung für {{count}} Stock/Stöcke gespeichert",
+    "errorNoHivesSelected": "Wählen Sie mindestens einen Bienenstock aus",
+    "errorNoObservations": "Füllen Sie mindestens eine Milbenzählung aus",
+    "noHives": "Keine aktiven Bienenstöcke in diesem Bienenstand.",
+    "backToApiaries": "Zurück zu Bienenständen"
   },
   "hives": {
     "title": "Bienenstöcke",
