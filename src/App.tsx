@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Apiaries from './pages/Apiaries';
+import ApiaryBulkEntry from './pages/ApiaryBulkEntry';
 import Hives from './pages/Hives';
 import HiveDetail from './pages/HiveDetail';
 import ImportExport from './pages/ImportExport';
@@ -15,6 +16,7 @@ function App() {
           <Route index element={<Navigate to="/overview" replace />} />
           <Route path="overview" element={<Dashboard />} />
           <Route path="apiaries" element={<Apiaries />} />
+          <Route path="apiaries/:id/register" element={<ApiaryBulkEntry />} />
           <Route path="hives" element={<Hives />} />
           <Route path="hives/:id" element={<HiveDetail />} />
           <Route path="varrodetector" element={<VarroDetectorImport />} />

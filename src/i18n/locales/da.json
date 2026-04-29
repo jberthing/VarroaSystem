@@ -133,9 +133,26 @@
     "seeHives": "Se bistader",
     "edit": "Redigerér",
     "archive": "Arkivér",
-    "archivedTitle": "Arkiverede bigårde",
     "restore": "Gendan",
+    "register": "Registrér for bigård",
     "error": "Der opstod en fejl"
+  },
+  "apiaryBulk": {
+    "title": "Registrér for {{name}}",
+    "subtitle": "Registrér behandling eller midtælling for alle stader i denne bigård på én gang.",
+    "selectHives": "Vælg stader",
+    "selectAll": "Vælg alle",
+    "deselectAll": "Fravælg alle",
+    "miteCountPerHive": "Antal mider pr. stade",
+    "emptySkips": "Tom = springes over",
+    "submitTreatment": "Gem behandling for {{count}} stade(r)",
+    "submitObservation": "Gem midtælling for {{count}} stade(r)",
+    "successTreatment": "Behandling gemt for {{count}} stade(r)",
+    "successObservation": "Midtælling gemt for {{count}} stade(r)",
+    "errorNoHivesSelected": "Vælg mindst ét stade",
+    "errorNoObservations": "Udfyld mindst én midtælling",
+    "noHives": "Ingen aktive stader i denne bigård.",
+    "backToApiaries": "Tilbage til bigårde"
   },
   "hives": {
     "title": "Bistader",

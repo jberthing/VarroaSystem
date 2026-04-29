@@ -133,9 +133,26 @@
     "seeHives": "See hives",
     "edit": "Edit",
     "archive": "Archive",
-    "archivedTitle": "Archived apiaries",
     "restore": "Restore",
+    "register": "Register for apiary",
     "error": "An error occurred"
+  },
+  "apiaryBulk": {
+    "title": "Register for {{name}}",
+    "subtitle": "Register a treatment or mite count for all hives in this apiary at once.",
+    "selectHives": "Select hives",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "miteCountPerHive": "Mite count per hive",
+    "emptySkips": "Empty = skip",
+    "submitTreatment": "Save treatment for {{count}} hive(s)",
+    "submitObservation": "Save mite count for {{count}} hive(s)",
+    "successTreatment": "Treatment saved for {{count}} hive(s)",
+    "successObservation": "Mite count saved for {{count}} hive(s)",
+    "errorNoHivesSelected": "Select at least one hive",
+    "errorNoObservations": "Fill in at least one mite count",
+    "noHives": "No active hives in this apiary.",
+    "backToApiaries": "Back to apiaries"
   },
   "hives": {
     "title": "Hives",

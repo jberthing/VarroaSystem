@@ -158,6 +158,9 @@ const Apiaries = () => {
                   </p>
                 </div>
                 <div className="apiary-actions">
+                  <Link to={`/apiaries/${apiary.id}/register`}>
+                    <button>{t('apiaries.register')}</button>
+                  </Link>
                   <Link to={`/hives?apiary=${apiary.id}`}>
                     <button className="secondary">{t('apiaries.seeHives')}</button>
                   </Link>
