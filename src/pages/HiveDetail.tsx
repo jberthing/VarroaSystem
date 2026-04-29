@@ -29,7 +29,18 @@ import {
   updateTreatment,
 } from '../db/repository';
 import { Hive, Treatment, Observation } from '../db/database';
-import { getMitesPerDayColor, calculateYearlyAverage } from '../utils/calculations';
+import {
+  getMitesPerDayColor,
+  calculateYearlyAverage,
+  isBiotechnicalTreatment,
+  getTreatmentI18nKey,
+  CHEMICAL_LINE_COLOR,
+  CHEMICAL_LABEL_BG,
+  BIOTECHNICAL_LINE_COLOR,
+  BIOTECHNICAL_LABEL_BG,
+  BIOTECHNICAL_BOX_BG,
+  applyAnnotationStagger,
+} from '../utils/calculations';
 import QuickObservationForm from '../components/QuickObservationForm';
 import './HiveDetail.css';
 
@@ -137,6 +148,7 @@ const HiveDetail = () => {
     setEditingTreatment(treatment.id);
     setEditForm({
       date: treatment.date,
+      endDate: treatment.endDate || '',
       treatmentType: treatment.treatmentType,
       notes: treatment.notes || '',
     });
@@ -146,6 +158,7 @@ const HiveDetail = () => {
     try {
       await updateTreatment(treatmentId, {
         date: editForm.date,
+        endDate: editForm.endDate || undefined,
         treatmentType: editForm.treatmentType,
         notes: editForm.notes,
       });
@@ -236,27 +249,48 @@ const HiveDetail = () => {
   // Create treatment annotations for time-series
   const treatmentAnnotations: any = {};
   treatments.forEach((treatment: Treatment, index: number) => {
-    treatmentAnnotations[`treatment${index}`] = {
-      type: 'line',
-      xMin: new Date(treatment.date),
-      xMax: new Date(treatment.date),
-      borderColor: '#ef4444',
-      borderWidth: 2,
-      borderDash: [6, 4],
-      label: {
-        display: true,
-        content: treatment.treatmentType,
-        position: 'start',
-        backgroundColor: 'rgba(239, 68, 68, 0.9)',
-        color: 'white',
-        font: {
-          size: 10,
-          weight: 'bold',
+    const isBio = isBiotechnicalTreatment(treatment.treatmentType);
+    if (isBio && treatment.endDate) {
+      treatmentAnnotations[`treatment${index}`] = {
+        type: 'box',
+        xMin: new Date(treatment.date),
+        xMax: new Date(treatment.endDate),
+        backgroundColor: BIOTECHNICAL_BOX_BG,
+        borderColor: BIOTECHNICAL_LINE_COLOR,
+        borderWidth: 1,
+        label: {
+          display: true,
+          content: t(getTreatmentI18nKey(treatment.treatmentType)),
+          position: { x: 'start', y: 'start' } as const,
+          backgroundColor: BIOTECHNICAL_LABEL_BG,
+          color: 'white',
+          font: { size: 10, weight: 'bold' as const },
+          padding: 4,
         },
-        padding: 4,
-      },
-    };
+      };
+    } else {
+      const lineColor = isBio ? BIOTECHNICAL_LINE_COLOR : CHEMICAL_LINE_COLOR;
+      const labelBg = isBio ? BIOTECHNICAL_LABEL_BG : CHEMICAL_LABEL_BG;
+      treatmentAnnotations[`treatment${index}`] = {
+        type: 'line',
+        xMin: new Date(treatment.date),
+        xMax: new Date(treatment.date),
+        borderColor: lineColor,
+        borderWidth: 2,
+        borderDash: [6, 4],
+        label: {
+          display: true,
+          content: t(getTreatmentI18nKey(treatment.treatmentType)),
+          position: 'start',
+          backgroundColor: labelBg,
+          color: 'white',
+          font: { size: 10, weight: 'bold' },
+          padding: 4,
+        },
+      };
+    }
   });
+  applyAnnotationStagger(treatmentAnnotations);
 
   const chartOptions = {
     responsive: true,
@@ -626,6 +660,7 @@ const HiveDetail = () => {
                   <thead>
                     <tr>
                       <th>{t('hiveDetail.date')}</th>
+                      <th>{t('treatments.endDateLabel')}</th>
                       <th>{t('hiveDetail.product')}</th>
                       <th>{t('hiveDetail.notes')}</th>
                       <th></th>
@@ -643,6 +678,20 @@ const HiveDetail = () => {
                                 onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                               />
                             </td>
+                            <td data-label={t('treatments.endDateLabel')}>
+                              {isBiotechnicalTreatment(editForm.treatmentType) ? (
+                                <input
+                                  type="date"
+                                  value={editForm.endDate || ''}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, endDate: e.target.value })
+                                  }
+                                  min={editForm.date}
+                                />
+                              ) : (
+                                '-'
+                              )}
+                            </td>
                             <td data-label={t('hiveDetail.product')}>
                               <select
                                 value={editForm.treatmentType}
@@ -651,14 +700,21 @@ const HiveDetail = () => {
                                 }
                                 style={{ width: '150px' }}
                               >
-                                <option value="Oxalsyre">{t('treatments.oxalicAcid')}</option>
-                                <option value="Myresyre">{t('treatments.formicAcid')}</option>
-                                <option value="Thymol">{t('treatments.thymol')}</option>
-                                <option value="Apiguard">{t('treatments.apiguard')}</option>
-                                <option value="ApiLife Var">{t('treatments.apiLifeVar')}</option>
-                                <option value="Dronelarve udskæring">
-                                  {t('treatments.droneBroodRemoval')}
-                                </option>
+                                <optgroup label={t('treatments.chemicalGroup')}>
+                                  <option value="Oxalsyre">{t('treatments.oxalicAcid')}</option>
+                                  <option value="Myresyre">{t('treatments.formicAcid')}</option>
+                                  <option value="Thymol">{t('treatments.thymol')}</option>
+                                  <option value="Apiguard">{t('treatments.apiguard')}</option>
+                                  <option value="ApiLife Var">{t('treatments.apiLifeVar')}</option>
+                                </optgroup>
+                                <optgroup label={t('treatments.biotechnicalGroup')}>
+                                  <option value="Dronning indespærring">{t('treatments.queenConfinement')}</option>
+                                  <option value="Total yngel fratagelse">{t('treatments.totalBroodRemoval')}</option>
+                                  <option value="Fangstkassette">{t('treatments.trapComb')}</option>
+                                  <option value="Dronelarve udskæring">
+                                    {t('treatments.droneBroodRemoval')}
+                                  </option>
+                                </optgroup>
                                 <option value="Andet">{t('treatments.other')}</option>
                               </select>
                             </td>
@@ -689,8 +745,11 @@ const HiveDetail = () => {
                         ) : (
                           <>
                             <td data-label={t('hiveDetail.date')}>{treatment.date}</td>
+                            <td data-label={t('treatments.endDateLabel')}>
+                              {treatment.endDate || '-'}
+                            </td>
                             <td data-label={t('hiveDetail.product')}>
-                              <strong>{treatment.treatmentType}</strong>
+                              <strong>{t(getTreatmentI18nKey(treatment.treatmentType))}</strong>
                             </td>
                             <td data-label={t('hiveDetail.notes')} className="notes-cell">
                               {treatment.notes || '-'}

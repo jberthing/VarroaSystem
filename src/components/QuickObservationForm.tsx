@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { createObservation, createTreatment, getAllHives, getAllApiaries } from '../db/repository';
 import { Hive, Apiary } from '../db/database';
 import { getTodayString } from '../utils/dateUtils';
+import { isBiotechnicalTreatment } from '../utils/calculations';
 import './QuickObservationForm.css';
 
 interface QuickObservationFormProps {
@@ -27,6 +28,7 @@ const QuickObservationForm = ({
   const [miteCount, setMiteCount] = useState('');
   const [trayDays, setTrayDays] = useState('3');
   const [treatmentType, setTreatmentType] = useState('Oxalsyre');
+  const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,7 +72,13 @@ const QuickObservationForm = ({
 
     try {
       if (registrationType === 'treatment') {
-        await createTreatment(hiveId, date, treatmentType, notes || undefined);
+        await createTreatment(
+          hiveId,
+          date,
+          treatmentType,
+          notes || undefined,
+          endDate || undefined
+        );
       } else {
         const miteCountNum = parseInt(miteCount);
         const trayDaysNum = parseInt(trayDays);
@@ -94,6 +102,7 @@ const QuickObservationForm = ({
       setMiteCount('');
       setTrayDays('3');
       setTreatmentType('Oxalsyre');
+      setEndDate('');
       setNotes('');
       setDate(getTodayString());
 
@@ -204,23 +213,44 @@ const QuickObservationForm = ({
           </div>
         </>
       ) : (
-        <div className="form-group">
-          <label htmlFor="treatmentType">{t('quickObservation.productLabel')}</label>
-          <select
-            id="treatmentType"
-            value={treatmentType}
-            onChange={(e) => setTreatmentType(e.target.value)}
-            required
-          >
-            <option value="Oxalsyre">{t('treatments.oxalicAcid')}</option>
-            <option value="Myresyre">{t('treatments.formicAcid')}</option>
-            <option value="Thymol">{t('treatments.thymol')}</option>
-            <option value="Apiguard">{t('treatments.apiguard')}</option>
-            <option value="ApiLife Var">{t('treatments.apiLifeVar')}</option>
-            <option value="Dronelarve udskæring">{t('treatments.droneBroodRemoval')}</option>
-            <option value="Andet">{t('treatments.other')}</option>
-          </select>
-        </div>
+        <>
+          <div className="form-group">
+            <label htmlFor="treatmentType">{t('quickObservation.productLabel')}</label>
+            <select
+              id="treatmentType"
+              value={treatmentType}
+              onChange={(e) => setTreatmentType(e.target.value)}
+              required
+            >
+              <optgroup label={t('treatments.chemicalGroup')}>
+                <option value="Oxalsyre">{t('treatments.oxalicAcid')}</option>
+                <option value="Myresyre">{t('treatments.formicAcid')}</option>
+                <option value="Thymol">{t('treatments.thymol')}</option>
+                <option value="Apiguard">{t('treatments.apiguard')}</option>
+                <option value="ApiLife Var">{t('treatments.apiLifeVar')}</option>
+              </optgroup>
+              <optgroup label={t('treatments.biotechnicalGroup')}>
+                <option value="Dronning indespærring">{t('treatments.queenConfinement')}</option>
+                <option value="Total yngel fratagelse">{t('treatments.totalBroodRemoval')}</option>
+                <option value="Fangstkassette">{t('treatments.trapComb')}</option>
+                <option value="Dronelarve udskæring">{t('treatments.droneBroodRemoval')}</option>
+              </optgroup>
+              <option value="Andet">{t('treatments.other')}</option>
+            </select>
+          </div>
+          {isBiotechnicalTreatment(treatmentType) && (
+            <div className="form-group">
+              <label htmlFor="endDate">{t('treatments.endDateLabel')}</label>
+              <input
+                type="date"
+                id="endDate"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={date}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <div className="form-group">

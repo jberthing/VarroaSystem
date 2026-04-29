@@ -17,6 +17,9 @@ import {
   getTrendColor,
   getMitesPerDayColor,
   calculateYearlyAverage,
+  isBiotechnicalTreatment,
+  getTreatmentI18nKey,
+  applyAnnotationStagger,
 } from '../utils/calculations';
 import QuickObservationForm from '../components/QuickObservationForm';
 import {
@@ -603,6 +606,7 @@ const Dashboard = () => {
     const [viewMode, setViewMode] = useState<'daily' | 'moving10' | 'weekly' | 'monthly'>('daily');
     const [scaleType, setScaleType] = useState<'linear' | 'logarithmic'>('linear');
     const [chartInstance, setChartInstance] = useState<any>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
       loadAllData();
@@ -700,15 +704,16 @@ const Dashboard = () => {
       const treatmentAnnotations = hivesData.reduce(
         (acc: any, { treatments, color }, hiveIndex) => {
           treatments.forEach((treatment: any, treatIndex: number) => {
+            const isBio = isBiotechnicalTreatment(treatment.treatmentType);
             acc[`treatment_${hiveIndex}_${treatIndex}`] = {
               type: 'line',
               xMin: new Date(treatment.date),
               xMax: new Date(treatment.date),
               borderColor: color.border,
               borderWidth: 2,
-              borderDash: [5, 5],
+              borderDash: isBio ? [6, 4] : [],
               label: {
-                content: treatment.treatmentType,
+                content: t(getTreatmentI18nKey(treatment.treatmentType)),
                 display: true,
                 position: 'start',
                 backgroundColor: color.border,
@@ -722,6 +727,7 @@ const Dashboard = () => {
         },
         {}
       );
+      applyAnnotationStagger(treatmentAnnotations);
 
       setChartData({
         datasets,

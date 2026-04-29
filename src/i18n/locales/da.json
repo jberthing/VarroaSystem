@@ -293,12 +293,18 @@
     "errorGeneric": "Der opstod en fejl ved gem af registreringen"
   },
   "treatments": {
+    "chemicalGroup": "Kemiske behandlinger",
+    "biotechnicalGroup": "Biotekniske behandlinger",
     "oxalicAcid": "Oxalsyre",
     "formicAcid": "Myresyre",
     "thymol": "Thymol",
     "apiguard": "Apiguard",
     "apiLifeVar": "ApiLife Var",
     "droneBroodRemoval": "Dronelarve udskæring",
-    "other": "Andet"
+    "queenConfinement": "Dronning indespærring",
+    "totalBroodRemoval": "Total yngel fratagelse",
+    "trapComb": "Fangstkassette",
+    "other": "Andet",
+    "endDateLabel": "Slutdato (valgfrit)"
   }
 }

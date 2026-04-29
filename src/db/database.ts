@@ -34,6 +34,7 @@ export interface Treatment {
   id: string;
   hiveId: string;
   date: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD – optional end date for biotechnical treatments
   treatmentType: string;
   notes?: string;
   createdAt: number;

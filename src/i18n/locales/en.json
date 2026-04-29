@@ -292,12 +292,18 @@
     "errorGeneric": "An error occurred while saving the observation"
   },
   "treatments": {
+    "chemicalGroup": "Chemical treatments",
+    "biotechnicalGroup": "Biotechnical treatments",
     "oxalicAcid": "Oxalic acid",
     "formicAcid": "Formic acid",
     "thymol": "Thymol",
     "apiguard": "Apiguard",
     "apiLifeVar": "ApiLife Var",
     "droneBroodRemoval": "Drone brood removal",
-    "other": "Other"
+    "queenConfinement": "Queen confinement",
+    "totalBroodRemoval": "Total brood removal",
+    "trapComb": "Trap comb",
+    "other": "Other",
+    "endDateLabel": "End date (optional)"
   }
 }
