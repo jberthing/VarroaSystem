@@ -36,6 +36,9 @@ import {
   Tooltip,
   Legend,
   TimeScale,
+  Filler,
+  ScatterController,
+  LineController,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
@@ -53,6 +56,9 @@ ChartJS.register(
   Tooltip,
   Legend,
   TimeScale,
+  Filler,
+  ScatterController,
+  LineController,
   annotationPlugin,
   zoomPlugin
 );

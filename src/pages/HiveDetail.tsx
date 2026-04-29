@@ -15,6 +15,9 @@ import {
   Tooltip,
   Legend,
   TimeScale,
+  Filler,
+  ScatterController,
+  LineController,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -52,6 +55,9 @@ ChartJS.register(
   Tooltip,
   Legend,
   TimeScale,
+  Filler,
+  ScatterController,
+  LineController,
   annotationPlugin,
   zoomPlugin
 );
